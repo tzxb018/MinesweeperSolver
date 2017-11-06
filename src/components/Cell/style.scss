@@ -1,0 +1,64 @@
+@import '../../_colors.scss';
+
+:local {
+  .cell {
+    background-image: url('../../images/cell.png');
+    height: 16px;
+    width: 16px;
+  }
+
+  .hidden {
+    @extend .cell;
+    background-image: url('../../images/hidden.png');
+  }
+
+  .hasMine {
+    @extend .cell;
+    background-image: url('../../images/mine.png');
+  }
+
+  .flagged {
+    @extend .cell;
+    background: url('../../images/flagged.png');
+  }
+
+  .one {
+    @extend .cell;
+    background-image: url('../../images/one.png');
+  }
+
+  .two {
+    @extend .cell;
+    background-image: url('../../images/two.png');
+  }
+
+  .three {
+    @extend .cell;
+    background-image: url('../../images/three.png');
+  }
+
+  .four {
+    @extend .cell;
+    background-image: url('../../images/four.png');
+  }
+
+  .five {
+    @extend .cell;
+    background-image: url('../../images/five.png');
+  }
+
+  .six {
+    @extend .cell;
+    background-image: url('../../images/six.png');
+  }
+
+  .seven {
+    @extend .cell;
+    background-image: url('../../images/seven.png');
+  }
+
+  .eight {
+    @extend .cell;
+    background-image: url('../../images/eight.png');
+  }
+}

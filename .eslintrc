@@ -1,0 +1,47 @@
+{
+  "extends": "airbnb",
+  "parser": "babel-eslint",
+  "rules": {
+    "max-len": ["error", 120],
+    "comma-dangle": ["error", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "always-multiline",
+      "exports": "always-multiline",
+      "functions": "ignore",
+      "indent": [2, 2]
+    }],
+    "class-methods-use-this": ["off"],
+    "import/extensions": ["off", "never"],
+    "indent": [2, 2, {
+      "SwitchCase": 0
+    }],
+    "arrow-parens": ["off"],
+    "no-case-declarations": ["off"],
+    "no-mixed-operators": ["off"],
+    "no-plusplus": ["off"],
+    "import/prefer-default-export": ["off"],
+    "react/no-array-index-key": ["off"],
+    "react/jsx-first-prop-new-line": ["off"],
+    "react/forbid-prop-types": ["off"],
+    "react/require-default-props": ["off"],
+    "jsx-a11y/no-static-element-interactions": ["off"],
+    "jsx-a11y/alt-text": ["off"],
+    "dot-notation": ["off"],
+    "import/no-extraneous-dependencies": ["off"],
+    "react/prefer-stateless-function": ["off"],
+    "no-lonely-if": ["off"]
+  },
+  "settings": {
+    "import/resolver": {
+      "webpack": {
+        "config": "webpack.config.js"
+      }
+    }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "jquery": true
+  }
+}

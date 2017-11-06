@@ -1,0 +1,13 @@
+@import '../../colors.scss';
+
+:local {
+  .container {
+    background: $bg;
+    display: grid;
+    grid-row-gap: 10px;
+    grid-template-columns: 272px;
+    grid-template-rows: 60px 272px;
+    padding: 10px;
+    width: 275px;
+  }
+}

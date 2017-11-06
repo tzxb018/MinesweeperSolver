@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "target": "es5",
+    "outDir": "dist/",
+    "lib": ["es2017", "dom"],
+    "sourceMap": true,
+    "jsx": "react"
+  },
+  "compileOnSave": false,
+  "buildOnSave": false,
+  "exclude": [
+    "node_modules"
+  ],
+  "atom": {
+    "rewriteTsconfig": false
+  },
+  "sourceMap": true
+}

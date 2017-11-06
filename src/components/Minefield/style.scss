@@ -1,0 +1,9 @@
+:local {
+  .container {
+    display: grid;
+    grid-template-columns: repeat(16, 16px);
+    grid-template-rows: repeat(16, 16px);
+    height: 1fr;
+    width: 1fr;
+  }
+}
