@@ -1,17 +1,29 @@
+import { connect } from 'react-redux';
 import React from 'react';
+
+import { resetBoard } from '../../actions/boardActions.js';
 import styles from './style.scss';
 
-export default class ResetButton extends React.Component {
+class ResetButton extends React.Component {
+  clickHandler = () => {
+    resetBoard();
+  }
+
   render() {
     return (
-      <button className={styles['button']} onClick={this.props.clickHandler}>
-        {this.props.text}
+      <button className={styles['button']} onClick={this.clickHandler}>
+        Reset
       </button>
     );
   }
 }
 
-ResetButton.propTypes = {
-  text: React.PropTypes.string,
-  clickHandler: React.PropTypes.func,
-};
+const mapDispatchToProps = (dispatch) => ({
+  resetBoard: () => {
+    dispatch(resetBoard());
+  },
+});
+
+export default connect(
+  mapDispatchToProps,
+)(ResetButton);

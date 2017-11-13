@@ -3,11 +3,8 @@
 :local {
   .container {
     background: $bg;
-    display: grid;
-    grid-row-gap: 10px;
-    grid-template-columns: 272px;
-    grid-template-rows: 60px 272px;
+    display: flex;
     padding: 10px;
-    width: 275px;
+    width: auto;
   }
 }
