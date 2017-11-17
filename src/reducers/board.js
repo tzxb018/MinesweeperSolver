@@ -1,87 +1,106 @@
+import Immutable from 'immutable';
+
+import { RESET_BOARD } from 'actions/boardActions';
+import {
+  REVEAL_CELL,
+  TOGGLE_FLAG,
+} from 'actions/cellActions';
+
 import {
   placeMines,
   revealMines,
   revealNeighbors,
-} from './functions.js';
+} from './functions';
 
-// default state for first render
-const cells = [];
-for (let i = 0; i < 16; i++) {
-  cells.push([]);
-  for (let j = 0; j < 16; j++) {
-    cells[i].push({
-      flagged: false,
-      hidden: true,
-      mines: 0,
-    });
-  }
-}
-const defaultState = {
-  cells,
+const initialState = Immutable.Map({
+  cells: () => {
+    let c = Immutable.List();
+    for (let i = 0; i < 16; i++) {
+      let row = Immutable.List();
+      for (let j = 0; j < 16; j++) {
+        row = row.push(Immutable.Map({
+          flagged: false,
+          hidden: true,
+          mines: 0,
+        }));
+      }
+      c = c.push(row);
+    }
+    return c;
+  },
   gameIsRunning: false,
   hasMines: false,
   numFlagged: 0,
   numMines: 40,
   numRevealed: 0,
-};
+});
 
 // reducer for the board property of state
-export default function board(state = defaultState, action) {
+const board = (state = initialState, action) => {
   switch (action.type) {
 
   // resets the board
-  case 'RESET_BOARD':
-    const reset = state;
-    for (let i = 0; i < reset.cells.length; i++) {
-      for (let j = 0; j < reset.cells[0].length; j++) {
-        reset.cells[i][j] = {
-          flagged: false,
-          hidden: true,
-          mines: 0,
-        };
+  case RESET_BOARD:
+    return state.withMutations(s => {
+      for (let i = 0; i < s.get('cells').size; i++) {
+        for (let j = 0; j < s.getIn(['cells', 0]).size; j++) {
+          s.setIn(['cells', i, j], Immutable.Map({
+            flagged: false,
+            hidden: true,
+            mines: 0,
+          }));
+        }
       }
-    }
-    reset.gameIsRunning = false;
-    reset.numFlagged = 0;
-    reset.numRevealed = 0;
-    return reset;
+      s.set('gameIsRunning', false);
+      s.set('numFlagged', 0);
+      s.set('numRevealed', 0);
+    });
 
   // reveals the clicked cell
-  case 'REVEAL_CELL':
-    let reveal = state;
-    // if there are no mines already, places mines and starts the game
-    if (reveal.hasMines === false) {
-      reveal.cells = placeMines(reveal.cells, action.row, action.col);
-      reveal.gameIsRunning = true;
-      reveal.hasMines = true;
-    }
-    reveal[action.row][action.col].hidden = false;
-    reveal.numRevealed += 1;
-   // if that cell had zero mines nearby, reveals all neighbors
-    if (reveal.cells[action.row][action.col].mines === 0) {
-      reveal = revealNeighbors(reveal, action.row, action.col);
-    // else if that cell had a mine, ends the game and reveals all mines
-    } else if (reveal.cells[action.row][action.col].mines === -1) {
-      reveal.cells = revealMines(reveal.cells);
-      reveal.gameIsRunning = false;
-    }
-    return reveal;
-
-  // if the game is running and there aren't too many flags, toggles the flag
-  case 'TOGGLE_FLAGGED':
-    const toggle = state;
-    if (toggle.gameIsRunning === true) {
-      if (toggle[action.row][action.col].flagged === false && toggle.numFlagged < toggle.numMines) {
-        toggle[action.row][action.col].flagged = true;
-        toggle.numFlagged += 1;
-      } else if (toggle[action.row][action.col].flagged === true) {
-        toggle[action.row][action.col].flagged = false;
-        toggle.numFlagged -= 1;
+  case REVEAL_CELL:
+    return state.withMutations(s => {
+      // if there are no mines already, place mines and start the game
+      if (s.get('hasMines') === false) {
+        s.set('cells', placeMines(s.get('cells'), s.get('numMines'), action.row, action.col));
+        s.set('gameIsRunning', true);
+        s.set('hasMines', true);
       }
-    }
-    return toggle;
+
+      // reveal the cell
+      s.setIn(['cells', action.row, action.col, 'hidden'], false);
+      s.set('numRevealed', s.get('numRevealed') + 1);
+
+      // if that cell had zero mines nearby, reveal all neighbors
+      if (s.getIn(['cells', action.row, action.col, 'mines']) === 0) {
+        const temp = revealNeighbors(s.get('cells'), s.get('numRevealed'), action.row, action.col);
+        s.set('cells', temp.cells);
+        s.set('numRevealed', temp.newNumRevealed);
+
+      // else if that cell had a mine, end the game and reveal all mines
+      } else if (s.getIn(['cells', action.row, action.col, 'mines']) === -1) {
+        s.set('cells', revealMines(s.get('cells')));
+        s.set('gameIsRunning', false);
+      }
+    });
+
+  // if the game is running and there aren't too many flags, toggle the flag
+  case TOGGLE_FLAG:
+    return state.withMutations(s => {
+      if (s.get('gameIsRunning') === true) {
+        if (s.getIn(['cells', action.row, action.col, 'flagged']) === false
+            && s.get('numFlagged') < s.get('numMines')) {
+          s.setIn(['cells', action.row, action.col, 'flagged'], true);
+          s.set('numFlagged', s.get('numFlagged') + 1);
+        } else if (s.setIn(['cells', action.row, action.col, 'flagged']) === true) {
+          s.setIn(['cells', action.row, action.col, 'flagged'], false);
+          s.set('numFlagged', s.get('numFlagged') - 1);
+        }
+      }
+    });
 
   default:
     return state;
   }
-}
+};
+
+export default board;

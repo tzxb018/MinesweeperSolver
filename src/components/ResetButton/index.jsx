@@ -1,12 +1,16 @@
-import { connect } from 'react-redux';
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import { resetBoard } from '../../actions/boardActions.js';
 import styles from './style.scss';
 
-class ResetButton extends React.Component {
+export default class ResetButton extends React.Component {
+  static propTypes = {
+    // dispatch props
+    resetBoard: PropTypes.func.isRequired,
+  };
+
   clickHandler = () => {
-    resetBoard();
+    this.props.resetBoard();
   }
 
   render() {
@@ -18,12 +22,3 @@ class ResetButton extends React.Component {
   }
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  resetBoard: () => {
-    dispatch(resetBoard());
-  },
-});
-
-export default connect(
-  mapDispatchToProps,
-)(ResetButton);

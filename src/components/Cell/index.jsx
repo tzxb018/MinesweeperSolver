@@ -1,31 +1,29 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import styles from './style.scss';
-import {
-  revealCell,
-  toggleFlagged,
-} from '../../actions/cellActions.js';
 
-class Cell extends React.Component {
+export default class Cell extends Component {
   static propTypes = {
     // state props
     flagged: PropTypes.bool.isRequired,
     hidden: PropTypes.bool.isRequired,
     mines: PropTypes.number.isRequired,
+    // dispatch props
+    revealCell: PropTypes.func.isRequired,
+    toggleFlagged: PropTypes.func.isRequired,
     // own props
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
   }
 
   clickHandler = () => {
-    revealCell(this.props.row, this.props.col);
+    this.props.revealCell(this.props.row, this.props.col);
   }
 
   rightClickHandler = (e) => {
     e.preventDefault();
-    toggleFlagged(this.props.row, this.props.col);
+    this.props.toggleFlagged(this.props.row, this.props.col);
   }
 
   render() {
@@ -68,26 +66,3 @@ class Cell extends React.Component {
     }
   }
 }
-
-const mapStateToProps = (state, ownProps) => ({
-  flagged: state.cells[ownProps.row][ownProps.col].flagged,
-  hidden: state.cells[ownProps.row][ownProps.col].hidden,
-  mines: state.cells[ownProps.row][ownProps.col].mines,
-
-  ...ownProps,
-});
-
-const mapDispatchToProps = dispatch => ({
-  revealCell: (row, col) => {
-    dispatch(revealCell(row, col));
-  },
-
-  toggleFlagged: (row, col) => {
-    dispatch(toggleFlagged(row, col));
-  },
-});
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Cell);

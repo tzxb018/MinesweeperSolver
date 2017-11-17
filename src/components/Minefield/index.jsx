@@ -1,12 +1,10 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import Cell from '../Cell/index.jsx';
-import resetBoard from '../../actions/boardActions.js';
+import CellContainer from 'containers/CellContainer.js';
 import styles from './style.scss';
 
-class Minefield extends React.Component {
+export default class Minefield extends Component {
   static propTypes = {
     // state props
     cols: PropTypes.number.isRequired,
@@ -18,7 +16,7 @@ class Minefield extends React.Component {
     for (let i = 0; i < this.props.rows; i++) {
       formattedCells.push([]);
       for (let j = 0; j < this.props.cols; j++) {
-        formattedCells[i].push(<Cell row={i} col={j} />);
+        formattedCells[i].push(<CellContainer row={i} col={j} />);
       }
     }
     return (
@@ -28,19 +26,3 @@ class Minefield extends React.Component {
     );
   }
 }
-
-const mapStateToProps = state => ({
-  cols: state.cells[0].length,
-  rows: state.cells.length,
-});
-
-const mapDispatchToProps = dispatch => ({
-  resetBoard: () => {
-    dispatch(resetBoard());
-  },
-});
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Minefield);

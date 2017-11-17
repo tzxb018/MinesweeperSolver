@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { Component } from 'react';
 
-import Minefield from '../Minefield/index.jsx';
-import ResetButton from '../ResetButton/index.jsx';
+import MinefieldContainer from 'containers/MinefieldContainer.js';
+import ResetButtonContainer from 'containers/ResetButtonContainer.js';
 import styles from './style.scss';
 
-export default class Board extends React.Component {
+export default class Board extends Component {
   render() {
     return (
-      <div className={styles.container} >
-        <ResetButton />
-        <Minefield />
+      <div className={styles['container']} >
+        <ResetButtonContainer />
+        <MinefieldContainer />
       </div>
     );
   }
