@@ -11,7 +11,7 @@ export default class Cell extends Component {
     mines: PropTypes.number.isRequired,
     // dispatch props
     revealCell: PropTypes.func.isRequired,
-    toggleFlagged: PropTypes.func.isRequired,
+    toggleFlag: PropTypes.func.isRequired,
     // own props
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
@@ -23,7 +23,7 @@ export default class Cell extends Component {
 
   rightClickHandler = (e) => {
     e.preventDefault();
-    this.props.toggleFlagged(this.props.row, this.props.col);
+    this.props.toggleFlag(this.props.row, this.props.col);
   }
 
   render() {

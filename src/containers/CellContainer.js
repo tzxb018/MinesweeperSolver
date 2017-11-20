@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import Cell from 'components/Cell/index.jsx';
 import {
   revealCell,
-  toggleFlagged,
+  toggleFlag,
 } from 'actions/cellActions.js';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -19,8 +19,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(revealCell(row, col));
   },
 
-  toggleFlagged: (row, col) => {
-    dispatch(toggleFlagged(row, col));
+  toggleFlag: (row, col) => {
+    dispatch(toggleFlag(row, col));
   },
 });
 
