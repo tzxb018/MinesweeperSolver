@@ -1,7 +1,6 @@
 import Immutable from 'immutable';
 
 import {
-  INCREMENT_TIMER,
   RESET_BOARD,
 } from 'actions/boardActions';
 import {
@@ -37,18 +36,11 @@ const initialState = Immutable.Map({
   numFlagged: 0,
   numMines: 40,
   numRevealed: 0,
-  timer: 0,
 });
 
 // reducer for the board property of state
 const board = (state = initialState, action) => {
   switch (action.type) {
-
-  // increments the timer
-  case INCREMENT_TIMER:
-    return state.withMutations(s => {
-      s.set('timer', s.get('timer') + 1);
-    });
 
   // resets the board
   case RESET_BOARD:

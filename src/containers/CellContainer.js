@@ -7,9 +7,9 @@ import {
 } from 'actions/cellActions.js';
 
 const mapStateToProps = (state, ownProps) => ({
-  flagged: state.board.get('cells').get(ownProps.row).get(ownProps.col).get('flagged'),
-  hidden: state.board.get('cells').get(ownProps.row).get(ownProps.col).get('hidden'),
-  mines: state.board.get('cells').get(ownProps.row).get(ownProps.col).get('mines'),
+  flagged: state.board.getIn(['cells', ownProps.row, ownProps.col, 'flagged']),
+  hidden: state.board.getIn(['cells', ownProps.row, ownProps.col, 'hidden']),
+  mines: state.board.getIn(['cells', ownProps.row, ownProps.col, 'mines']),
 
   ...ownProps,
 });
