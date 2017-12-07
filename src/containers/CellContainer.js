@@ -1,10 +1,10 @@
 import { connect } from 'react-redux';
 
-import Cell from 'components/Cell/index.jsx';
+import Cell from 'components/Cell';
 import {
   revealCell,
   toggleFlag,
-} from 'actions/cellActions.js';
+} from 'actions/boardActions';
 
 const mapStateToProps = (state, ownProps) => ({
   flagged: state.board.getIn(['cells', ownProps.row, ownProps.col, 'flagged']),

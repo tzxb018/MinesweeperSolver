@@ -1,19 +1,25 @@
 import Immutable from 'immutable';
 
 import {
+  CHANGE_SMILE,
+  GENERATE_CSP_VARIABLES,
   RESET_BOARD,
-} from 'actions/boardActions';
-import {
   REVEAL_CELL,
   TOGGLE_FLAG,
-} from 'actions/cellActions';
+} from 'actions/boardActions';
+import faceState from 'faceStates';
 
 import {
   flagMines,
   placeMines,
   revealMines,
   revealNeighbors,
-} from './functions';
+} from './utils/cellUtils';
+
+import {
+  buildConstraint,
+  isOnFringe,
+} from './utils/cspUtils';
 
 // default state for first render
 let cells = Immutable.List();
@@ -36,11 +42,53 @@ const initialState = Immutable.Map({
   numFlagged: 0,
   numMines: 40,
   numRevealed: 0,
+  smile: faceState.OK,
+  variables: [],
 });
 
 // reducer for the board property of state
 const board = (state = initialState, action) => {
   switch (action.type) {
+  // changes the smile
+  case CHANGE_SMILE:
+    let changeSmile = state;
+    changeSmile = changeSmile.set('smile', action.newSmile);
+    return changeSmile;
+
+  
+  // generates CSP variables
+  case GENERATE_CSP_VARIABLES:
+    // create a variable for each cell on a fringe
+    const variables = [];
+    for (let i = 0; i < state.get('cells').size; i++) {
+      for (let j = 0; j < state.getIn(['cells', 0]).size; j++) {
+        if (state.getIn(['cells', i, j, 'hidden']) && isOnFringe(state.get('cells'), i, j)) {
+          variables.push({
+            row: i,
+            col: j,
+            isFlagged: state.getIn(['cells', i, j, 'flagged']),
+          });
+        }
+      }
+    }
+    // create a constraint for each revealed cell with a number
+    const constraints = [];
+    for (let i = 0; i < state.get('cells').size; i++) {
+      for (let j = 0; j < state.getIn(['cells', 0]).size; j++) {
+        if (!state.getIn(['cells', i, j, 'hidden']) && state.getIn(['cells', i, j, 'mines']) > 0) {
+          constraints.push(buildConstraint(variables, i, j, state.getIn(['cell', i, j, 'mines'])));
+        }
+      }
+    }
+
+    // go through all variables, if not visited already
+      // mark as visited
+      // create a component and add current variable to it
+      // go through all unvisited constraints that affect current variable and grab other unvisited variables
+        // mark other variables as visited and mark constraint as visited
+        // add variables to component
+        // recurse until all variables and constraints are visited
+    return state;
 
   // resets the board
   case RESET_BOARD:

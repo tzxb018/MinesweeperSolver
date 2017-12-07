@@ -1,5 +1,7 @@
-// given the state.cells
-// flags all mines
+/**
+ * Flags all hidden cells that have mines
+ * @param {*} cells array of cell objects
+ */
 export const flagMines = (cells) => cells.withMutations(c => {
   for (let i = 0; i < c.size; i++) {
     for (let j = 0; j < c.get(0).size; j++) {
@@ -11,8 +13,12 @@ export const flagMines = (cells) => cells.withMutations(c => {
   return c;
 });
 
-// given the state.cells and mine at row i col j
-// updates the numbers surrounding the mine dropped at (i, j)
+/**
+ * Updates the numbers around the mine placed at row: i, col: j
+ * @param {*} cells array of cell objects
+ * @param {*} i row
+ * @param {*} j column
+ */
 const placeNumbers = (cells, i, j) => cells.withMutations(c => {
   // top-left
   if (i - 1 >= 0 && j - 1 >= 0 && c.getIn([i - 1, j - 1, 'mines']) !== -1) {
@@ -49,8 +55,13 @@ const placeNumbers = (cells, i, j) => cells.withMutations(c => {
   return c;
 });
 
-// given the state.cells, state.numMines, safe cell at row x col y
-// drops random mines avoiding the safe cell, and calls place numbers
+/**
+ * Places mines randomly with a safe cell at row: x, col: y
+ * @param {*} cells array of cell objects
+ * @param {*} numMines number of mines to be placed
+ * @param {*} x row of safe cell
+ * @param {*} y col of safe cell
+ */
 export const placeMines = (cells, numMines, x, y) => {
   let copy = cells;
   let minesLeft = numMines;
@@ -69,8 +80,10 @@ export const placeMines = (cells, numMines, x, y) => {
   return copy;
 };
 
-// given the state.cells
-// reveals all mines
+/**
+ * Reveals all hidden cells that have mines
+ * @param {*} cells array of cell objects
+ */
 export const revealMines = (cells) => cells.withMutations(c => {
   for (let i = 0; i < c.size; i++) {
     for (let j = 0; j < c.get(0).size; j++) {
@@ -82,8 +95,13 @@ export const revealMines = (cells) => cells.withMutations(c => {
   return c;
 });
 
-// given the state and row i col j
-// reveals all neighboring cells of cell at (i, j)
+/**
+ * Reveals all hidden cells around cell at row: i, col: j
+ * @param {*} cells array of cell objects
+ * @param {*} numRevealed number of revealed cells
+ * @param {*} i row
+ * @param {*} j col
+ */
 export const revealNeighbors = (cells, numRevealed, i, j) => {
   let newNumRevealed = numRevealed;
   let copy = cells;
