@@ -1,12 +1,19 @@
-import React from 'react';
-import styles from './style.scss';
-import Minefield from '../Minefield/index.jsx';
+import React, { Component } from 'react';
 
-export default class Board extends React.Component {
+import MineCounterContainer from 'containers/MineCounterContainer';
+import MinefieldContainer from 'containers/MinefieldContainer';
+import ResetButtonContainer from 'containers/ResetButtonContainer';
+import TimerContainer from 'containers/TimerContainer';
+import styles from './style.scss';
+
+export default class Board extends Component {
   render() {
     return (
-      <div className={styles.container} >
-        <Minefield height={16} width={16} numMines={40} className={styles['row2']} />
+      <div className={styles['container']} >
+        <MineCounterContainer />
+        <ResetButtonContainer />
+        <TimerContainer />
+        <MinefieldContainer />
       </div>
     );
   }

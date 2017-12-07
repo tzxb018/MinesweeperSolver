@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-export default class MineCounter extends React.Component {
+export default class MineCounter extends Component {
+  static propTypes = {
+    // state props
+    numMinesLeft: PropTypes.number.isRequired,
+  }
+
   render() {
     return (
       <div>
-        {this.props.numMines}
+        {this.props.numMinesLeft}
       </div>
     );
   }
 }
-
-MineCounter.propTypes = {
-  numMines: React.PropTypes.number.isRequired,
-};

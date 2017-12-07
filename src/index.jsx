@@ -1,8 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Board from 'components/Board/index.jsx';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+
+import App from 'components/App';
+import reducer from 'reducers';
+
+const store = createStore(
+  reducer
+);
 
 ReactDOM.render(
-  <Board />,
+  <Provider store={store}>
+    <App />
+  </Provider>,
   document.getElementById('app'),
 );
