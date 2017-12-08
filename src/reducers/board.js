@@ -19,6 +19,7 @@ import {
 import {
   buildConstraint,
   isOnFringe,
+  separateComponents,
 } from './utils/cspUtils';
 
 // default state for first render
@@ -43,7 +44,7 @@ const initialState = Immutable.Map({
   numMines: 40,
   numRevealed: 0,
   smile: faceState.OK,
-  components: [],
+  components: Immutable.List(),
 });
 
 // reducer for the board property of state
@@ -66,7 +67,6 @@ const board = (state = initialState, action) => {
             col: j,
             isFlagged: state.getIn(['cells', i, j, 'flagged']),
             row: i,
-            visited: false,
           });
         }
       }
@@ -81,18 +81,8 @@ const board = (state = initialState, action) => {
       }
     }
 
-    // go through all variables, if not visited already
-    for (let i = 0; i < variables.length; i++) {
-      if (!variables[i].visited) {
-        variables[i].visited = true;
-      }
-    }
-      // create a component and add current variable to it
-      // go through all unvisited constraints that affect current variable and grab other unvisited variables
-        // mark other variables as visited and mark constraint as visited
-        // add variables to component
-        // recurse until all variables and constraints are visited
-    return state;
+    const newState = state.set('components', separateComponents(variables, constraints));
+    return newState;
 
   // resets the board
   case RESET_BOARD:

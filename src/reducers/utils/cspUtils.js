@@ -1,3 +1,5 @@
+import Immutable from 'immutable';
+
 /**
  * Algorithm that generates all the possible configurations of mines
  * @param {*} minesLeft number of mines left to be found
@@ -166,4 +168,45 @@ export const isOnFringe = (cells, i, j) => {
     return true;
   }
   return false;
+};
+/**
+ * Separates variables into individual component problems
+ * @param {*} vars array of fringe variable objects
+ * @param {*} constraints array of constraint objects
+ */
+export const separateComponents = (vars, constraints) => {
+  // go through all variables, if not visited already
+      // create a component and add current variable to it
+      // go through all unvisited constraints that affect current variable and grab other unvisited variables
+        // mark other variables as visited and mark constraint as visited
+        // add variables to component
+        // recurse until all variables and constraints are visited
+  const components = [];
+  const variables = vars;
+  for (let i = 0; i < variables.length; i++) {
+    variables[i].visited = false;
+  }
+
+  for (let i = 0; i < variables.length; i++) {
+    if (!variables[i].visited) {
+      const stack = [];
+      stack.push(i);
+      variables[i].visited = true;
+      const component = [];
+      while (stack.length > 0) {
+        for (let j = 0; j < constraints.length; j++) {
+          if (constraintContains(constraints[j], stack[0])) {
+            for (let k = 0; k < constraints[j].length; k++) {
+              if (!variables[constraints[j][k][0]].visited) {
+                stack.push(constraints[j][k][0]);
+              }
+            }
+          }
+        }
+        component.push(stack.shift);
+      }
+      components.push(component);
+    }
+  }
+  return components;
 };
