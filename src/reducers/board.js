@@ -43,7 +43,7 @@ const initialState = Immutable.Map({
   numMines: 40,
   numRevealed: 0,
   smile: faceState.OK,
-  variables: [],
+  components: [],
 });
 
 // reducer for the board property of state
@@ -55,7 +55,6 @@ const board = (state = initialState, action) => {
     changeSmile = changeSmile.set('smile', action.newSmile);
     return changeSmile;
 
-  
   // generates CSP variables
   case GENERATE_CSP_VARIABLES:
     // create a variable for each cell on a fringe
@@ -64,9 +63,10 @@ const board = (state = initialState, action) => {
       for (let j = 0; j < state.getIn(['cells', 0]).size; j++) {
         if (state.getIn(['cells', i, j, 'hidden']) && isOnFringe(state.get('cells'), i, j)) {
           variables.push({
-            row: i,
             col: j,
             isFlagged: state.getIn(['cells', i, j, 'flagged']),
+            row: i,
+            visited: false,
           });
         }
       }
@@ -82,7 +82,11 @@ const board = (state = initialState, action) => {
     }
 
     // go through all variables, if not visited already
-      // mark as visited
+    for (let i = 0; i < variables.length; i++) {
+      if (!variables[i].visited) {
+        variables[i].visited = true;
+      }
+    }
       // create a component and add current variable to it
       // go through all unvisited constraints that affect current variable and grab other unvisited variables
         // mark other variables as visited and mark constraint as visited
@@ -139,6 +143,7 @@ const board = (state = initialState, action) => {
         // if all the non-bomb cells are revealed, win the game
         if (s.get('numRevealed') === s.get('cells').size * s.getIn(['cells', 0]).size - s.get('numMines')) {
           s.set('cells', flagMines(s.get('cells')));
+          s.set('numFlagged', s.get('numMines'));
           s.set('gameIsRunning', false);
         }
       });
