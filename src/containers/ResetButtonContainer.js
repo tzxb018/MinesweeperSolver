@@ -7,7 +7,7 @@ const mapStateToProps = () => ({
 
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = dispatch => ({
   resetBoard: () => {
     dispatch(resetBoard());
   },

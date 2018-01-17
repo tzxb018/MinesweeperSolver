@@ -18,8 +18,8 @@ import {
 
 import {
   buildConstraint,
-  isOnFringe,
   separateComponents,
+  setVariables,
 } from './utils/cspUtils';
 
 // default state for first render
@@ -59,18 +59,8 @@ const board = (state = initialState, action) => {
   // generates CSP variables
   case GENERATE_CSP_VARIABLES:
     // create a variable for each cell on a fringe
-    const variables = [];
-    for (let i = 0; i < state.get('cells').size; i++) {
-      for (let j = 0; j < state.getIn(['cells', 0]).size; j++) {
-        if (state.getIn(['cells', i, j, 'hidden']) && isOnFringe(state.get('cells'), i, j)) {
-          variables.push({
-            col: j,
-            isFlagged: state.getIn(['cells', i, j, 'flagged']),
-            row: i,
-          });
-        }
-      }
-    }
+    const variables = setVariables(state.get('cells'));
+
     // create a constraint for each revealed cell with a number
     const constraints = [];
     for (let i = 0; i < state.get('cells').size; i++) {
@@ -81,6 +71,7 @@ const board = (state = initialState, action) => {
       }
     }
 
+    // separates variables and constraints into individual components and changes the state
     const newState = state.set('components', separateComponents(variables, constraints));
     return newState;
 
