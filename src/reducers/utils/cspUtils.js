@@ -130,14 +130,14 @@ export const buildConstraint = (variables, x, y, numMines) => {
   // get all possible configurations and transfer them to the constraint
   const configurations = generateAllPossibilities(minesLeft, numVariables, numPossibilities);
   let count = 0;
-  for (let key = 0; key < constraint[0].length; key++) {
-    if (variables[key].isFlagged) {
+  for (let i = 0; i < constraint[0].length; i++) {
+    if (variables[constraint[0][i]].isFlagged) {
       for (let j = 1; j <= numPossibilities; j++) {
-        constraint[j][key] = (true);
+        constraint[j][i] = true;
       }
     } else {
       for (let j = 1; j <= numPossibilities; j++) {
-        constraint[j][key] = configurations[j - 1][count];
+        constraint[j][i] = configurations[j - 1][count];
       }
       count++;
     }
@@ -152,7 +152,7 @@ export const buildConstraint = (variables, x, y, numMines) => {
  */
 const constraintContains = (constraint, key) => {
   for (let i = 0; i < constraint.length; i++) {
-    if (constraint[i][0] === key) {
+    if (constraint[0][i] === key) {
       return true;
     }
   }
@@ -217,7 +217,7 @@ export const separateComponents = (vars, constrs) => {
       while (stack.length > 0) {
         for (let j = 0; j < constraints.length; j++) {
           if (constraintContains(constraints[j], stack[0])) {
-            for (let k = 0; k < constraints[j].length; k++) {
+            for (let k = 0; k < constraints[j][0].length; k++) {
               const key = constraints[j][0][k];
               if (!variables[key].visited) {
                 stack.push(key);
@@ -227,7 +227,7 @@ export const separateComponents = (vars, constrs) => {
             component.constraints.push(constraints.splice(j, 1));
           }
         }
-        component.variables.push(stack.shift);
+        component.variables.push(stack.shift());
       }
       components.push(component);
     }
