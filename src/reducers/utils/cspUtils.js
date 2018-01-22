@@ -192,20 +192,16 @@ const isOnFringe = (cells, i, j) => {
  * @param {*} constraints array of constraint objects
  */
 export const separateComponents = (vars, constrs) => {
-  // go through all variables, if not visited already
-      // create a component and add current variable to it
-      // go through all unvisited constraints that affect current variable and grab other unvisited variables
-        // mark other variables as visited and mark constraint as visited
-        // add variables to component
-        // recurse until all variables and constraints are visited
   const components = Immutable.List();
   const constraints = constrs;
   const variables = vars;
+  // add a marker to all variables to record which have been visited already
   for (let i = 0; i < variables.length; i++) {
     variables[i].visited = false;
   }
 
   for (let i = 0; i < variables.length; i++) {
+    // grab the first unvisited variable and make a new component for it
     if (!variables[i].visited) {
       const stack = [];
       stack.push(i);
@@ -215,6 +211,7 @@ export const separateComponents = (vars, constrs) => {
         variables: [],
       };
       while (stack.length > 0) {
+        // grab all unvisited variables from all relevant constraints
         for (let j = 0; j < constraints.length; j++) {
           if (constraintContains(constraints[j], stack[0])) {
             for (let k = 0; k < constraints[j][0].length; k++) {
@@ -224,11 +221,14 @@ export const separateComponents = (vars, constrs) => {
                 variables[key].visited = true;
               }
             }
+            // cut visited contraint from the list to the component
             component.constraints.push(constraints.splice(j, 1));
           }
         }
-        component.variables.push(stack.shift());
+        // shift visited variable from the stack to the component
+        component.variables.push(vars[stack.shift()]);
       }
+      // add completed component to the list
       components.push(component);
     }
   }
