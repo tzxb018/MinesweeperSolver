@@ -28,19 +28,14 @@ export default class Cell extends Component {
   }
 
   render() {
-    if (this.props.flagged === true) {
+    if (this.props.flagged) {
       return (<div className={styles['flagged']} onContextMenu={this.rightClickHandler} />);
-    } else if (this.props.component > 0) {
-      switch (this.props.component) {
-      
-      case 1:
-        return (<div className={styles[`comp${this.props.component}`]} onClick={this.clickHandler} onContextMenu={this.rightClickHandler} />);
-      }
-    } else if (this.props.hidden === true) {
+    } else if (this.props.component > 0 && this.props.component <= 8) {
+      return (<div className={styles['comp1']} onClick={this.clickHandler} onContextMenu={this.rightClickHandler} />);
+    } else if (this.props.hidden) {
       return (<div className={styles['hidden']} onClick={this.clickHandler} onContextMenu={this.rightClickHandler} />);
     }
     switch (this.props.mines) {
-
     case -1:
       return (<div className={styles['hasMine']} />);
 

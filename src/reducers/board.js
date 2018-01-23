@@ -18,6 +18,7 @@ import {
 
 import {
   buildConstraint,
+  colorCodeComponents,
   separateComponents,
   setVariables,
 } from './utils/cspUtils';
@@ -28,6 +29,7 @@ for (let i = 0; i < 16; i++) {
   let row = Immutable.List();
   for (let j = 0; j < 16; j++) {
     row = row.push(Immutable.Map({
+      component: 0,
       flagged: false,
       hidden: true,
       mines: 0,
@@ -71,8 +73,12 @@ const board = (state = initialState, action) => {
       }
     }
 
-    // separates variables and constraints into individual components and changes the state
-    const newState = state.set('components', separateComponents(variables, constraints));
+    // separates variables and constraints into individual components
+    let newState = state.set('components', separateComponents(variables, constraints));
+
+    // color codes all cells found to be part of a component
+    newState = newState.set('cells', colorCodeComponents(state.get('cells'), newState.get('components')));
+
     return newState;
 
   // resets the board
@@ -81,6 +87,7 @@ const board = (state = initialState, action) => {
       for (let i = 0; i < s.get('cells').size; i++) {
         for (let j = 0; j < s.getIn(['cells', 0]).size; j++) {
           s.setIn(['cells', i, j], Immutable.Map({
+            component: 0,
             flagged: false,
             hidden: true,
             mines: 0,

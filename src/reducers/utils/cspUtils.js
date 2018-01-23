@@ -1,6 +1,29 @@
 import Immutable from 'immutable';
 
 /**
+ * Color codes all cells that are part of a component
+ * @param {*} cells array of cells
+ * @param {*} components list of components
+ */
+export const colorCodeComponents = (cells, components) => cells.withMutations(c => {
+  // removes any old coloring
+  for (let i = 0; i < cells.size; i++) {
+    for (let j = 0; j < cells.get(0).size; j++) {
+      c.setIn([i, j, 'component'], 0);
+    }
+  }
+
+  // adds the new color to the pertinent cells
+  for (let i = 0; i < components.size; i++) {
+    for (let j = 0; j < components.get(i).variables.length; j++) {
+      const variable = components.get(i).variables[j];
+      c.setIn([variable.row, variable.col, 'component'], i + 1);
+    }
+  }
+  return c;
+});
+
+/**
  * Algorithm that generates all the possible configurations of mines
  * @param {*} minesLeft number of mines left to be found
  * @param {*} numVariables number of variable cells

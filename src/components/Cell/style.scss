@@ -2,19 +2,19 @@
 
 :local {
   .cell {
-    background-image: url('../../images/cell/cell.png');
+    background: url('../../images/cell/cell.png');
     height: 16px;
     width: 16px;
   }
 
   .hidden {
     @extend .cell;
-    background-image: url('../../images/cell/hidden.png');
+    background: url('../../images/cell/hidden.png');
   }
 
   .hasMine {
     @extend .cell;
-    background-image: url('../../images/mines/mine.png');
+    background: url('../../images/mines/mine.png');
   }
 
   .flagged {
@@ -24,81 +24,81 @@
 
   .one {
     @extend .cell;
-    background-image: url('../../images/mines/one.png');
+    background: url('../../images/mines/one.png');
   }
 
   .two {
     @extend .cell;
-    background-image: url('../../images/mines/two.png');
+    background: url('../../images/mines/two.png');
   }
 
   .three {
     @extend .cell;
-    background-image: url('../../images/mines/three.png');
+    background: url('../../images/mines/three.png');
   }
 
   .four {
     @extend .cell;
-    background-image: url('../../images/mines/four.png');
+    background: url('../../images/mines/four.png');
   }
 
   .five {
     @extend .cell;
-    background-image: url('../../images/mines/five.png');
+    background: url('../../images/mines/five.png');
   }
 
   .six {
     @extend .cell;
-    background-image: url('../../images/mines/six.png');
+    background: url('../../images/mines/six.png');
   }
 
   .seven {
     @extend .cell;
-    background-image: url('../../images/mines/seven.png');
+    background: url('../../images/mines/seven.png');
   }
 
   .eight {
     @extend .cell;
-    background-image: url('../../images/mines/eight.png');
+    background: url('../../images/mines/eight.png');
   }
 
   .comp1 {
     @extend .cell;
-    background-image: url('../../images/cell/blue.png');
+    background: url('../../images/cell/blue.png');
   }
 
   .comp2 {
     @extend .cell;
-    background-image: url('../../images/cell/dark_green.png');
+    background: url('../../images/cell/dark_green.png');
   }
 
   .comp3 {
     @extend .cell;
-    background-image: url('../../images/cell/red.png');
+    background: url('../../images/cell/red.png');
   }
 
   .comp4 {
     @extend .cell;
-    background-image: url('../../images/cell/dark_blue.png');
+    background: url('../../images/cell/dark_blue.png');
   }
 
   .comp5 {
     @extend .cell;
-    background-image: url('../../images/cell/dark_red.png');
+    background: url('../../images/cell/dark_red.png');
   }
 
   .comp6 {
     @extend .cell;
-    background-image: url('../../images/cell/dark_cyan.png');
+    background: url('../../images/cell/dark_cyan.png');
   }
 
   .comp7 {
     @extend .cell;
-    background-image: url('../../images/cell/green.png');
+    background: url('../../images/cell/green.png');
   }
 
   .comp8 {
     @extend .cell;
-    background-image: url('../../images/cell/cyan.png');
+    background: url('../../images/cell/cyan.png');
   }
 }
