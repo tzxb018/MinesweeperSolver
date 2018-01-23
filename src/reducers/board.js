@@ -77,7 +77,7 @@ const board = (state = initialState, action) => {
     let newState = state.set('components', separateComponents(variables, constraints));
 
     // color codes all cells found to be part of a component
-    newState = newState.set('cells', colorCodeComponents(state.get('cells'), newState.get('components')));
+    newState = newState.set('cells', colorCodeComponents(newState.get('cells'), newState.get('components')));
 
     return newState;
 

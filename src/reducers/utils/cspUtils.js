@@ -215,7 +215,7 @@ const isOnFringe = (cells, i, j) => {
  * @param {*} constraints array of constraint objects
  */
 export const separateComponents = (vars, constrs) => {
-  const components = Immutable.List();
+  let components = Immutable.List();
   const constraints = constrs;
   const variables = vars;
   // add a marker to all variables to record which have been visited already
@@ -252,7 +252,7 @@ export const separateComponents = (vars, constrs) => {
         component.variables.push(vars[stack.shift()]);
       }
       // add completed component to the list
-      components.push(component);
+      components = components.push(component);
     }
   }
   return components;
