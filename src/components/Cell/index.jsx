@@ -11,6 +11,7 @@ export default class Cell extends Component {
     hidden: PropTypes.bool.isRequired,
     mines: PropTypes.number.isRequired,
     // dispatch props
+    changeSmile: PropTypes.func.isRequired,
     revealCell: PropTypes.func.isRequired,
     toggleFlag: PropTypes.func.isRequired,
     // own props
@@ -22,7 +23,13 @@ export default class Cell extends Component {
     this.props.revealCell(this.props.row, this.props.col);
   }
 
-  rightClickHandler = (e) => {
+  mouseDownHandler = e => {
+    if (e.nativeEvent.which === 1) {
+      this.props.changeSmile('SCARED');
+    }
+  }
+
+  rightClickHandler = e => {
     e.preventDefault();
     this.props.toggleFlag(this.props.row, this.props.col);
   }
@@ -31,12 +38,20 @@ export default class Cell extends Component {
     if (this.props.flagged) {
       return (<div className={styles['flagged']} onContextMenu={this.rightClickHandler} />);
     } else if (this.props.hidden && this.props.component > 0 && this.props.component <= 8) {
-      const s = `comp${this.props.component}`;
-      return (<div className={styles[s]} onClick={this.clickHandler} onContextMenu={this.rightClickHandler} />);
+      return (
+        <div className={styles[`comp${this.props.component}`]}
+          onClick={this.clickHandler}
+          onContextMenu={this.rightClickHandler}
+          onMouseDown={this.mouseDownHandler}
+        />);
     } else if (this.props.hidden) {
-      return (<div className={styles['hidden']} onClick={this.clickHandler} onContextMenu={this.rightClickHandler} />);
+      return (
+        <div className={styles['hidden']}
+          onClick={this.clickHandler}
+          onContextMenu={this.rightClickHandler}
+          onMouseDown={this.mouseDownHandler}
+        />);
     }
-    const s = `mines${this.props.mines}`;
-    return (<div className={styles[s]} />);
+    return (<div className={styles[`mines${this.props.mines}`]} />);
   }
 }

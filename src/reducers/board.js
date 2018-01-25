@@ -95,6 +95,7 @@ const board = (state = initialState, action) => {
       s.set('hasMines', false);
       s.set('numFlagged', 0);
       s.set('numRevealed', 0);
+      s.set('smile', 'SMILE');
       s.set('timer', 0);
     });
 
@@ -112,6 +113,7 @@ const board = (state = initialState, action) => {
         // reveal the cell
         s.setIn(['cells', action.row, action.col, 'hidden'], false);
         s.set('numRevealed', s.get('numRevealed') + 1);
+        s.set('smile', 'SMILE');
 
         // if that cell had zero mines nearby, reveal all neighbors
         if (s.getIn(['cells', action.row, action.col, 'mines']) === 0) {
@@ -123,6 +125,7 @@ const board = (state = initialState, action) => {
         } else if (s.getIn(['cells', action.row, action.col, 'mines']) === -1) {
           s.set('cells', revealMines(s.get('cells')));
           s.set('gameIsRunning', false);
+          s.set('smile', 'LOST');
         }
 
         // if all the non-bomb cells are revealed, win the game
@@ -130,6 +133,7 @@ const board = (state = initialState, action) => {
           s.set('cells', flagMines(s.get('cells')));
           s.set('numFlagged', s.get('numMines'));
           s.set('gameIsRunning', false);
+          s.set('smile', 'WON');
         }
       });
     }
