@@ -30,7 +30,7 @@ export default class Cell extends Component {
   render() {
     if (this.props.flagged) {
       return (<div className={styles['flagged']} onContextMenu={this.rightClickHandler} />);
-    } else if (this.props.component > 0 && this.props.component <= 8) {
+    } else if (this.props.hidden && this.props.component > 0 && this.props.component <= 8) {
       const s = `comp${this.props.component}`;
       return (<div className={styles[s]} onClick={this.clickHandler} onContextMenu={this.rightClickHandler} />);
     } else if (this.props.hidden) {

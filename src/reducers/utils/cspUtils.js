@@ -174,7 +174,7 @@ export const buildConstraint = (variables, x, y, numMines) => {
  * @param {*} key
  */
 const constraintContains = (constraint, key) => {
-  for (let i = 0; i < constraint.length; i++) {
+  for (let i = 0; i < constraint[0].length; i++) {
     if (constraint[0][i] === key) {
       return true;
     }
@@ -228,7 +228,6 @@ export const separateComponents = (vars, constrs) => {
     if (!variables[i].visited) {
       const stack = [];
       stack.push(i);
-      variables[i].visited = true;
       const component = {
         constraints: [],
         variables: [],
@@ -241,7 +240,6 @@ export const separateComponents = (vars, constrs) => {
               const key = constraints[j][0][k];
               if (!variables[key].visited) {
                 stack.push(key);
-                variables[key].visited = true;
               }
             }
             // cut visited contraint from the list to the component
@@ -249,6 +247,7 @@ export const separateComponents = (vars, constrs) => {
           }
         }
         // shift visited variable from the stack to the component
+        variables[stack[0]].visited = true;
         component.variables.push(vars[stack.shift()]);
       }
       // add completed component to the list

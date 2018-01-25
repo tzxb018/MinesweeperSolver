@@ -7,7 +7,6 @@ import {
   REVEAL_CELL,
   TOGGLE_FLAG,
 } from 'actions/boardActions';
-import faceState from 'faceStates';
 
 import {
   flagMines,
@@ -45,7 +44,7 @@ const initialState = Immutable.Map({
   numFlagged: 0,
   numMines: 40,
   numRevealed: 0,
-  smile: faceState.OK,
+  smile: 'SMILE',
   components: Immutable.List(),
 });
 
@@ -54,9 +53,7 @@ const board = (state = initialState, action) => {
   switch (action.type) {
   // changes the smile
   case CHANGE_SMILE:
-    let changeSmile = state;
-    changeSmile = changeSmile.set('smile', action.newSmile);
-    return changeSmile;
+    return state.set('smile', action.newSmile);
 
   // generates CSP variables
   case GENERATE_CSP_VARIABLES:
