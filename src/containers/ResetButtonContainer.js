@@ -1,13 +1,20 @@
 import { connect } from 'react-redux';
 
 import ResetButton from 'components/ResetButton/index.jsx';
-import { resetBoard } from 'actions/boardActions.js';
+import {
+  changeSmile,
+  resetBoard,
+} from 'actions/boardActions.js';
 
-const mapStateToProps = () => ({
-
+const mapStateToProps = state => ({
+  smile: state.board.get('smile'),
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = dispatch => ({
+  changeSmile: (newSmile) => {
+    dispatch(changeSmile(newSmile));
+  },
+
   resetBoard: () => {
     dispatch(resetBoard());
   },

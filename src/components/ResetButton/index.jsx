@@ -5,7 +5,10 @@ import styles from './style.scss';
 
 export default class ResetButton extends React.Component {
   static propTypes = {
+    // state props
+    smile: PropTypes.string.isRequired,
     // dispatch props
+    changeSmile: PropTypes.func.isRequired,
     resetBoard: PropTypes.func.isRequired,
   };
 
@@ -13,11 +16,21 @@ export default class ResetButton extends React.Component {
     this.props.resetBoard();
   }
 
+  mouseDownHandler = () => {
+    this.props.changeSmile('PRESSED');
+  }
+
+  mouseUpHandler = () => {
+    this.props.changeSmile('SMILE');
+  }
+
   render() {
     return (
-      <button className={styles['button']} onClick={this.clickHandler}>
-        Reset
-      </button>
+      <div className={styles[this.props.smile]}
+        onClick={this.clickHandler}
+        onMouseDown={this.mouseDownHandler}
+        onMouseUp={this.mouseUpHandler}
+      />
     );
   }
 }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+import CSPButtonContainer from 'containers/CSPButtonContainer';
 import MineCounterContainer from 'containers/MineCounterContainer';
 import MinefieldContainer from 'containers/MinefieldContainer';
 import ResetButtonContainer from 'containers/ResetButtonContainer';
@@ -14,6 +15,7 @@ export default class Board extends Component {
         <ResetButtonContainer />
         <TimerContainer />
         <MinefieldContainer />
+        <CSPButtonContainer />
       </div>
     );
   }

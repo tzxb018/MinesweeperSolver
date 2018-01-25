@@ -2,11 +2,13 @@ import { connect } from 'react-redux';
 
 import Cell from 'components/Cell';
 import {
+  changeSmile,
   revealCell,
   toggleFlag,
 } from 'actions/boardActions';
 
 const mapStateToProps = (state, ownProps) => ({
+  component: state.board.getIn(['cells', ownProps.row, ownProps.col, 'component']),
   flagged: state.board.getIn(['cells', ownProps.row, ownProps.col, 'flagged']),
   hidden: state.board.getIn(['cells', ownProps.row, ownProps.col, 'hidden']),
   mines: state.board.getIn(['cells', ownProps.row, ownProps.col, 'mines']),
@@ -15,6 +17,10 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+  changeSmile: (newSmile) => {
+    dispatch(changeSmile(newSmile));
+  },
+
   revealCell: (row, col) => {
     dispatch(revealCell(row, col));
   },

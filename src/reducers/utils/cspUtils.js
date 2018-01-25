@@ -1,3 +1,28 @@
+import Immutable from 'immutable';
+
+/**
+ * Color codes all cells that are part of a component
+ * @param {*} cells array of cells
+ * @param {*} components list of components
+ */
+export const colorCodeComponents = (cells, components) => cells.withMutations(c => {
+  // removes any old coloring
+  for (let i = 0; i < cells.size; i++) {
+    for (let j = 0; j < cells.get(0).size; j++) {
+      c.setIn([i, j, 'component'], 0);
+    }
+  }
+
+  // adds the new color to the pertinent cells
+  for (let i = 0; i < components.size; i++) {
+    for (let j = 0; j < components.get(i).variables.length; j++) {
+      const variable = components.get(i).variables[j];
+      c.setIn([variable.row, variable.col, 'component'], i + 1);
+    }
+  }
+  return c;
+});
+
 /**
  * Algorithm that generates all the possible configurations of mines
  * @param {*} minesLeft number of mines left to be found
@@ -97,48 +122,64 @@ const generateAllPossibilities = (minesLeft, numVariables, numPossibilities) => 
  */
 export const buildConstraint = (variables, x, y, numMines) => {
   const constraint = [];
+  constraint.push([]);
   let minesLeft = numMines;
-  for (let i = 0; i < variables.length; i++) {
+  for (let key = 0; key < variables.length; key++) {
     // if the variable is within the scope of the constraint, add it to the list
-    if (variables[i].row >= x - 1 && variables[i].row <= x + 1
-        && variables[i].col >= y - 1 && variables[i].col <= y + 1) {
-      constraint.push([]);
-      constraint[constraint.length - 1].push(i);
+    if (variables[key].row >= x - 1 && variables[key].row <= x + 1
+        && variables[key].col >= y - 1 && variables[key].col <= y + 1) {
+      constraint[0].push(key);
       // if the variable is already flagged, adjust minesLeft to be placed
-      if (variables[i].isFlagged) {
+      if (variables[key].isFlagged) {
         minesLeft--;
       }
     }
   }
 
-  // calculate how many possible configurations there are
-  const numVariables = constraint.length - (numMines - minesLeft);
+  // calculate how many possible configurations there are and fill the contstraint with
+  // enough space to fit each one
+  const numVariables = constraint[0].length - (numMines - minesLeft);
   let numPossibilities = 1;
   for (let i = 0; i < minesLeft; i++) {
     numPossibilities *= (numVariables - i) / (i + 1);
   }
-
-  // preset any flagged variables in the constraint to true
-  for (let i = 0; i < constraint.length; i++) {
-    if (variables[constraint[i]].isFlagged) {
-      for (let j = 1; j <= numPossibilities; j++) {
-        constraint[i].push(true);
-      }
+  for (let i = 1; i <= numPossibilities; i++) {
+    constraint.push([]);
+    for (let j = 0; j < numVariables; j++) {
+      constraint[i].push(null);
     }
   }
 
   // get all possible configurations and transfer them to the constraint
   const configurations = generateAllPossibilities(minesLeft, numVariables, numPossibilities);
   let count = 0;
-  for (let i = 0; i < constraint.length; i++) {
-    if (constraint[i].length === 1) {
-      for (let j = 0; j < numPossibilities; j++) {
-        constraint[i].push(configurations[j][count]);
-        count++;
+  for (let i = 0; i < constraint[0].length; i++) {
+    if (variables[constraint[0][i]].isFlagged) {
+      for (let j = 1; j <= numPossibilities; j++) {
+        constraint[j][i] = true;
       }
+    } else {
+      for (let j = 1; j <= numPossibilities; j++) {
+        constraint[j][i] = configurations[j - 1][count];
+      }
+      count++;
     }
   }
   return constraint;
+};
+
+/**
+ * Finds whether the given constraint contains the given key
+ * @param {*} constraint
+ * @param {*} key
+ */
+const constraintContains = (constraint, key) => {
+  for (let i = 0; i < constraint[0].length; i++) {
+    if (constraint[0][i] === key) {
+      return true;
+    }
+  }
+  return false;
 };
 
 /**
@@ -147,7 +188,7 @@ export const buildConstraint = (variables, x, y, numMines) => {
  * @param {*} i row
  * @param {*} j col
  */
-export const isOnFringe = (cells, i, j) => {
+const isOnFringe = (cells, i, j) => {
   if (i - 1 >= 0 && j - 1 >= 0 && !cells.getIn([i - 1, j - 1, 'hidden'])) {
     return true;
   } else if (i - 1 >= 0 && !cells.getIn([i - 1, j, 'hidden'])) {
@@ -166,4 +207,75 @@ export const isOnFringe = (cells, i, j) => {
     return true;
   }
   return false;
+};
+
+/**
+ * Separates variables into individual component problems
+ * @param {*} vars array of fringe variable objects
+ * @param {*} constraints array of constraint objects
+ */
+export const separateComponents = (vars, constrs) => {
+  let components = Immutable.List();
+  const constraints = constrs;
+  const variables = vars;
+  // add a marker to all variables to record which have been visited already
+  for (let i = 0; i < variables.length; i++) {
+    variables[i].visited = false;
+  }
+
+  for (let i = 0; i < variables.length; i++) {
+    // grab the first unvisited variable and make a new component for it
+    if (!variables[i].visited) {
+      const stack = [];
+      stack.push(i);
+      const component = {
+        constraints: [],
+        variables: [],
+      };
+      while (stack.length > 0) {
+        // grab all unvisited variables from all relevant constraints
+        for (let j = 0; j < constraints.length; j++) {
+          if (constraintContains(constraints[j], stack[0])) {
+            for (let k = 0; k < constraints[j][0].length; k++) {
+              const key = constraints[j][0][k];
+              if (!variables[key].visited) {
+                stack.push(key);
+              }
+            }
+            // cut visited contraint from the list to the component
+            component.constraints.push(constraints.splice(j, 1));
+          }
+        }
+        // shift visited variable from the stack to the component
+        variables[stack[0]].visited = true;
+        component.variables.push(vars[stack.shift()]);
+      }
+      // add completed component to the list
+      components = components.push(component);
+    }
+  }
+  return components;
+};
+
+/**
+ * Finds each fringe cell and assigns it a variable
+ * @param {*} cells array of cells
+ */
+export const setVariables = (cells) => {
+  const variables = [];
+  let count = 0;
+  for (let i = 0; i < cells.size; i++) {
+    for (let j = 0; j < cells.get(0).size; j++) {
+      if (cells.getIn([i, j, 'hidden']) && isOnFringe(cells, i, j)) {
+        variables.push({
+          col: j,
+          isFlagged: cells.getIn([i, j, 'flagged']),
+          key: count,
+          row: i,
+        });
+        count++;
+      }
+    }
+  }
+  return variables;
 };

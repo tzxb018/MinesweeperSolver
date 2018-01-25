@@ -1,64 +1,104 @@
 @import '../../_colors.scss';
 
 :local {
-  .cell {
-    background-image: url('../../images/cell.png');
+  .mines0 {
+    background: url('../../images/cell/cell.png');
     height: 16px;
     width: 16px;
   }
 
   .hidden {
-    @extend .cell;
-    background-image: url('../../images/hidden.png');
+    @extend .mines0;
+    background: url('../../images/cell/hidden.png');
   }
 
-  .hasMine {
-    @extend .cell;
-    background-image: url('../../images/mine.png');
+  .mines-1 {
+    @extend .mines0;
+    background: url('../../images/mines/mine.png');
   }
 
   .flagged {
-    @extend .cell;
-    background: url('../../images/flagged.png');
+    @extend .mines0;
+    background: url('../../images/cell/flagged.png');
   }
 
-  .one {
-    @extend .cell;
-    background-image: url('../../images/one.png');
+  .mines1 {
+    @extend .mines0;
+    background: url('../../images/mines/one.png');
   }
 
-  .two {
-    @extend .cell;
-    background-image: url('../../images/two.png');
+  .mines2 {
+    @extend .mines0;
+    background: url('../../images/mines/two.png');
   }
 
-  .three {
-    @extend .cell;
-    background-image: url('../../images/three.png');
+  .mines3 {
+    @extend .mines0;
+    background: url('../../images/mines/three.png');
   }
 
-  .four {
-    @extend .cell;
-    background-image: url('../../images/four.png');
+  .mines4 {
+    @extend .mines0;
+    background: url('../../images/mines/four.png');
   }
 
-  .five {
-    @extend .cell;
-    background-image: url('../../images/five.png');
+  .mines5 {
+    @extend .mines0;
+    background: url('../../images/mines/five.png');
   }
 
-  .six {
-    @extend .cell;
-    background-image: url('../../images/six.png');
+  .mines6 {
+    @extend .mines0;
+    background: url('../../images/mines/six.png');
   }
 
-  .seven {
-    @extend .cell;
-    background-image: url('../../images/seven.png');
+  .mines7 {
+    @extend .mines0;
+    background: url('../../images/mines/seven.png');
   }
 
-  .eight {
-    @extend .cell;
-    background-image: url('../../images/eight.png');
+  .mines8 {
+    @extend .mines0;
+    background: url('../../images/mines/eight.png');
+  }
+
+  .comp1 {
+    @extend .mines0;
+    background: url('../../images/cell/blue.png');
+  }
+
+  .comp2 {
+    @extend .mines0;
+    background: url('../../images/cell/dark_green.png');
+  }
+
+  .comp3 {
+    @extend .mines0;
+    background: url('../../images/cell/red.png');
+  }
+
+  .comp4 {
+    @extend .mines0;
+    background: url('../../images/cell/dark_blue.png');
+  }
+
+  .comp5 {
+    @extend .mines0;
+    background: url('../../images/cell/dark_red.png');
+  }
+
+  .comp6 {
+    @extend .mines0;
+    background: url('../../images/cell/dark_cyan.png');
+  }
+
+  .comp7 {
+    @extend .mines0;
+    background: url('../../images/cell/green.png');
+  }
+
+  .comp8 {
+    @extend .mines0;
+    background: url('../../images/cell/cyan.png');
   }
 }

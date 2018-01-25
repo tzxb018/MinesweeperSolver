@@ -2,7 +2,7 @@
  * Flags all hidden cells that have mines
  * @param {*} cells array of cell objects
  */
-export const flagMines = (cells) => cells.withMutations(c => {
+export const flagMines = cells => cells.withMutations(c => {
   for (let i = 0; i < c.size; i++) {
     for (let j = 0; j < c.get(0).size; j++) {
       if (c.getIn([i, j, 'mines']) === -1 && c.getIn([i, j, 'flagged']) === false) {
@@ -114,7 +114,7 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
     if (copy.getIn([i - 1, j - 1, 'mines']) === 0) {
       const temp = revealNeighbors(copy, newNumRevealed, i - 1, j - 1);
       copy = temp.cells;
-      newNumRevealed = temp.numRevealed;
+      newNumRevealed = temp.newNumRevealed;
     }
   }
   // top-mid
@@ -124,7 +124,7 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
     if (copy.getIn([i - 1, j, 'mines']) === 0) {
       const temp = revealNeighbors(copy, newNumRevealed, i - 1, j);
       copy = temp.cells;
-      newNumRevealed = temp.numRevealed;
+      newNumRevealed = temp.newNumRevealed;
     }
   }
   // top-right
@@ -134,7 +134,7 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
     if (copy.getIn([i - 1, j + 1, 'mines']) === 0) {
       const temp = revealNeighbors(copy, newNumRevealed, i - 1, j + 1);
       copy = temp.cells;
-      newNumRevealed = temp.numRevealed;
+      newNumRevealed = temp.newNumRevealed;
     }
   }
   // mid-right
@@ -144,7 +144,7 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
     if (copy.getIn([i, j + 1, 'mines']) === 0) {
       const temp = revealNeighbors(copy, newNumRevealed, i, j + 1);
       copy = temp.cells;
-      newNumRevealed = temp.numRevealed;
+      newNumRevealed = temp.newNumRevealed;
     }
   }
   // bottom-right
@@ -154,7 +154,7 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
     if (copy.getIn([i + 1, j + 1, 'mines']) === 0) {
       const temp = revealNeighbors(copy, newNumRevealed, i + 1, j + 1);
       copy = temp.cells;
-      newNumRevealed = temp.numRevealed;
+      newNumRevealed = temp.newNumRevealed;
     }
   }
   // bottom-mid
@@ -164,7 +164,7 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
     if (copy.getIn([i + 1, j, 'mines']) === 0) {
       const temp = revealNeighbors(copy, newNumRevealed, i + 1, j);
       copy = temp.cells;
-      newNumRevealed = temp.numRevealed;
+      newNumRevealed = temp.newNumRevealed;
     }
   }
   // bottom-left
@@ -174,7 +174,7 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
     if (copy.getIn([i + 1, j - 1, 'mines']) === 0) {
       const temp = revealNeighbors(copy, newNumRevealed, i + 1, j - 1);
       copy = temp.cells;
-      newNumRevealed = temp.numRevealed;
+      newNumRevealed = temp.newNumRevealed;
     }
   }
   // mid-left
@@ -184,7 +184,7 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
     if (copy.getIn([i, j - 1, 'mines']) === 0) {
       const temp = revealNeighbors(copy, newNumRevealed, i, j - 1);
       copy = temp.cells;
-      newNumRevealed = temp.numRevealed;
+      newNumRevealed = temp.newNumRevealed;
     }
   }
   return {
