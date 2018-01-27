@@ -1,9 +1,12 @@
 :local {
-  .container {
+  .intermediate {
+    bottom: 12px;
     display: grid;
     grid-template-columns: repeat(16, 16px);
     grid-template-rows: repeat(16, 16px);
-    height: 1fr;
-    width: 1fr;
+    height: 256px;
+    left: 10px;
+    position: relative;
+    width: 256px;
   }
 }

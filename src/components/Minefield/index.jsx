@@ -20,7 +20,7 @@ export default class Minefield extends Component {
       }
     }
     return (
-      <div className={styles['container']} >
+      <div className={styles['intermediate']} >
         { formattedCells }
       </div>
     );

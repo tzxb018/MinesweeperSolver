@@ -62,7 +62,7 @@ module.exports = {
           }],
         }),
       }, {
-        test: /\.(jpe?g|png|gif|svg)$/i,
+        test: /\.(jpe?g|png|gif)$/i,
         loaders: [
           'file-loader', {
             loader: 'image-webpack-loader',
@@ -73,6 +73,9 @@ module.exports = {
             },
           },
         ],
+      }, {
+        test: /\.(eot|svg|ttf|woff|woff2)$/,
+        loader: 'url-loader',
       },
     ],
   },
