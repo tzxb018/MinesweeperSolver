@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import styles from './style.scss';
+
 export default class Timer extends Component {
   static propTypes = {
     // state props
@@ -27,13 +29,24 @@ export default class Timer extends Component {
   }
 
   incrementTimer() {
-    this.setState({ counter: this.state.counter + 1 });
+    if (this.state.counter < 999) {
+      this.setState({ counter: this.state.counter + 1 });
+    }
   }
 
   render() {
+    let length = 1;
+    if (this.state.counter > 0) {
+      length = Math.log(this.state.counter) * Math.LOG10E + 1;
+    }
+    let output = '';
+    for (length; length < 3; length++) {
+      output += '0';
+    }
+    output += this.state.counter.toString();
     return (
-      <div>
-        {this.state.counter}
+      <div className={styles['intermediate']}>
+        {output}
       </div>
     );
   }

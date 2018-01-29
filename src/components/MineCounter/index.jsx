@@ -10,9 +10,18 @@ export default class MineCounter extends Component {
   }
 
   render() {
+    let length = 1;
+    if (this.props.numMinesLeft > 0) {
+      length = Math.log(this.props.numMinesLeft) * Math.LOG10E + 1;
+    }
+    let output = '';
+    for (length; length < 3; length++) {
+      output += '0';
+    }
+    output += this.props.numMinesLeft.toString();
     return (
-      <div className={styles['intermediate']} fontFamily="PixelLCD-7" >
-        {this.props.numMinesLeft}
+      <div className={styles['intermediate']}>
+        {output}
       </div>
     );
   }
