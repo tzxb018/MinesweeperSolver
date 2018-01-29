@@ -5,6 +5,7 @@ import Timer from 'components/Timer';
 const mapStateToProps = state => ({
   gameIsRunning: state.board.get('gameIsRunning'),
   hasMines: state.board.get('hasMines'),
+  size: state.board.get('size'),
 });
 
 const mapDispatchToProps = () => ({

@@ -9,6 +9,7 @@ export default class Minefield extends Component {
     // state props
     cols: PropTypes.number.isRequired,
     rows: PropTypes.number.isRequired,
+    size: PropTypes.string.isRequired,
   }
 
   render() {
@@ -20,7 +21,7 @@ export default class Minefield extends Component {
       }
     }
     return (
-      <div className={styles['intermediate']} >
+      <div className={styles[this.props.size]} >
         { formattedCells }
       </div>
     );

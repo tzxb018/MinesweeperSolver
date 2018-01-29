@@ -7,6 +7,7 @@ import styles from './style.scss';
 export default class ResetButton extends React.Component {
   static propTypes = {
     // state props
+    size: PropTypes.string.isRequired,
     smile: PropTypes.string.isRequired,
     // dispatch props
     changeSmile: PropTypes.func.isRequired,
@@ -27,7 +28,7 @@ export default class ResetButton extends React.Component {
 
   render() {
     return (
-      <div className={classNames({ [styles[this.props.smile]]: true, [styles.intermediate]: true })}
+      <div className={classNames({ [styles[this.props.smile]]: true, [styles[this.props.size]]: true })}
         onClick={this.clickHandler}
         onMouseDown={this.mouseDownHandler}
         onMouseUp={this.mouseUpHandler}

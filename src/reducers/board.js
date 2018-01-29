@@ -44,6 +44,7 @@ const initialState = Immutable.Map({
   numFlagged: 0,
   numMines: 40,
   numRevealed: 0,
+  size: 'intermediate',
   smile: 'SMILE',
   components: Immutable.List(),
 });
