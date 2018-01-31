@@ -1,7 +1,19 @@
 :local {
+  .beginner {
+    bottom: 14px;
+    left: 68px;
+    position: relative;
+  }
+
   .intermediate {
     bottom: 14px;
     left: 124px;
+    position: relative;
+  }
+
+  .expert {
+    bottom: 14px;
+    left: 236px;
     position: relative;
   }
 

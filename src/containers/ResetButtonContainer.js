@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import ResetButton from 'components/ResetButton/index.jsx';
+import ResetButton from 'components/ResetButton';
 import {
   changeSmile,
   resetBoard,

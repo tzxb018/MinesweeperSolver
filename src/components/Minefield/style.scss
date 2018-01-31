@@ -1,4 +1,15 @@
 :local {
+  .beginner {
+    bottom: 26px;
+    display: grid;
+    grid-template-columns: repeat(9, 16px);
+    grid-template-rows: repeat(9, 16px);
+    height: 144px;
+    left: 10px;
+    position: relative;
+    width: 144px;
+  }
+
   .intermediate {
     bottom: 27px;
     display: grid;
@@ -8,5 +19,16 @@
     left: 10px;
     position: relative;
     width: 256px;
+  }
+
+  .expert {
+    bottom: 27px;
+    display: grid;
+    grid-template-columns: repeat(30, 16px);
+    grid-template-rows: repeat(16, 16px);
+    height: 256px;
+    left: 10px;
+    position: relative;
+    width: 480px;
   }
 }

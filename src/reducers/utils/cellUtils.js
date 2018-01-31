@@ -1,3 +1,58 @@
+import Immutable from 'immutable';
+
+/**
+ * Changes the size of the board
+ * @param {*} state board state to be changed
+ * @param {*} newSize passed from action
+ */
+export const changeSize = (state, newSize) => state.withMutations(s => {
+  let rows = 0;
+  let cols = 0;
+  let numMines = 0;
+  switch (newSize) {
+  case 'beginner':
+    rows = 9;
+    cols = 9;
+    numMines = 10;
+    break;
+  case 'intermediate':
+    rows = 16;
+    cols = 16;
+    numMines = 40;
+    break;
+  case 'expert':
+    rows = 16;
+    cols = 30;
+    numMines = 99;
+    break;
+  default:
+    rows = 16;
+    cols = 16;
+    numMines = 40;
+  }
+  let cells = Immutable.List();
+  for (let i = 0; i < rows; i++) {
+    let row = Immutable.List();
+    for (let j = 0; j < cols; j++) {
+      row = row.push(Immutable.Map({
+        component: 0,
+        flagged: false,
+        hidden: true,
+        mines: 0,
+      }));
+    }
+    cells = cells.push(row);
+  }
+  s.set('cells', cells);
+  s.set('numMines', numMines);
+  s.set('size', newSize);
+  s.set('gameIsRunning', false);
+  s.set('hasMines', false);
+  s.set('numFlagged', 0);
+  s.set('numRevealed', 0);
+  s.set('smile', 'SMILE');
+});
+
 /**
  * Flags all hidden cells that have mines
  * @param {*} cells array of cell objects

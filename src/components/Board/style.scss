@@ -1,9 +1,21 @@
 @import '../../colors.scss';
 
 :local {
+  .beginner {
+    background: url('../../images/9x9board.png');
+    height: 206px;
+    width: 164px;
+  }
+
   .intermediate {
     background: url('../../images/16x16board.png');
     height: 317px;
     width: 276px;
+  }
+
+  .expert {
+    background: url('../../images/16x30board.png');
+    height: 317px;
+    width: 500px;
   }
 }
