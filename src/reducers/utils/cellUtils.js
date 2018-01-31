@@ -144,7 +144,10 @@ export const revealMines = (cells) => cells.withMutations(c => {
     for (let j = 0; j < c.get(0).size; j++) {
       if (c.getIn([i, j, 'mines']) === -1) {
         c.setIn([i, j, 'hidden'], false);
+      } else if (c.getIn([i, j, 'flagged']) === true) {
+        c.setIn([i, j, 'mines'], -2);
       }
+      c.setIn([i, j, 'component'], 0);
     }
   }
   return c;

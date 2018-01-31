@@ -130,6 +130,7 @@ const board = (state = initialState, action) => {
         // else if that cell had a mine, end the game and reveal all mines
         } else if (s.getIn(['cells', action.row, action.col, 'mines']) === -1) {
           s.set('cells', revealMines(s.get('cells')));
+          s.setIn(['cells', action.row, action.col, 'mines'], -2);
           s.set('gameIsRunning', false);
           s.set('smile', 'LOST');
         }
