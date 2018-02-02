@@ -1,10 +1,8 @@
 import { connect } from 'react-redux';
 
-import Timer from 'components/Timer';
+import Board from 'components/Board';
 
 const mapStateToProps = state => ({
-  gameIsRunning: state.board.get('gameIsRunning'),
-  hasMines: state.board.get('hasMines'),
   size: state.board.get('size'),
 });
 
@@ -15,4 +13,4 @@ const mapDispatchToProps = () => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(Timer);
+)(Board);

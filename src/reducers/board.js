@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
 
 import {
+  CHANGE_SIZE,
   CHANGE_SMILE,
   GENERATE_CSP_VARIABLES,
   RESET_BOARD,
@@ -9,6 +10,7 @@ import {
 } from 'actions/boardActions';
 
 import {
+  changeSize,
   flagMines,
   placeMines,
   revealMines,
@@ -44,6 +46,7 @@ const initialState = Immutable.Map({
   numFlagged: 0,
   numMines: 40,
   numRevealed: 0,
+  size: 'intermediate',
   smile: 'SMILE',
   components: Immutable.List(),
 });
@@ -51,6 +54,10 @@ const initialState = Immutable.Map({
 // reducer for the board property of state
 const board = (state = initialState, action) => {
   switch (action.type) {
+  // changes the board size
+  case CHANGE_SIZE:
+    return changeSize(state, action.newSize);
+
   // changes the smile
   case CHANGE_SMILE:
     return state.set('smile', action.newSmile);
@@ -96,7 +103,6 @@ const board = (state = initialState, action) => {
       s.set('numFlagged', 0);
       s.set('numRevealed', 0);
       s.set('smile', 'SMILE');
-      s.set('timer', 0);
     });
 
   // reveals the clicked cell
@@ -124,6 +130,7 @@ const board = (state = initialState, action) => {
         // else if that cell had a mine, end the game and reveal all mines
         } else if (s.getIn(['cells', action.row, action.col, 'mines']) === -1) {
           s.set('cells', revealMines(s.get('cells')));
+          s.setIn(['cells', action.row, action.col, 'mines'], -2);
           s.set('gameIsRunning', false);
           s.set('smile', 'LOST');
         }

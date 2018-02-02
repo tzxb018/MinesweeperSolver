@@ -1,12 +1,13 @@
 import { connect } from 'react-redux';
 
-import ResetButton from 'components/ResetButton/index.jsx';
+import ResetButton from 'components/ResetButton';
 import {
   changeSmile,
   resetBoard,
 } from 'actions/boardActions.js';
 
 const mapStateToProps = state => ({
+  size: state.board.get('size'),
   smile: state.board.get('smile'),
 });
 

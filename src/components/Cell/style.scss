@@ -19,7 +19,7 @@
 
   .flagged {
     @extend .mines0;
-    background: url('../../images/cell/flagged.png');
+    background: url('../../images/mines/flagged.png');
   }
 
   .mines1 {
@@ -60,6 +60,16 @@
   .mines8 {
     @extend .mines0;
     background: url('../../images/mines/eight.png');
+  }
+
+  .misflagged {
+    @extend .mines0;
+    background: url('../../images/mines/wrong_flag.png');
+  }
+
+  .mines-2 {
+    @extend .mines0;
+    background: url('../../images/mines/clicked_mine.png');
   }
 
   .comp1 {

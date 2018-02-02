@@ -1,0 +1,43 @@
+@font-face {
+  font-family: 'Pixel-LCD-7';
+  src: url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.eot');
+  src: url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.woff') format('woff'),
+       url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.svg') format('svg');
+}
+:local {
+  .beginner {
+    background-color: black;
+    color: red;
+    font-family: 'Pixel-LCD-7';
+    font-size: 20pt;
+    height: 26px;
+    left: 13px;
+    position: relative;
+    top: 12px;
+    width: 56px;
+  }
+
+  .intermediate {
+    background-color: black;
+    color: red;
+    font-family: 'Pixel-LCD-7';
+    font-size: 20pt;
+    height: 26px;
+    left: 13px;
+    position: relative;
+    top: 12px;
+    width: 56px;
+  }
+
+  .expert {
+    background-color: black;
+    color: red;
+    font-family: 'Pixel-LCD-7';
+    font-size: 20pt;
+    height: 26px;
+    left: 13px;
+    position: relative;
+    top: 12px;
+    width: 56px;
+  }
+}
