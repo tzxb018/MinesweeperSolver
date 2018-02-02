@@ -1,0 +1,9 @@
+:local {
+  .container {
+    display: grid;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    grid-template-columns: 500px 150px;
+    grid-template-rows: 57px 250px;
+  }
+}

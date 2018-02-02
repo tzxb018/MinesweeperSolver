@@ -1,19 +1,28 @@
 @import '../../colors.scss';
 
 :local {
+  .container {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+    justify-self: center;
+  }
+
   .beginner {
+    @extend .container;
     background: url('../../images/9x9board.png');
     height: 206px;
     width: 164px;
   }
 
   .intermediate {
+    @extend .container;
     background: url('../../images/16x16board.png');
     height: 317px;
     width: 276px;
   }
 
   .expert {
+    @extend .container;
     background: url('../../images/16x30board.png');
     height: 317px;
     width: 500px;

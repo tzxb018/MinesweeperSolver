@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import styles from './style.scss';
+
 export default class SizeSelector extends Component {
   static propTypes = {
     // state props
@@ -15,7 +17,7 @@ export default class SizeSelector extends Component {
 
   render() {
     return (
-      <div>
+      <div className={styles['container']}>
         <div className="radio">
           <input type="radio"
             value="beginner"

@@ -4,10 +4,12 @@ import CSPButtonContainer from 'containers/CSPButtonContainer';
 import SizeSelectorContainer from 'containers/SizeSelectorContainer';
 import BoardContainer from 'containers/BoardContainer';
 
+import styles from './style.scss';
+
 export default class App extends React.Component {
   render() {
     return (
-      <div>
+      <div className={styles['container']}>
         <BoardContainer />
         <SizeSelectorContainer />
         <CSPButtonContainer />
