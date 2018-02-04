@@ -169,20 +169,6 @@ export const buildConstraint = (variables, x, y, numMines) => {
 };
 
 /**
- * Finds whether the given constraint contains the given key
- * @param {*} constraint
- * @param {*} key
- */
-const constraintContains = (constraint, key) => {
-  for (let i = 0; i < constraint[0].length; i++) {
-    if (constraint[0][i] === key) {
-      return true;
-    }
-  }
-  return false;
-};
-
-/**
  * Calculates whether the cell at row: i, col: j is on a fringe
  * @param {*} cells array of cells
  * @param {*} i row
@@ -207,6 +193,65 @@ const isOnFringe = (cells, i, j) => {
     return true;
   }
   return false;
+};
+
+/**
+ * Checks if a given solution is supported by a given constraint
+ * @param {*} solution possible solution
+ * @param {*} constraint array of possible solutions
+ */
+const isSupported = (solution, constraint) => {
+  let i = 1;
+  let support = false;
+  while (i < constraint.length && !support) {
+    support = constraint[i].every((value, index) => value === solution[index]);
+    i++;
+  }
+  return support;
+};
+
+/**
+ * Reduces the number of constraints by removing any that are contained
+ * within another
+ * @param {*} constraints array of constraints
+ */
+export const normalize = (constraints) => {
+  const normalized = constraints;
+  // for all constraints check if all their variables are contained in another constraint
+  for (let i = 0; i < normalized.length; i++) {
+    for (let l = 0; l < normalized.length; l++) {
+      // if this is a possible subset
+      if (i !== l && normalized[i][0].length <= normalized[l][0].length) {
+        let isSubset = true;
+        const keyIndex = [];
+        for (let k = 0; k < normalized[i][0].length; k++) {
+          const index = normalized[l][0].indexOf(normalized[i][0][k]);
+          if (index === -1) {
+            isSubset = false;
+          } else {
+            keyIndex.push(index);
+          }
+        }
+        // if still a subset
+        if (isSubset) {
+          // check that each possibility in the big set has support in the subset
+          for (let m = 1; m < normalized[l].length; m++) {
+            const solution = [];
+            keyIndex.forEach(element => {
+              solution.push(normalized[l][m][element]);
+            });
+            // if it isn't supported delete it out of the big array
+            if (!isSupported(solution, normalized[i])) {
+              normalized[l].splice(m, 1);
+            }
+          }
+          // after the big array is all cleaned up, delete the small array from normalized
+          normalized.splice(i, 1);
+        }
+      }
+    }
+  }
+  return normalized;
 };
 
 /**
@@ -235,7 +280,7 @@ export const separateComponents = (vars, constrs) => {
       while (stack.length > 0) {
         // grab all unvisited variables from all relevant constraints
         for (let j = 0; j < constraints.length; j++) {
-          if (constraintContains(constraints[j], stack[0])) {
+          if (constraints[j][0].includes(stack[0])) {
             for (let k = 0; k < constraints[j][0].length; k++) {
               const key = constraints[j][0][k];
               if (!variables[key].visited) {

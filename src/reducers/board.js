@@ -20,6 +20,7 @@ import {
 import {
   buildConstraint,
   colorCodeComponents,
+  normalize,
   separateComponents,
   setVariables,
 } from './utils/cspUtils';
@@ -68,7 +69,7 @@ const board = (state = initialState, action) => {
     const variables = setVariables(state.get('cells'));
 
     // create a constraint for each revealed cell with a number
-    const constraints = [];
+    let constraints = [];
     for (let i = 0; i < state.get('cells').size; i++) {
       for (let j = 0; j < state.getIn(['cells', 0]).size; j++) {
         if (!state.getIn(['cells', i, j, 'hidden']) && state.getIn(['cells', i, j, 'mines']) > 0) {
@@ -76,6 +77,9 @@ const board = (state = initialState, action) => {
         }
       }
     }
+
+    // normalizes the constraints
+    constraints = normalize(constraints);
 
     // separates variables and constraints into individual components
     let newState = state.set('components', separateComponents(variables, constraints));
