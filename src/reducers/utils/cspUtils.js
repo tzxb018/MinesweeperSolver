@@ -1,4 +1,5 @@
 import Immutable from 'immutable';
+import { generatePossibilities } from './algorithm';
 
 /**
  * Color codes all cells that are part of a component
@@ -24,96 +25,6 @@ export const colorCodeComponents = (cells, components) => cells.withMutations(c 
 });
 
 /**
- * Algorithm that generates all the possible configurations of mines
- * @param {*} minesLeft number of mines left to be found
- * @param {*} numVariables number of variable cells
- * @param {*} numPossibilities number of possible configurations
- */
-const generateAllPossibilities = (minesLeft, numVariables, numPossibilities) => {
-  const configurations = [];
-  let lead = 0;
-  let firstGap = null;
-  let secondGap = null;
-  let thirdGap = null;
-  let placeValue = true;
-  let valuesNeeded = minesLeft;
-  if (minesLeft > numVariables / 2) {
-    placeValue = false;
-    valuesNeeded = numVariables - minesLeft;
-  }
-  // calculate which variables are needed
-  if (valuesNeeded > 1) {
-    firstGap = 0;
-  }
-  if (valuesNeeded > 2) {
-    secondGap = 0;
-  }
-  if (valuesNeeded > 3) {
-    thirdGap = 0;
-  }
-  // for all solutions
-  for (let i = 0; i < numPossibilities; i++) {
-    // add space for new solution
-    configurations.push([]);
-    let valuesLeft = valuesNeeded;
-    let totalGaps = 0;
-    // if the gaps are maxed, reset those that are full and iterate
-    if (totalGaps === numVariables - valuesNeeded) {
-      // if lead is empty, something else needs reset
-      if (lead === 0) {
-        // if first gap is empty, the second gap needs reset
-        if (firstGap === 0) {
-          secondGap = 0;
-          thirdGap++;
-        // else reset first gap
-        } else {
-          firstGap = 0;
-          secondGap++;
-        }
-      // else reset lead
-      } else {
-        lead = 0;
-        firstGap++;
-      }
-    } else {
-      lead++;
-    }
-    for (let j = 0; j < numVariables; j++) {
-      // if all values are already placed, finish solution with defaults
-      if (valuesLeft === 0) {
-        configurations[i].push(!placeValue);
-      } else {
-        // if the lead is over, place the first value
-        if (j === lead) {
-          configurations[i].push(placeValue);
-          valuesLeft--;
-          totalGaps += lead;
-        // if the first gap is needed and over, place the second value
-        } else if (firstGap !== null && j === lead + firstGap + 1) {
-          configurations[i].push(placeValue);
-          valuesLeft--;
-          totalGaps += firstGap;
-        // if the second gap is needed and over, place the third value
-        } else if (secondGap !== null && j === lead + firstGap + secondGap + 2) {
-          configurations[i].push(placeValue);
-          valuesLeft--;
-          totalGaps += secondGap;
-        // if the third gap is needed and over, place the fourth value
-        } else if (thirdGap !== null && j === lead + firstGap + secondGap + thirdGap + 3) {
-          configurations[i].push(placeValue);
-          valuesLeft--;
-          totalGaps += thirdGap;
-        // if none of the gaps are finished, pad with default values
-        } else {
-          configurations[i].push(!placeValue);
-        }
-      }
-    }
-  }
-  return configurations;
-};
-
-/**
  * Creates the constraint for cell at row: x, col: y
  * @param {*} variables array of variables
  * @param {*} x row
@@ -136,36 +47,52 @@ export const buildConstraint = (variables, x, y, numMines) => {
     }
   }
 
-  // calculate how many possible configurations there are and fill the contstraint with
-  // enough space to fit each one
+  // get all possible configurations and transfer them to the constraint
   const numVariables = constraint[0].length - (numMines - minesLeft);
-  let numPossibilities = 1;
-  for (let i = 0; i < minesLeft; i++) {
-    numPossibilities *= (numVariables - i) / (i + 1);
-  }
-  for (let i = 1; i <= numPossibilities; i++) {
+  const configurations = generatePossibilities(minesLeft, numVariables);
+  for (let i = 1; i <= configurations.length; i++) {
     constraint.push([]);
-    for (let j = 0; j < numVariables; j++) {
-      constraint[i].push(null);
+    for (let j = 0; j < constraint[0].length; j++) {
+      constraint[i].push(false);
     }
   }
-
-  // get all possible configurations and transfer them to the constraint
-  const configurations = generateAllPossibilities(minesLeft, numVariables, numPossibilities);
   let count = 0;
   for (let i = 0; i < constraint[0].length; i++) {
     if (variables[constraint[0][i]].isFlagged) {
-      for (let j = 1; j <= numPossibilities; j++) {
+      for (let j = 1; j <= configurations.length; j++) {
         constraint[j][i] = true;
       }
     } else {
-      for (let j = 1; j <= numPossibilities; j++) {
+      for (let j = 1; j <= configurations.length; j++) {
         constraint[j][i] = configurations[j - 1][count];
       }
       count++;
     }
   }
   return constraint;
+};
+
+/**
+ * Enforces unary constraints
+ * @param {*} constraints
+ */
+export const enforceUnary = (constrs) => {
+  const constraints = constrs;
+  for (let i = 0; i < constraints.length; i++) {
+    for (let k = 0; k < constraints[i][0].length; k++) {
+      let j = 1;
+      const value = constraints[i][j][k];
+      let unary = true;
+      while (j < constraints[i].length && unary) {
+        unary = constraints[i][j][k] === value;
+        j++;
+      }
+      if (unary) {
+        console.log('is unary');
+      }
+    }
+  }
+  return constraints;
 };
 
 /**
@@ -219,10 +146,11 @@ export const normalize = (constraints) => {
   const normalized = constraints;
   // for all constraints check if all their variables are contained in another constraint
   for (let i = 0; i < normalized.length; i++) {
+    let wasSubset = false;
     for (let l = 0; l < normalized.length; l++) {
+      let isSubset = true;
       // if this is a possible subset
       if (i !== l && normalized[i][0].length <= normalized[l][0].length) {
-        let isSubset = true;
         const keyIndex = [];
         for (let k = 0; k < normalized[i][0].length; k++) {
           const index = normalized[l][0].indexOf(normalized[i][0][k]);
@@ -245,10 +173,18 @@ export const normalize = (constraints) => {
               normalized[l].splice(m, 1);
             }
           }
-          // after the big array is all cleaned up, delete the small array from normalized
-          normalized.splice(i, 1);
         }
+      } else {
+        isSubset = false;
       }
+      if (isSubset) {
+        wasSubset = true;
+      }
+    }
+    if (wasSubset) {
+      // after all the big arrays are all cleaned up, delete the small array from normalized
+      normalized.splice(i, 1);
+      i--;
     }
   }
   return normalized;

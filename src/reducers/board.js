@@ -20,6 +20,7 @@ import {
 import {
   buildConstraint,
   colorCodeComponents,
+  enforceUnary,
   normalize,
   separateComponents,
   setVariables,
@@ -73,13 +74,16 @@ const board = (state = initialState, action) => {
     for (let i = 0; i < state.get('cells').size; i++) {
       for (let j = 0; j < state.getIn(['cells', 0]).size; j++) {
         if (!state.getIn(['cells', i, j, 'hidden']) && state.getIn(['cells', i, j, 'mines']) > 0) {
-          constraints.push(buildConstraint(variables, i, j, state.getIn(['cell', i, j, 'mines'])));
+          constraints.push(buildConstraint(variables, i, j, state.getIn(['cells', i, j, 'mines'])));
         }
       }
     }
 
     // normalizes the constraints
     constraints = normalize(constraints);
+
+    // enforces unary constraints
+    constraints = enforceUnary(constraints);
 
     // separates variables and constraints into individual components
     let newState = state.set('components', separateComponents(variables, constraints));
