@@ -1,5 +1,5 @@
 export const CHANGE_SMILE = 'CHANGE_SMILE';
-export const GENERATE_CSP_VARIABLES = 'GENERATE_CSP_VARIABLES';
+export const CSP = 'CSP';
 export const RESET_BOARD = 'RESET_BOARD';
 export const REVEAL_CELL = 'REVEAL_CELL';
 export const CHANGE_SIZE = 'CHANGE_SIZE';
@@ -10,8 +10,8 @@ export const changeSmile = newSmile => ({
   newSmile,
 });
 
-export const generateCSPVariables = () => ({
-  type: GENERATE_CSP_VARIABLES,
+export const csp = () => ({
+  type: CSP,
 });
 
 export const resetBoard = () => ({

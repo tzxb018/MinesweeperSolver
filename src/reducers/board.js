@@ -3,12 +3,11 @@ import Immutable from 'immutable';
 import {
   CHANGE_SIZE,
   CHANGE_SMILE,
-  GENERATE_CSP_VARIABLES,
+  CSP,
   RESET_BOARD,
   REVEAL_CELL,
   TOGGLE_FLAG,
 } from 'actions/boardActions';
-
 import {
   changeSize,
   flagMines,
@@ -16,17 +15,18 @@ import {
   revealMines,
   revealNeighbors,
 } from './utils/cellUtils';
-
 import {
   buildConstraint,
+  separateComponents,
+  setVariables,
+} from './utils/cspGeneration';
+import {
   colorCodeComponents,
   enforceUnary,
   normalize,
-  separateComponents,
-  setVariables,
-} from './utils/cspUtils';
+} from './utils/cspReduction';
 
-// default state for first render
+// default state
 let cells = Immutable.List();
 for (let i = 0; i < 16; i++) {
   let row = Immutable.List();
@@ -40,7 +40,6 @@ for (let i = 0; i < 16; i++) {
   }
   cells = cells.push(row);
 }
-
 const initialState = Immutable.Map({
   cells,
   gameIsRunning: false,
@@ -53,9 +52,15 @@ const initialState = Immutable.Map({
   components: Immutable.List(),
 });
 
-// reducer for the board property of state
+/**
+ * Reducer for the board
+ * @param state Redux state
+ * @param action Redux action thrown
+ * @returns updated state
+ */
 const board = (state = initialState, action) => {
   switch (action.type) {
+
   // changes the board size
   case CHANGE_SIZE:
     return changeSize(state, action.newSize);
@@ -64,9 +69,9 @@ const board = (state = initialState, action) => {
   case CHANGE_SMILE:
     return state.set('smile', action.newSmile);
 
-  // generates CSP variables
-  case GENERATE_CSP_VARIABLES:
-    // create a variable for each cell on a fringe
+  // performs CSP stuff
+  case CSP:
+    // create a variable for each cell on the fringe
     const variables = setVariables(state.get('cells'));
 
     // create a constraint for each revealed cell with a number
@@ -79,16 +84,16 @@ const board = (state = initialState, action) => {
       }
     }
 
-    // normalizes the constraints
+    // normalize the constraints
     constraints = normalize(constraints);
 
-    // enforces unary constraints
+    // enforce unary constraints
     constraints = enforceUnary(constraints);
 
-    // separates variables and constraints into individual components
+    // separate variables and constraints into individual components
     let newState = state.set('components', separateComponents(variables, constraints));
 
-    // color codes all cells found to be part of a component
+    // color code all cells found to be part of a component
     newState = newState.set('cells', colorCodeComponents(newState.get('cells'), newState.get('components')));
 
     return newState;
@@ -123,18 +128,15 @@ const board = (state = initialState, action) => {
           s.set('gameIsRunning', true);
           s.set('hasMines', true);
         }
-
         // reveal the cell
         s.setIn(['cells', action.row, action.col, 'hidden'], false);
         s.set('numRevealed', s.get('numRevealed') + 1);
         s.set('smile', 'SMILE');
-
         // if that cell had zero mines nearby, reveal all neighbors
         if (s.getIn(['cells', action.row, action.col, 'mines']) === 0) {
           const temp = revealNeighbors(s.get('cells'), s.get('numRevealed'), action.row, action.col);
           s.set('cells', temp.cells);
           s.set('numRevealed', temp.newNumRevealed);
-
         // else if that cell had a mine, end the game and reveal all mines
         } else if (s.getIn(['cells', action.row, action.col, 'mines']) === -1) {
           s.set('cells', revealMines(s.get('cells')));
@@ -142,7 +144,6 @@ const board = (state = initialState, action) => {
           s.set('gameIsRunning', false);
           s.set('smile', 'LOST');
         }
-
         // if all the non-bomb cells are revealed, win the game
         if (s.get('numRevealed') === s.get('cells').size * s.getIn(['cells', 0]).size - s.get('numMines')) {
           s.set('cells', flagMines(s.get('cells')));
@@ -154,7 +155,7 @@ const board = (state = initialState, action) => {
     }
     return state;
 
-  // if the game is running and there aren't too many flags, toggle the flag
+  // toggles the flag of the cell
   case TOGGLE_FLAG:
     return state.withMutations(s => {
       if (s.get('gameIsRunning') === true) {
