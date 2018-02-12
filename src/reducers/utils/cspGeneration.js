@@ -1,5 +1,3 @@
-import Immutable from 'immutable';
-
 /**
  * Determines whether a cell is on the fringe
  * @param cells matrix of cells
@@ -185,60 +183,6 @@ export const buildConstraint = (variables, x, y, numMines) => {
   }
 
   return constraint;
-};
-
-/**
- * Separates variables and constraints into individual components
- * @param vars array of variable objects
- * @param constrs list of constraint matrices
- * @returns immutable list of component objects
- */
-export const separateComponents = (vars, constrs) => {
-  // create copy of variables and constraints
-  let components = Immutable.List();
-  const constraints = constrs;
-  const variables = vars;
-  // add a marker to all variables to record which have been visited already
-  for (let i = 0; i < variables.length; i++) {
-    variables[i].visited = false;
-  }
-
-  // look at each variable to discern separate components
-  for (let i = 0; i < variables.length; i++) {
-    // grab the first unvisited variable and make a new component for it
-    if (!variables[i].visited) {
-      const stack = [];
-      stack.push(i);
-      // component object
-      const component = {
-        constraints: [],  // list of relevant constraint matrices
-        variables: [],    // list of relevant variable objects
-      };
-      // grab all relevant variables and constraints until the component is completed
-      while (stack.length > 0) {
-        // check all relevant constraints for unvisited variables
-        for (let j = 0; j < constraints.length; j++) {
-          if (constraints[j][0].includes(stack[0])) {
-            for (let k = 0; k < constraints[j][0].length; k++) {
-              const key = constraints[j][0][k];
-              if (!variables[key].visited) {
-                stack.push(key);
-              }
-            }
-            // cut visited contraint from the list to the component
-            component.constraints.push(constraints.splice(j, 1));
-          }
-        }
-        // shift visited variable (original) from the stack to the component
-        variables[stack[0]].visited = true;
-        component.variables.push(vars[stack.shift()]);
-      }
-      // add completed component to the list
-      components = components.push(component);
-    }
-  }
-
-  return components;
 };
 
 /**

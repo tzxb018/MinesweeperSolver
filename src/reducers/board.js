@@ -17,13 +17,13 @@ import {
 } from './utils/cellUtils';
 import {
   buildConstraint,
-  separateComponents,
   setVariables,
 } from './utils/cspGeneration';
 import {
   colorCodeComponents,
   enforceUnary,
   normalize,
+  separateComponents,
 } from './utils/cspReduction';
 
 // default state
@@ -73,7 +73,6 @@ const board = (state = initialState, action) => {
   case CSP:
     // create a variable for each cell on the fringe
     const variables = setVariables(state.get('cells'));
-
     // create a constraint for each revealed cell with a number
     let constraints = [];
     for (let i = 0; i < state.get('cells').size; i++) {
@@ -83,19 +82,15 @@ const board = (state = initialState, action) => {
         }
       }
     }
-
     // normalize the constraints
     constraints = normalize(constraints);
-
     // enforce unary constraints
     constraints = enforceUnary(constraints);
-
     // separate variables and constraints into individual components
     let newState = state.set('components', separateComponents(variables, constraints));
-
     // color code all cells found to be part of a component
     newState = newState.set('cells', colorCodeComponents(newState.get('cells'), newState.get('components')));
-
+    console.log(newState.get('components'));
     return newState;
 
   // resets the board

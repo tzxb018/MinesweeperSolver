@@ -1,3 +1,5 @@
+import Immutable from 'immutable';
+
 /**
  * Checks if a given solution is supported by a given constraint
  * @param solution possible solution
@@ -47,8 +49,9 @@ export const colorCodeComponents = (cells, components) => cells.withMutations(c 
  */
 export const enforceUnary = (constrs) => {
   const constraints = constrs;
+  const unaryVariables = [];
 
-  // check if a variable in the constraint is unary
+  // find all unary variables
   for (let i = 0; i < constraints.length; i++) {
     for (let k = 0; k < constraints[i][0].length; k++) {
       let j = 1;
@@ -58,12 +61,33 @@ export const enforceUnary = (constrs) => {
         unary = constraints[i][j][k] === value;
         j++;
       }
+      // if it is unary and not already in the list, add it to the list
       if (unary) {
-        // TODO: stuff
-        console.log('is unary');
+        if (!unaryVariables.some(element => element.key === constraints[i][0][k])) {
+          unaryVariables.push({
+            key: constraints[i][0][k],
+            value,
+          });
+        }
       }
     }
   }
+
+  // enforce all unary variables on the constraints
+  unaryVariables.forEach(element => {
+    constraints.forEach(constraint => {
+      const index = constraint[0].indexOf(element.key);
+      if (index !== -1) {
+        for (let j = 1; j < constraint.length; j++) {
+          // cut out a solution if it does not match the unary constraint
+          if (constraint[j][index] !== element.value) {
+            constraint.splice(j, 1);
+            j--;
+          }
+        }
+      }
+    });
+  });
 
   return constraints;
 };
@@ -120,4 +144,62 @@ export const normalize = constraints => {
   }
 
   return normalized;
+};
+
+/**
+ * Separates variables and constraints into individual components
+ * @param vars array of variable objects
+ * @param constrs list of constraint matrices
+ * @returns immutable list of component objects
+ */
+export const separateComponents = (vars, constrs) => {
+  // create copy of variables and constraints
+  let components = Immutable.List();
+  const constraints = constrs;
+  const variables = vars;
+  // add a marker to all variables to record which have been visited already
+  for (let i = 0; i < variables.length; i++) {
+    variables[i].visited = false;
+  }
+
+  // look at each variable to discern separate components
+  for (let i = 0; i < variables.length; i++) {
+    // grab the first unvisited variable and make a new component for it
+    if (!variables[i].visited) {
+      const stack = [];
+      stack.push(i);
+      // component object
+      const component = {
+        constraints: [],  // list of relevant constraint matrices
+        variables: [],    // list of relevant variable objects
+      };
+      // grab all relevant variables and constraints until the component is completed
+      while (stack.length > 0) {
+        // check all relevant constraints for unvisited variables
+        for (let j = 0; j < constraints.length; j++) {
+          if (constraints[j][0].includes(stack[0])) {
+            for (let k = 0; k < constraints[j][0].length; k++) {
+              const key = constraints[j][0][k];
+              if (!variables[key].visited) {
+                stack.push(key);
+              }
+            }
+            // cut visited contraint from the list to the component
+            component.constraints.push(constraints.splice(j, 1)[0]);
+          }
+        }
+        // shift visited variable (original) from the stack to the component if it isn't already there
+        variables[stack[0]].visited = true;
+        if (!component.variables.some(element => element.key === stack[0])) {
+          component.variables.push(vars[stack.shift()]);
+        } else {
+          stack.shift();
+        }
+      }
+      // add completed component to the list
+      components = components.push(component);
+    }
+  }
+
+  return components;
 };
