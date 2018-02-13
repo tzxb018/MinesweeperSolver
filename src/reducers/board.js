@@ -4,6 +4,7 @@ import {
   CHANGE_SIZE,
   CHANGE_SMILE,
   CSP,
+  PEEK,
   RESET_BOARD,
   REVEAL_CELL,
   TOGGLE_FLAG,
@@ -90,8 +91,45 @@ const board = (state = initialState, action) => {
     let newState = state.set('components', separateComponents(variables, constraints));
     // color code all cells found to be part of a component
     newState = newState.set('cells', colorCodeComponents(newState.get('cells'), newState.get('components')));
-    console.log(newState.get('components'));
     return newState;
+
+  // reveals a random open cell
+  case PEEK:
+    if (state.get('gameIsRunning') || !state.get('hasMines')) {
+      return state.withMutations(s => {
+        let row = Math.floor(Math.random() * state.get('cells').size);
+        let col = Math.floor(Math.random() * state.getIn(['cells', 0]).size);
+        // if there are no mines already, place mines and start the game
+        if (!s.get('hasMines')) {
+          s.set('cells', placeMines(s.get('cells'), s.get('numMines'), row, col));
+          s.set('gameIsRunning', true);
+          s.set('hasMines', true);
+        } else {
+          while (!s.getIn(['cells', row, col, 'hidden']) || s.getIn(['cells', row, col, 'mines']) === -1) {
+            row = Math.floor(Math.random() * s.get('cells').size);
+            col = Math.floor(Math.random() * s.getIn(['cells', 0]).size);
+          }
+        }
+        // reveal the cell
+        s.setIn(['cells', row, col, 'hidden'], false);
+        s.set('numRevealed', s.get('numRevealed') + 1);
+        s.set('smile', 'SMILE');
+        // if that cell had zero mines nearby, reveal all neighbors
+        if (s.getIn(['cells', row, col, 'mines']) === 0) {
+          const temp = revealNeighbors(s.get('cells'), s.get('numRevealed'), row, col);
+          s.set('cells', temp.cells);
+          s.set('numRevealed', temp.newNumRevealed);
+        }
+        // if all the non-bomb cells are revealed, win the game
+        if (s.get('numRevealed') === s.get('cells').size * s.getIn(['cells', 0]).size - s.get('numMines')) {
+          s.set('cells', flagMines(s.get('cells')));
+          s.set('numFlagged', s.get('numMines'));
+          s.set('gameIsRunning', false);
+          s.set('smile', 'WON');
+        }
+      });
+    }
+    return state;
 
   // resets the board
   case RESET_BOARD:
@@ -115,10 +153,10 @@ const board = (state = initialState, action) => {
 
   // reveals the clicked cell
   case REVEAL_CELL:
-    if (state.get('gameIsRunning') === true || state.get('hasMines') === false) {
+    if (state.get('gameIsRunning') || !state.get('hasMines')) {
       return state.withMutations(s => {
         // if there are no mines already, place mines and start the game
-        if (s.get('hasMines') === false) {
+        if (!s.get('hasMines')) {
           s.set('cells', placeMines(s.get('cells'), s.get('numMines'), action.row, action.col));
           s.set('gameIsRunning', true);
           s.set('hasMines', true);
