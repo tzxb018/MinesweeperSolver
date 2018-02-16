@@ -1,5 +1,7 @@
 import Immutable from 'immutable';
 
+import { Mines } from 'enums/mines';
+
 /**
  * Changes the size of the board
  * @param state board state to be changed
@@ -42,7 +44,7 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
         component: 0,
         flagged: false,
         hidden: true,
-        mines: 0,
+        mines: Mines.ZERO,
       }));
     }
     cells = cells.push(row);
@@ -65,7 +67,7 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
 export const flagMines = cells => cells.withMutations(c => {
   for (let i = 0; i < c.size; i++) {
     for (let j = 0; j < c.get(0).size; j++) {
-      if (c.getIn([i, j, 'mines']) === -1 && !c.getIn([i, j, 'flagged'])) {
+      if (c.getIn([i, j, 'mines']) === Mines.MINE && !c.getIn([i, j, 'flagged'])) {
         c.setIn([i, j, 'flagged'], true);
       }
     }
@@ -99,7 +101,7 @@ const placeNumbers = (cells, i, j) => cells.withMutations(c => {
         && x < c.size
         && y >= 0
         && y < c.get(0).size
-        && mines !== -1) {
+        && mines !== Mines.MINE) {
       c.setIn([x, y, 'mines'], mines + 1);
     }
   });
@@ -121,9 +123,9 @@ export const placeMines = (cells, numMines, x, y) => {
     const j = Math.floor(Math.random() * newCells.get(0).size);
     // if a random cell doesn't already have a mine
     // and is not within range of the safe cell, then place a mine there
-    if (newCells.getIn([i, j, 'mines']) !== -1
+    if (newCells.getIn([i, j, 'mines']) !== Mines.MINE
       && !((i >= x - 1 && i <= x + 1) && (j >= y - 1 && j <= y + 1))) {
-      newCells = newCells.setIn([i, j, 'mines'], -1);
+      newCells = newCells.setIn([i, j, 'mines'], Mines.MINE);
       newCells = placeNumbers(newCells, i, j);
       minesLeft--;
     }
@@ -139,10 +141,10 @@ export const placeMines = (cells, numMines, x, y) => {
 export const revealMines = cells => cells.withMutations(c => {
   for (let i = 0; i < c.size; i++) {
     for (let j = 0; j < c.get(0).size; j++) {
-      if (c.getIn([i, j, 'mines']) === -1) {
+      if (c.getIn([i, j, 'mines']) === Mines.MINE) {
         c.setIn([i, j, 'hidden'], false);
-      } else if (c.getIn([i, j, 'flagged']) === true) {
-        c.setIn([i, j, 'mines'], -2);
+      } else if (c.getIn([i, j, 'flagged'])) {
+        c.setIn([i, j, 'mines'], Mines.ERROR);
       }
       c.setIn([i, j, 'component'], 0);
     }
@@ -184,7 +186,7 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
       newCells = newCells.setIn([x, y, 'hidden'], false);
       newNumRevealed++;
       // if the newly revealed cell is also empty, recursively call revealNeighbors
-      if (newCells.getIn([x, y, 'mines']) === 0) {
+      if (newCells.getIn([x, y, 'mines']) === Mines.ZERO) {
         const temp = revealNeighbors(newCells, newNumRevealed, x, y);
         newCells = temp.newCells;
         newNumRevealed = temp.newNumRevealed;
