@@ -117,7 +117,7 @@ const board = (state = initialState, action) => {
         // if that cell had zero mines nearby, reveal all neighbors
         if (s.getIn(['cells', row, col, 'mines']) === 0) {
           const temp = revealNeighbors(s.get('cells'), s.get('numRevealed'), row, col);
-          s.set('cells', temp.cells);
+          s.set('cells', temp.newCells);
           s.set('numRevealed', temp.newNumRevealed);
         }
         // if all the non-bomb cells are revealed, win the game
@@ -168,7 +168,7 @@ const board = (state = initialState, action) => {
         // if that cell had zero mines nearby, reveal all neighbors
         if (s.getIn(['cells', action.row, action.col, 'mines']) === 0) {
           const temp = revealNeighbors(s.get('cells'), s.get('numRevealed'), action.row, action.col);
-          s.set('cells', temp.cells);
+          s.set('cells', temp.newCells);
           s.set('numRevealed', temp.newNumRevealed);
         // else if that cell had a mine, end the game and reveal all mines
         } else if (s.getIn(['cells', action.row, action.col, 'mines']) === -1) {

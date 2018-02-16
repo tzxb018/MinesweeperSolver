@@ -2,13 +2,15 @@ import Immutable from 'immutable';
 
 /**
  * Changes the size of the board
- * @param {*} state board state to be changed
- * @param {*} newSize passed from action
+ * @param state board state to be changed
+ * @param newSize passed from action
+ * @return new state with mutations
  */
 export const changeSize = (state, newSize) => state.withMutations(s => {
   let rows = 0;
   let cols = 0;
   let numMines = 0;
+  // change settings based on new size
   switch (newSize) {
   case 'beginner':
     rows = 9;
@@ -30,6 +32,8 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
     cols = 16;
     numMines = 40;
   }
+
+  // reset all cells
   let cells = Immutable.List();
   for (let i = 0; i < rows; i++) {
     let row = Immutable.List();
@@ -54,92 +58,85 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
 });
 
 /**
- * Flags all hidden cells that have mines
- * @param {*} cells array of cell objects
+ * Flags all hidden cells that have mines for when the game is won
+ * @param cells array of cell objects
+ * @return new state with mutations
  */
 export const flagMines = cells => cells.withMutations(c => {
   for (let i = 0; i < c.size; i++) {
     for (let j = 0; j < c.get(0).size; j++) {
-      if (c.getIn([i, j, 'mines']) === -1 && c.getIn([i, j, 'flagged']) === false) {
+      if (c.getIn([i, j, 'mines']) === -1 && !c.getIn([i, j, 'flagged'])) {
         c.setIn([i, j, 'flagged'], true);
       }
     }
   }
-  return c;
 });
 
 /**
- * Updates the numbers around the mine placed at row: i, col: j
- * @param {*} cells array of cell objects
- * @param {*} i row
- * @param {*} j column
+ * Updates the numbers of cells around a new mine
+ * @param cells array of cell objects
+ * @param i row of mine placed
+ * @param j column of mine placed
+ * @return new state with mutations
  */
 const placeNumbers = (cells, i, j) => cells.withMutations(c => {
-  // top-left
-  if (i - 1 >= 0 && j - 1 >= 0 && c.getIn([i - 1, j - 1, 'mines']) !== -1) {
-    c.setIn([i - 1, j - 1, 'mines'], c.getIn([i - 1, j - 1, 'mines']) + 1);
-  }
-  // top-mid
-  if (i - 1 >= 0 && c.getIn([i - 1, j, 'mines']) !== -1) {
-    c.setIn([i - 1, j, 'mines'], c.getIn([i - 1, j, 'mines']) + 1);
-  }
-  // top-right
-  if (i - 1 >= 0 && j + 1 < c.get(0).size && c.getIn([i - 1, j + 1, 'mines']) !== -1) {
-    c.setIn([i - 1, j + 1, 'mines'], c.getIn([i - 1, j + 1, 'mines']) + 1);
-  }
-  // mid-right
-  if (j + 1 < c.get(0).size && c.getIn([i, j + 1, 'mines']) !== -1) {
-    c.setIn([i, j + 1, 'mines'], c.getIn([i, j + 1, 'mines']) + 1);
-  }
-  // bottom-right
-  if (i + 1 < c.size && j + 1 < c.get(0).size && c.getIn([i + 1, j + 1, 'mines']) !== -1) {
-    c.setIn([i + 1, j + 1, 'mines'], c.getIn([i + 1, j + 1, 'mines']) + 1);
-  }
-  // bottom-mid
-  if (i + 1 < c.size && c.getIn([i + 1, j, 'mines']) !== -1) {
-    c.setIn([i + 1, j, 'mines'], c.getIn([i + 1, j, 'mines']) + 1);
-  }
-  // bottom-left
-  if (i + 1 < c.size && j - 1 >= 0 && c.getIn([i + 1, j - 1, 'mines']) !== -1) {
-    c.setIn([i + 1, j - 1, 'mines'], c.getIn([i + 1, j - 1, 'mines']) + 1);
-  }
-  // mid-left
-  if (j - 1 >= 0 && c.getIn([i, j - 1, 'mines']) !== -1) {
-    c.setIn([i, j - 1, 'mines'], c.getIn([i, j - 1, 'mines']) + 1);
-  }
-  return c;
+  const coords = [
+    [-1, -1],   // top-left
+    [-1, 0],    // top-mid
+    [-1, 1],    // top-right
+    [0, 1],     // mid-right
+    [1, 1],     // bottom-right
+    [1, 0],     // bottom-mid
+    [1, -1],    // bottom-left
+    [0, -1],    // mid-left
+  ];
+  coords.forEach(element => {
+    const x = i + element[0];
+    const y = j + element[1];
+    const mines = c.getIn([x, y, 'mines']);
+    // if the coordinate exists on the board and doesn't have a mine, add to its number
+    if (x >= 0
+        && x < c.size
+        && y >= 0
+        && y < c.get(0).size
+        && mines !== -1) {
+      c.setIn([x, y, 'mines'], mines + 1);
+    }
+  });
 });
 
 /**
- * Places mines randomly with a safe cell at row: x, col: y
- * @param {*} cells array of cell objects
- * @param {*} numMines number of mines to be placed
- * @param {*} x row of safe cell
- * @param {*} y col of safe cell
+ * Places mines randomly on the board, avoiding the clicked cell
+ * @param cells array of cell objects
+ * @param numMines number of mines to be placed
+ * @param x row of safe cell
+ * @param y col of safe cell
+ * @returns new array of cell objects with mines and numbers
  */
 export const placeMines = (cells, numMines, x, y) => {
-  let copy = cells;
+  let newCells = cells;
   let minesLeft = numMines;
   while (minesLeft !== 0) {
-    const i = Math.floor(Math.random() * copy.size);
-    const j = Math.floor(Math.random() * copy.get(0).size);
-    // if the cell at row: i col: j doesn't already have a mine
+    const i = Math.floor(Math.random() * newCells.size);
+    const j = Math.floor(Math.random() * newCells.get(0).size);
+    // if a random cell doesn't already have a mine
     // and is not within range of the safe cell, then place a mine there
-    if (copy.getIn([i, j, 'mines']) !== -1
+    if (newCells.getIn([i, j, 'mines']) !== -1
       && !((i >= x - 1 && i <= x + 1) && (j >= y - 1 && j <= y + 1))) {
-      copy = copy.setIn([i, j, 'mines'], -1);
-      copy = placeNumbers(copy, i, j);
+      newCells = newCells.setIn([i, j, 'mines'], -1);
+      newCells = placeNumbers(newCells, i, j);
       minesLeft--;
     }
   }
-  return copy;
+  return newCells;
 };
 
 /**
- * Reveals all hidden cells that have mines
- * @param {*} cells array of cell objects
+ * Reveals all hidden cells that have mines for when the game is lost
+ * @param cells array of cell objects
+ * @returns updated array of cell objects
  */
-export const revealMines = (cells) => cells.withMutations(c => {
+export const revealMines = cells => cells.withMutations(c => {
   for (let i = 0; i < c.size; i++) {
     for (let j = 0; j < c.get(0).size; j++) {
       if (c.getIn([i, j, 'mines']) === -1) {
@@ -150,103 +147,53 @@ export const revealMines = (cells) => cells.withMutations(c => {
       c.setIn([i, j, 'component'], 0);
     }
   }
-  return c;
 });
 
 /**
- * Reveals all hidden cells around cell at row: i, col: j
- * @param {*} cells array of cell objects
- * @param {*} numRevealed number of revealed cells
- * @param {*} i row
- * @param {*} j col
+ * Reveals all hidden cells around an empty clicked cell
+ * @param cells array of cell objects
+ * @param numRevealed number of revealed cells
+ * @param i row of clicked cell
+ * @param j col of clicked cell
+ * @returns ({ updated array of cells, updated number of revealed cells })
  */
 export const revealNeighbors = (cells, numRevealed, i, j) => {
   let newNumRevealed = numRevealed;
-  let copy = cells;
-  // reveals all neighboring cells if they exist and haven't been revealed already
-  // if the newly revealed cell also has no mines nearby, recursively calls revealNeighbors
-  // top-left
-  if (i - 1 >= 0 && j - 1 >= 0 && copy.getIn([i - 1, j - 1, 'hidden']) !== false) {
-    copy = copy.setIn([i - 1, j - 1, 'hidden'], false);
-    newNumRevealed += 1;
-    if (copy.getIn([i - 1, j - 1, 'mines']) === 0) {
-      const temp = revealNeighbors(copy, newNumRevealed, i - 1, j - 1);
-      copy = temp.cells;
-      newNumRevealed = temp.newNumRevealed;
+  let newCells = cells;
+  const coords = [
+    [-1, -1],   // top-left
+    [-1, 0],    // top-mid
+    [-1, 1],    // top-right
+    [0, 1],     // mid-right
+    [1, 1],     // bottom-right
+    [1, 0],     // bottom-mid
+    [1, -1],    // bottom-left
+    [0, -1],    // mid-left
+  ];
+
+  // reveal all neighboring cells
+  coords.forEach(element => {
+    const x = i + element[0];
+    const y = j + element[1];
+    // if the coordinate exists on the board and isn't already revealed, reveal it
+    if (x >= 0
+        && x < newCells.size
+        && y >= 0
+        && y < newCells.get(0).size
+        && newCells.getIn([x, y, 'hidden'])) {
+      newCells = newCells.setIn([x, y, 'hidden'], false);
+      newNumRevealed++;
+      // if the newly revealed cell is also empty, recursively call revealNeighbors
+      if (newCells.getIn([x, y, 'mines']) === 0) {
+        const temp = revealNeighbors(newCells, newNumRevealed, x, y);
+        newCells = temp.newCells;
+        newNumRevealed = temp.newNumRevealed;
+      }
     }
-  }
-  // top-mid
-  if (i - 1 >= 0 && copy.getIn([i - 1, j, 'hidden']) !== false) {
-    copy = copy.setIn([i - 1, j, 'hidden'], false);
-    newNumRevealed += 1;
-    if (copy.getIn([i - 1, j, 'mines']) === 0) {
-      const temp = revealNeighbors(copy, newNumRevealed, i - 1, j);
-      copy = temp.cells;
-      newNumRevealed = temp.newNumRevealed;
-    }
-  }
-  // top-right
-  if (i - 1 >= 0 && j + 1 < copy.get(0).size && copy.getIn([i - 1, j + 1, 'hidden']) !== false) {
-    copy = copy.setIn([i - 1, j + 1, 'hidden'], false);
-    newNumRevealed += 1;
-    if (copy.getIn([i - 1, j + 1, 'mines']) === 0) {
-      const temp = revealNeighbors(copy, newNumRevealed, i - 1, j + 1);
-      copy = temp.cells;
-      newNumRevealed = temp.newNumRevealed;
-    }
-  }
-  // mid-right
-  if (j + 1 < copy.get(0).size && copy.getIn([i, j + 1, 'hidden']) !== false) {
-    copy = copy.setIn([i, j + 1, 'hidden'], false);
-    newNumRevealed += 1;
-    if (copy.getIn([i, j + 1, 'mines']) === 0) {
-      const temp = revealNeighbors(copy, newNumRevealed, i, j + 1);
-      copy = temp.cells;
-      newNumRevealed = temp.newNumRevealed;
-    }
-  }
-  // bottom-right
-  if (i + 1 < copy.size && j + 1 < copy.get(0).size && copy.getIn([i + 1, j + 1, 'hidden']) !== false) {
-    copy = copy.setIn([i + 1, j + 1, 'hidden'], false);
-    newNumRevealed += 1;
-    if (copy.getIn([i + 1, j + 1, 'mines']) === 0) {
-      const temp = revealNeighbors(copy, newNumRevealed, i + 1, j + 1);
-      copy = temp.cells;
-      newNumRevealed = temp.newNumRevealed;
-    }
-  }
-  // bottom-mid
-  if (i + 1 < copy.size && copy.getIn([i + 1, j, 'hidden']) !== false) {
-    copy = copy.setIn([i + 1, j, 'hidden'], false);
-    newNumRevealed += 1;
-    if (copy.getIn([i + 1, j, 'mines']) === 0) {
-      const temp = revealNeighbors(copy, newNumRevealed, i + 1, j);
-      copy = temp.cells;
-      newNumRevealed = temp.newNumRevealed;
-    }
-  }
-  // bottom-left
-  if (i + 1 < copy.size && j - 1 >= 0 && copy.getIn([i + 1, j - 1, 'hidden']) !== false) {
-    copy = copy.setIn([i + 1, j - 1, 'hidden'], false);
-    newNumRevealed += 1;
-    if (copy.getIn([i + 1, j - 1, 'mines']) === 0) {
-      const temp = revealNeighbors(copy, newNumRevealed, i + 1, j - 1);
-      copy = temp.cells;
-      newNumRevealed = temp.newNumRevealed;
-    }
-  }
-  // mid-left
-  if (j - 1 >= 0 && copy.getIn([i, j - 1, 'hidden']) !== false) {
-    copy = copy.setIn([i, j - 1, 'hidden'], false);
-    newNumRevealed += 1;
-    if (copy.getIn([i, j - 1, 'mines']) === 0) {
-      const temp = revealNeighbors(copy, newNumRevealed, i, j - 1);
-      copy = temp.cells;
-      newNumRevealed = temp.newNumRevealed;
-    }
-  }
+  });
+
   return {
-    cells: copy,
+    newCells,
     newNumRevealed,
   };
 };
