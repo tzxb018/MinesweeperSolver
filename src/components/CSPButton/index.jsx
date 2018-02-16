@@ -8,12 +8,12 @@ export default class CSPButton extends Component {
     // state props
     gameIsRunning: PropTypes.bool.isRequired,
     // dispatch props
-    generateCSPVariables: PropTypes.func.isRequired,
+    csp: PropTypes.func.isRequired,
   }
 
   clickHandler = () => {
     if (this.props.gameIsRunning) {
-      this.props.generateCSPVariables();
+      this.props.csp();
     }
   }
 
