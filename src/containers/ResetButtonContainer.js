@@ -4,7 +4,7 @@ import ResetButton from 'components/ResetButton';
 import {
   changeSmile,
   resetBoard,
-} from 'actions/boardActions.js';
+} from 'actions/boardActions';
 
 const mapStateToProps = state => ({
   size: state.board.get('size'),
@@ -12,7 +12,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  changeSmile: (newSmile) => {
+  changeSmile: newSmile => {
     dispatch(changeSmile(newSmile));
   },
 

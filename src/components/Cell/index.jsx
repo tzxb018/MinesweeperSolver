@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
-import styles from './style.scss';
+import styles from './style';
 
 export default class Cell extends Component {
   static propTypes = {
@@ -15,8 +15,8 @@ export default class Cell extends Component {
     revealCell: PropTypes.func.isRequired,
     toggleFlag: PropTypes.func.isRequired,
     // own props
-    row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
+    row: PropTypes.number.isRequired,
   }
 
   clickHandler = () => {

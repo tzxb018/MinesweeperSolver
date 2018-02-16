@@ -9,6 +9,7 @@ import {
   REVEAL_CELL,
   TOGGLE_FLAG,
 } from 'actions/boardActions';
+
 import {
   changeSize,
   flagMines,

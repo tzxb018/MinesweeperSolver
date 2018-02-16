@@ -1,9 +1,13 @@
 @font-face {
   font-family: 'Pixel-LCD-7';
-  src: url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.eot');
-  src: url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.woff') format('woff'),
-       url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.svg') format('svg');
+  src:url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.woff') format('woff'),
+      url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.svg#Pixel-LCD-7') format('svg'),
+      url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.eot'),
+      url('../../fonts/Pixel-LCD-7/Pixel-LCD-7.eot?#iefix') format('embedded-opentype'); 
+  font-weight: normal;
+  font-style: normal;
 }
+
 :local {
   .beginner {
     background-color: black;

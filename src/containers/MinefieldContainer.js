@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import Minefield from 'components/Minefield/index.jsx';
+import Minefield from 'components/Minefield';
 
 const mapStateToProps = state => ({
   cols: state.board.getIn(['cells', 0]).size,

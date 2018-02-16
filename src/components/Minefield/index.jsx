@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 import CellContainer from 'containers/CellContainer.js';
-import styles from './style.scss';
+
+import styles from './style';
 
 export default class Minefield extends Component {
   static propTypes = {

@@ -1,10 +1,10 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
-import styles from './style.scss';
+import styles from './style';
 
-export default class ResetButton extends React.Component {
+export default class ResetButton extends Component {
   static propTypes = {
     // state props
     size: PropTypes.string.isRequired,
@@ -36,4 +36,3 @@ export default class ResetButton extends React.Component {
     );
   }
 }
-
