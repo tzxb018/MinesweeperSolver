@@ -4,7 +4,7 @@ import CSPButton from 'components/CSPButton';
 import { csp } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
-  gameIsRunning: state.board.get('gameIsRunning'),
+  gameIsRunning: state.board.present.get('gameIsRunning'),
 });
 
 const mapDispatchToProps = dispatch => ({

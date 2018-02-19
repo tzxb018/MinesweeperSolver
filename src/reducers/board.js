@@ -135,6 +135,9 @@ const board = (state = initialState, action) => {
 
   // resets the board
   case RESET_BOARD:
+    if (!state.get('hasMines')) {
+      return state;
+    }
     return state.withMutations(s => {
       for (let i = 0; i < s.get('cells').size; i++) {
         for (let j = 0; j < s.getIn(['cells', 0]).size; j++) {

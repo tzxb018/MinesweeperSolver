@@ -4,6 +4,7 @@ import BoardContainer from 'containers/BoardContainer';
 import CSPButtonContainer from 'containers/CSPButtonContainer';
 import PeekButtonContainer from 'containers/PeekButtonContainer';
 import SizeSelectorContainer from 'containers/SizeSelectorContainer';
+import UndoRedo from 'containers/UndoRedo';
 
 import styles from './style';
 
@@ -15,6 +16,7 @@ export default class App extends Component {
         <SizeSelectorContainer />
         <CSPButtonContainer />
         <PeekButtonContainer />
+        <UndoRedo />
       </div>
     );
   }

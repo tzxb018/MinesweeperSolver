@@ -4,7 +4,7 @@ import SizeSelector from 'components/SizeSelector';
 import { changeSize } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
-  size: state.board.get('size'),
+  size: state.board.present.get('size'),
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -7,8 +7,8 @@ import {
 } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
-  size: state.board.get('size'),
-  smile: state.board.get('smile'),
+  size: state.board.present.get('size'),
+  smile: state.board.present.get('smile'),
 });
 
 const mapDispatchToProps = dispatch => ({

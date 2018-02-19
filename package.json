@@ -66,6 +66,7 @@
     "react-redux": "^5.0.5",
     "redux": "^3.7.0",
     "redux-thunk": "^2.2.0",
+    "redux-undo": "^0.6.1",
     "reselect": "^3.0.1",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.18.2",
