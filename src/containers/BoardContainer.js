@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import Board from 'components/Board';
 
 const mapStateToProps = state => ({
-  size: state.board.get('size'),
+  size: state.board.present.get('size'),
 });
 
 const mapDispatchToProps = () => ({

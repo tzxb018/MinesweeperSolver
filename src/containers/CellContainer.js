@@ -8,16 +8,15 @@ import {
 } from 'actions/boardActions';
 
 const mapStateToProps = (state, ownProps) => ({
-  component: state.board.getIn(['cells', ownProps.row, ownProps.col, 'component']),
-  flagged: state.board.getIn(['cells', ownProps.row, ownProps.col, 'flagged']),
-  hidden: state.board.getIn(['cells', ownProps.row, ownProps.col, 'hidden']),
-  mines: state.board.getIn(['cells', ownProps.row, ownProps.col, 'mines']),
-
+  component: state.board.present.getIn(['cells', ownProps.row, ownProps.col, 'component']),
+  flagged: state.board.present.getIn(['cells', ownProps.row, ownProps.col, 'flagged']),
+  hidden: state.board.present.getIn(['cells', ownProps.row, ownProps.col, 'hidden']),
+  mines: state.board.present.getIn(['cells', ownProps.row, ownProps.col, 'mines']),
   ...ownProps,
 });
 
 const mapDispatchToProps = dispatch => ({
-  changeSmile: (newSmile) => {
+  changeSmile: newSmile => {
     dispatch(changeSmile(newSmile));
   },
 

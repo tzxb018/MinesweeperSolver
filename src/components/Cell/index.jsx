@@ -1,7 +1,9 @@
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
-import styles from './style.scss';
+import { Mines } from 'enums/mines';
+
+import styles from './style';
 
 export default class Cell extends Component {
   static propTypes = {
@@ -15,8 +17,8 @@ export default class Cell extends Component {
     revealCell: PropTypes.func.isRequired,
     toggleFlag: PropTypes.func.isRequired,
     // own props
-    row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
+    row: PropTypes.number.isRequired,
   }
 
   clickHandler = () => {
@@ -36,7 +38,7 @@ export default class Cell extends Component {
 
   render() {
     if (this.props.flagged) {
-      if (this.props.mines === -2) {
+      if (this.props.mines === Mines.ERROR) {
         return (<div className={styles['misflagged']} />);
       }
       return (<div className={styles['flagged']} onContextMenu={this.rightClickHandler} />);

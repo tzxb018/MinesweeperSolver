@@ -6,7 +6,7 @@ export const RESET_BOARD = 'RESET_BOARD';
 export const REVEAL_CELL = 'REVEAL_CELL';
 export const TOGGLE_FLAG = 'TOGGLE_FLAG';
 
-export const changeSize = (newSize) => ({
+export const changeSize = newSize => ({
   type: CHANGE_SIZE,
   newSize,
 });

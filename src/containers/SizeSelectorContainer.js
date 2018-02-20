@@ -1,14 +1,14 @@
 import { connect } from 'react-redux';
 
 import SizeSelector from 'components/SizeSelector';
-import { changeSize } from 'actions/boardActions.js';
+import { changeSize } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
-  size: state.board.get('size'),
+  size: state.board.present.get('size'),
 });
 
 const mapDispatchToProps = dispatch => ({
-  changeSize: (newSize) => {
+  changeSize: newSize => {
     dispatch(changeSize(newSize));
   },
 });

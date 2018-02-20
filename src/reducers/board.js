@@ -9,6 +9,8 @@ import {
   REVEAL_CELL,
   TOGGLE_FLAG,
 } from 'actions/boardActions';
+import { Mines } from 'enums/mines';
+
 import {
   changeSize,
   flagMines,
@@ -36,7 +38,7 @@ for (let i = 0; i < 16; i++) {
       component: 0,
       flagged: false,
       hidden: true,
-      mines: 0,
+      mines: Mines.ZERO,
     }));
   }
   cells = cells.push(row);
@@ -78,7 +80,7 @@ const board = (state = initialState, action) => {
     let constraints = [];
     for (let i = 0; i < state.get('cells').size; i++) {
       for (let j = 0; j < state.getIn(['cells', 0]).size; j++) {
-        if (!state.getIn(['cells', i, j, 'hidden']) && state.getIn(['cells', i, j, 'mines']) > 0) {
+        if (!state.getIn(['cells', i, j, 'hidden']) && state.getIn(['cells', i, j, 'mines']) > Mines.ZERO) {
           constraints.push(buildConstraint(variables, i, j, state.getIn(['cells', i, j, 'mines'])));
         }
       }
@@ -105,7 +107,7 @@ const board = (state = initialState, action) => {
           s.set('gameIsRunning', true);
           s.set('hasMines', true);
         } else {
-          while (!s.getIn(['cells', row, col, 'hidden']) || s.getIn(['cells', row, col, 'mines']) === -1) {
+          while (!s.getIn(['cells', row, col, 'hidden']) || s.getIn(['cells', row, col, 'mines']) === Mines.MINE) {
             row = Math.floor(Math.random() * s.get('cells').size);
             col = Math.floor(Math.random() * s.getIn(['cells', 0]).size);
           }
@@ -115,7 +117,7 @@ const board = (state = initialState, action) => {
         s.set('numRevealed', s.get('numRevealed') + 1);
         s.set('smile', 'SMILE');
         // if that cell had zero mines nearby, reveal all neighbors
-        if (s.getIn(['cells', row, col, 'mines']) === 0) {
+        if (s.getIn(['cells', row, col, 'mines']) === Mines.ZERO) {
           const temp = revealNeighbors(s.get('cells'), s.get('numRevealed'), row, col);
           s.set('cells', temp.newCells);
           s.set('numRevealed', temp.newNumRevealed);
@@ -133,6 +135,9 @@ const board = (state = initialState, action) => {
 
   // resets the board
   case RESET_BOARD:
+    if (!state.get('hasMines')) {
+      return state;
+    }
     return state.withMutations(s => {
       for (let i = 0; i < s.get('cells').size; i++) {
         for (let j = 0; j < s.getIn(['cells', 0]).size; j++) {
@@ -140,7 +145,7 @@ const board = (state = initialState, action) => {
             component: 0,
             flagged: false,
             hidden: true,
-            mines: 0,
+            mines: Mines.ZERO,
           }));
         }
       }
@@ -166,14 +171,14 @@ const board = (state = initialState, action) => {
         s.set('numRevealed', s.get('numRevealed') + 1);
         s.set('smile', 'SMILE');
         // if that cell had zero mines nearby, reveal all neighbors
-        if (s.getIn(['cells', action.row, action.col, 'mines']) === 0) {
+        if (s.getIn(['cells', action.row, action.col, 'mines']) === Mines.ZERO) {
           const temp = revealNeighbors(s.get('cells'), s.get('numRevealed'), action.row, action.col);
           s.set('cells', temp.newCells);
           s.set('numRevealed', temp.newNumRevealed);
         // else if that cell had a mine, end the game and reveal all mines
-        } else if (s.getIn(['cells', action.row, action.col, 'mines']) === -1) {
+        } else if (s.getIn(['cells', action.row, action.col, 'mines']) === Mines.MINE) {
           s.set('cells', revealMines(s.get('cells')));
-          s.setIn(['cells', action.row, action.col, 'mines'], -2);
+          s.setIn(['cells', action.row, action.col, 'mines'], Mines.ERROR);
           s.set('gameIsRunning', false);
           s.set('smile', 'LOST');
         }

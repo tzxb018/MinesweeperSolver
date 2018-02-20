@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
-import styles from './style.scss';
+import styles from './style';
 
 export default class MineCounter extends Component {
   static propTypes = {
