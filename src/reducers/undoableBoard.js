@@ -9,7 +9,7 @@ import {
 import board from './board';
 
 const undoableBoard = undoable(board, {
-  filter: excludeAction([CHANGE_SIZE, REVEAL_CELL]),
+  filter: excludeAction(REVEAL_CELL),
   initTypes: [CHANGE_SIZE, RESET_BOARD],
 });
 

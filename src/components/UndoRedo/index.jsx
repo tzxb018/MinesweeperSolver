@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreators } from 'redux-undo';
 
-class UndoRedo extends Component {
+import styles from './style';
+
+export default class UndoRedo extends Component {
   static propTypes = {
     // state props
     canRedo: PropTypes.bool.isRequired,
@@ -15,35 +15,15 @@ class UndoRedo extends Component {
 
   render() {
     return (
-      <p>
+      <div className={styles['container']} >
         <button onClick={this.props.onUndo} disabled={!this.props.canUndo} >
           Undo
         </button>
+        <div className={styles['gap']} />
         <button onClick={this.props.onRedo} disabled={!this.props.canRedo} >
           Redo
         </button>
-      </p>
+      </div>
     );
   }
-
 }
-
-const mapStateToProps = state => ({
-  canUndo: state.board.past.length > 0,
-  canRedo: state.board.future.length > 0,
-});
-
-const mapDispatchToProps = dispatch => ({
-  onUndo: () => {
-    dispatch(ActionCreators.undo());
-  },
-
-  onRedo: () => {
-    dispatch(ActionCreators.redo());
-  },
-});
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(UndoRedo);
