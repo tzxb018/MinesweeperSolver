@@ -1,87 +1,27 @@
 import Immutable from 'immutable';
 
-import { Mines } from 'enums/mines';
-
 /**
- * Changes the size of the board
- * @param state board state to be changed
- * @param newSize passed from action
- * @return new state with mutations
+ * Flags all hidden cells that have mines for when the game is won.
+ * @param cells matrix of cell objects
+ * @return new cells
  */
-export const changeSize = (state, newSize) => state.withMutations(s => {
-  let rows = 0;
-  let cols = 0;
-  let numMines = 0;
-  // change settings based on new size
-  switch (newSize) {
-  case 'beginner':
-    rows = 9;
-    cols = 9;
-    numMines = 10;
-    break;
-  case 'intermediate':
-    rows = 16;
-    cols = 16;
-    numMines = 40;
-    break;
-  case 'expert':
-    rows = 16;
-    cols = 30;
-    numMines = 99;
-    break;
-  default:
-    rows = 16;
-    cols = 16;
-    numMines = 40;
-  }
-
-  // reset all cells
-  let cells = Immutable.List();
-  for (let i = 0; i < rows; i++) {
-    let row = Immutable.List();
-    for (let j = 0; j < cols; j++) {
-      row = row.push(Immutable.Map({
-        component: 0,
-        flagged: false,
-        hidden: true,
-        mines: Mines.ZERO,
-      }));
-    }
-    cells = cells.push(row);
-  }
-  s.set('cells', cells);
-  s.set('numMines', numMines);
-  s.set('size', newSize);
-  s.set('gameIsRunning', false);
-  s.set('hasMines', false);
-  s.set('numFlagged', 0);
-  s.set('numRevealed', 0);
-  s.set('smile', 'SMILE');
-});
-
-/**
- * Flags all hidden cells that have mines for when the game is won
- * @param cells array of cell objects
- * @return new state with mutations
- */
-export const flagMines = cells => cells.withMutations(c => {
-  for (let i = 0; i < c.size; i++) {
-    for (let j = 0; j < c.get(0).size; j++) {
-      if (c.getIn([i, j, 'mines']) === Mines.MINE && !c.getIn([i, j, 'flagged'])) {
-        c.setIn([i, j, 'flagged'], true);
+const flagMines = cells => cells.withMutations(c => {
+  for (let row = 0; row < c.size; row++) {
+    for (let col = 0; col < c.get(0).size; col++) {
+      if (c.getIn([row, col, 'mines']) === -1 && !c.getIn([row, col, 'flagged'])) {
+        c.setIn([row, col, 'flagged'], true);
       }
     }
   }
 });
 
 /**
- * Updates the numbers of cells around a new mine
- * @param cells array of cell objects
- * @param i row of mine placed
- * @param j column of mine placed
- * @return new state with mutations
+ * Updates the number of nearby mines of the cells around mines.
+ * @param cells matrix of cell objects
+ * @param mines list of mine locations
+ * @return new cells
  */
-const placeNumbers = (cells, i, j) => cells.withMutations(c => {
+const placeNumbers = (cells, mines) => {
   const coords = [
     [-1, -1],   // top-left
     [-1, 0],    // top-mid
@@ -92,76 +32,61 @@ const placeNumbers = (cells, i, j) => cells.withMutations(c => {
     [1, -1],    // bottom-left
     [0, -1],    // mid-left
   ];
-  coords.forEach(element => {
-    const x = i + element[0];
-    const y = j + element[1];
-    const mines = c.getIn([x, y, 'mines']);
-    // if the coordinate exists on the board and doesn't have a mine, add to its number
-    if (x >= 0
-        && x < c.size
-        && y >= 0
-        && y < c.get(0).size
-        && mines !== Mines.MINE) {
-      c.setIn([x, y, 'mines'], mines + 1);
-    }
-  });
-});
+  const numRows = cells.size;
+  const numCols = cells.get(0).size;
 
-/**
- * Places mines randomly on the board, avoiding the clicked cell
- * @param cells array of cell objects
- * @param numMines number of mines to be placed
- * @param x row of safe cell
- * @param y col of safe cell
- * @returns new array of cell objects with mines and numbers
- */
-export const placeMines = (cells, numMines, x, y) => {
-  let newCells = cells;
-  let minesLeft = numMines;
-  while (minesLeft !== 0) {
-    const i = Math.floor(Math.random() * newCells.size);
-    const j = Math.floor(Math.random() * newCells.get(0).size);
-    // if a random cell doesn't already have a mine
-    // and is not within range of the safe cell, then place a mine there
-    if (newCells.getIn([i, j, 'mines']) !== Mines.MINE
-      && !((i >= x - 1 && i <= x + 1) && (j >= y - 1 && j <= y + 1))) {
-      newCells = newCells.setIn([i, j, 'mines'], Mines.MINE);
-      newCells = placeNumbers(newCells, i, j);
-      minesLeft--;
-    }
-  }
-  return newCells;
+  return cells.withMutations(c => {
+    mines.forEach(mine => {
+      coords.forEach(element => {
+        const x = mine.x + element[0];
+        const y = mine.y + element[1];
+        const numMines = c.getIn([x, y, 'mines']);
+        // if the coordinate exists on the board and doesn't have a mine, add to its number
+        if (x >= 0
+            && x < numRows
+            && y >= 0
+            && y < numCols
+            && numMines !== -1) {
+          c.setIn([x, y, 'mines'], numMines + 1);
+        }
+      });
+    });
+  });
 };
 
 /**
- * Reveals all hidden cells that have mines for when the game is lost
- * @param cells array of cell objects
- * @returns updated array of cell objects
+ * Reveals all mines that weren't found and any flags that were in the wrong place for when the game is lost.
+ * @param cells matrix of cell objects
+ * @returns new cells
  */
-export const revealMines = cells => cells.withMutations(c => {
-  for (let i = 0; i < c.size; i++) {
-    for (let j = 0; j < c.get(0).size; j++) {
-      if (c.getIn([i, j, 'mines']) === Mines.MINE) {
-        c.setIn([i, j, 'hidden'], false);
-      } else if (c.getIn([i, j, 'flagged'])) {
-        c.setIn([i, j, 'mines'], Mines.ERROR);
+const revealMines = cells => cells.withMutations(c => {
+  for (let row = 0; row < c.size; row++) {
+    for (let col = 0; col < c.get(0).size; col++) {
+      if (c.getIn([row, col, 'mines']) === -1) {
+        c.setIn([row, col, 'hidden'], false);
+      } else if (c.getIn([row, col, 'flagged'])) {
+        c.setIn([row, col, 'mines'], -2);
       }
-      c.setIn([i, j, 'component'], 0);
+      c.setIn([row, col, 'component'], 0);
     }
   }
 });
 
 /**
- * Reveals all hidden cells around an empty clicked cell
- * @param cells array of cell objects
- * @param numRevealed number of revealed cells
- * @param i row of clicked cell
- * @param j col of clicked cell
- * @returns ({ updated array of cells, updated number of revealed cells })
+ * Reveals all hidden cells near a cell that was revealed and found to be blank.
+ * @param minefield state of the minefield
+ * @param row row of revealed cell
+ * @param col column of revealed cell
+ * @returns new minefield
  */
-export const revealNeighbors = (cells, numRevealed, i, j) => {
-  let newNumRevealed = numRevealed;
-  let newCells = cells;
+const revealNeighbors = (minefield, row, col) => {
+  const cellQueue = [];
+  cellQueue.push({
+    x: row,
+    y: col,
+  });
+  const numRows = minefield.get('cells').size;
+  const numCols = minefield.getIn(['cells', 0]).size;
   const coords = [
     [-1, -1],   // top-left
     [-1, 0],    // top-mid
@@ -174,28 +99,154 @@ export const revealNeighbors = (cells, numRevealed, i, j) => {
   ];
 
   // reveal all neighboring cells
-  coords.forEach(element => {
-    const x = i + element[0];
-    const y = j + element[1];
-    // if the coordinate exists on the board and isn't already revealed, reveal it
-    if (x >= 0
-        && x < newCells.size
-        && y >= 0
-        && y < newCells.get(0).size
-        && newCells.getIn([x, y, 'hidden'])) {
-      newCells = newCells.setIn([x, y, 'hidden'], false);
-      newNumRevealed++;
-      // if the newly revealed cell is also empty, recursively call revealNeighbors
-      if (newCells.getIn([x, y, 'mines']) === Mines.ZERO) {
-        const temp = revealNeighbors(newCells, newNumRevealed, x, y);
-        newCells = temp.newCells;
-        newNumRevealed = temp.newNumRevealed;
+  return minefield.withMutations(m => {
+    do {
+      const currentCell = cellQueue.pop();
+      coords.forEach(element => {
+        const x = currentCell.x + element[0];
+        const y = currentCell.y + element[1];
+        // if the coordinate exists on the board and isn't already revealed, reveal it
+        if (x >= 0
+            && x < numRows
+            && y >= 0
+            && y < numCols
+            && m.getIn(['cells', x, y, 'hidden'])) {
+          m.setIn(['cells', x, y, 'hidden'], false);
+          m.update('numRevealed', n => n + 1);
+          // if this cell is also empty, add it to the queue so its neighbors can also be revealed
+          if (m.getIn(['cells', x, y, 'mines']) === 0) {
+            cellQueue.push({
+              x,
+              y,
+            });
+          }
+        }
+      });
+    } while (cellQueue.length > 0);
+  });
+};
+
+/**
+ * Changes the size of the board.
+ * @param state state of the board
+ * @param newSize new size to make the board
+ * @return new state
+ */
+export const changeSize = (state, newSize) => state.withMutations(s => {
+  let numRows;
+  let numCols;
+  let numMines;
+  // change settings based on new size
+  switch (newSize) {
+  case 'beginner':
+    numRows = 9;
+    numCols = 9;
+    numMines = 10;
+    break;
+  case 'intermediate':
+    numRows = 16;
+    numCols = 16;
+    numMines = 40;
+    break;
+  case 'expert':
+    numRows = 16;
+    numCols = 30;
+    numMines = 99;
+    break;
+  default:
+    numRows = 16;
+    numCols = 16;
+    numMines = 40;
+  }
+
+  // reset all cells
+  let cells = Immutable.List();
+  for (let i = 0; i < numRows; i++) {
+    let row = Immutable.List();
+    for (let j = 0; j < numCols; j++) {
+      row = row.push(Immutable.Map({
+        component: 0,
+        flagged: false,
+        hidden: true,
+        mines: 0,
+      }));
+    }
+    cells = cells.push(row);
+  }
+  s.setIn(['minefield', 'cells'], cells);
+  s.setIn(['minefield', 'numFlagged'], 0);
+  s.setIn(['minefield', 'numRevealed'], 0);
+  s.set('numMines', numMines);
+  s.set('size', newSize);
+  s.set('gameIsRunning', false);
+  s.set('hasMines', false);
+  s.set('smile', 'SMILE');
+});
+
+/**
+ * Places mines randomly on the board, avoiding the given safe cell.
+ * @param cells matrix of cell objects
+ * @param numMines number of mines to be placed
+ * @param row row of safe cell
+ * @param col column of safe cell
+ * @returns new cells
+ */
+export const placeMines = (cells, numMines, row, col) => {
+  let minesLeft = numMines;
+  const numRows = cells.size;
+  const numCols = cells.get(0).size;
+  const mines = [];
+
+  const newCells = cells.withMutations(c => {
+    while (minesLeft > 0) {
+      const x = Math.floor(Math.random() * numRows);
+      const y = Math.floor(Math.random() * numCols);
+      // if a random cell doesn't already have a mine and is not within range of the safe cell, then place a mine there
+      if (c.getIn([x, y, 'mines']) !== -1
+        && !((x >= row - 1 && x <= row + 1) && (y >= col - 1 && y <= col + 1))) {
+        c.setIn([x, y, 'mines'], -1);
+        mines.push({
+          x,
+          y,
+        });
+        minesLeft--;
       }
     }
   });
 
-  return {
-    newCells,
-    newNumRevealed,
-  };
+  return placeNumbers(newCells, mines);
 };
+
+/**
+ * Reveals a cell and other required operations depending on state of that cell
+ * @param state state of the board
+ * @param row row of cell
+ * @param col col of cell
+ * @returns updated state of board
+ */
+export const revealCell = (state, row, col) => state.withMutations(s => {
+  // reveal the cell
+  s.setIn(['minefield', 'cells', row, col, 'hidden'], false);
+  s.updateIn(['minefield', 'numRevealed'], n => n + 1);
+  s.set('smile', 'SMILE');
+
+  // if that cell had zero mines nearby, reveal all neighbors
+  if (s.getIn(['minefield', 'cells', row, col, 'mines']) === 0) {
+    s.update('minefield', m => revealNeighbors(m, row, col));
+  // else if that cell had a mine, end the game and reveal all mines
+  } else if (s.getIn(['minefield', 'cells', row, col, 'mines']) === -1) {
+    s.updateIn(['minefield', 'cells'], c => revealMines(c));
+    s.setIn(['minefield', 'cells', row, col, 'mines'], -2);
+    s.set('gameIsRunning', false);
+    s.set('smile', 'LOST');
+  }
+
+  // if all the non-bomb cells are revealed, win the game
+  if (s.getIn(['minefield', 'numRevealed'])
+      === s.getIn(['minefield', 'cells']).size * s.getIn(['minefield', 'cells', 0]).size - s.get('numMines')) {
+    s.updateIn(['minefield', 'cells'], c => flagMines(c));
+    s.setIn(['minefield', 'numFlagged'], s.get('numMines'));
+    s.set('gameIsRunning', false);
+    s.set('smile', 'WON');
+  }
+});
