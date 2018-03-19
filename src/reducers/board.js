@@ -18,6 +18,7 @@ import {
   revealCell,
 } from './utils/cellUtils';
 import {
+  checkConsistency,
   colorSolvable,
   solve,
 } from './utils/cspSatisfaction';
@@ -44,7 +45,6 @@ for (let i = 0; i < 16; i++) {
 const initialState = Immutable.Map({
   csp: Immutable.Map({
     constraints: [],
-    inconsistent: Immutable.List(),
     solvable: Immutable.List(),
     variables: [],
   }),
@@ -90,7 +90,10 @@ export default (state = initialState, action) => {
       s.update('csp', c => normalize(c));
 
       // separate variables and constraints into individual components
-      s.set('components', separateComponents(s.get('csp')));
+      s.set('csp', separateComponents(s.get('csp')));
+
+      // check for consistency
+      s.updateIn(['minefield', 'cells'], c => checkConsistency(c, s.getIn(['csp', 'components'])));
     });
 
   // reveals a random open cell
@@ -122,6 +125,11 @@ export default (state = initialState, action) => {
       return state;
     }
     return state.withMutations(s => {
+      s.set('csp', Immutable.Map({
+        constraints: [],
+        solvable: Immutable.List(),
+        variables: [],
+      }));
       for (let i = 0; i < s.getIn(['minefield', 'cells']).size; i++) {
         for (let j = 0; j < s.getIn(['minefield', 'cells', 0]).size; j++) {
           s.setIn(['minefield', 'cells', i, j], Immutable.Map({

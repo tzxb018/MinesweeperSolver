@@ -109,4 +109,44 @@
     @extend .mines0;
     background: url('../../images/cell/cyan.png');
   }
+
+  .bad1 {
+    @extend .mines0;
+    background: url('../../images/mines/bad_one.png');
+  }
+
+  .bad2 {
+    @extend .mines0;
+    background: url('../../images/mines/bad_two.png');
+  }
+
+  .bad3 {
+    @extend .mines0;
+    background: url('../../images/mines/bad_three.png');
+  }
+
+  .bad4 {
+    @extend .mines0;
+    background: url('../../images/mines/bad_four.png');
+  }
+
+  .bad5 {
+    @extend .mines0;
+    background: url('../../images/mines/bad_five.png');
+  }
+
+  .bad6 {
+    @extend .mines0;
+    background: url('../../images/mines/bad_six.png');
+  }
+
+  .bad7 {
+    @extend .mines0;
+    background: url('../../images/mines/bad_seven.png');
+  }
+
+  .bad8 {
+    @extend .mines0;
+    background: url('../../images/mines/bad_eight.png');
+  }
 }

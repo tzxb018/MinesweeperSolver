@@ -42,7 +42,7 @@ export default class Cell extends Component {
         return (<div className={styles['misflagged']} />);
       }
       return (<div className={styles['flagged']} onContextMenu={this.rightClickHandler} />);
-    } else if (this.props.hidden && this.props.component > 0 && this.props.component <= 8) {
+    } else if (this.props.hidden && this.props.component > 0) {
       return (
         <div className={styles[`comp${this.props.component}`]}
           onClick={this.clickHandler}
@@ -56,6 +56,8 @@ export default class Cell extends Component {
           onContextMenu={this.rightClickHandler}
           onMouseDown={this.mouseDownHandler}
         />);
+    } else if (this.props.component === -1) {
+      return (<div className={styles[`bad${this.props.mines}`]} />);
     }
     return (<div className={styles[`mines${this.props.mines}`]} />);
   }
