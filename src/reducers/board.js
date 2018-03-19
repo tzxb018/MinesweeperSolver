@@ -7,30 +7,28 @@ import {
   PEEK,
   RESET_BOARD,
   REVEAL_CELL,
+  SOLVE,
   TOGGLE_FLAG,
 } from 'actions/boardActions';
 import { Mines } from 'enums/mines';
 
 import {
   changeSize,
-  flagMines,
   placeMines,
-  revealMines,
-  revealNeighbors,
+  revealCell,
 } from './utils/cellUtils';
 import {
-  buildConstraint,
-  setVariables,
-} from './utils/cspGeneration';
-import {
-  colorCodeComponents,
-  enforceUnary,
-  normalize,
-  separateComponents,
-} from './utils/cspReduction';
+  colorSolvable,
+  solve,
+} from './utils/cspSatisfaction';
+import unaryConsistency from './consistency algorithms/unary';
+import normalize from './consistency algorithms/normalize';
+import generateCSP from './utils/generateCSP';
+import separateComponents from './utils/separateComponents';
 
 // default state
 let cells = Immutable.List();
+cells = cells.set('numFlagged', 0);
 for (let i = 0; i < 16; i++) {
   let row = Immutable.List();
   for (let j = 0; j < 16; j++) {
@@ -44,15 +42,22 @@ for (let i = 0; i < 16; i++) {
   cells = cells.push(row);
 }
 const initialState = Immutable.Map({
-  cells,
+  csp: Immutable.Map({
+    constraints: [],
+    inconsistent: Immutable.List(),
+    solvable: Immutable.List(),
+    variables: [],
+  }),
   gameIsRunning: false,
   hasMines: false,
-  numFlagged: 0,
+  minefield: Immutable.Map({
+    cells,
+    numFlagged: 0,
+    numRevealed: 0,
+  }),
   numMines: 40,
-  numRevealed: 0,
   size: 'intermediate',
   smile: 'SMILE',
-  components: Immutable.List(),
 });
 
 /**
@@ -61,9 +66,8 @@ const initialState = Immutable.Map({
  * @param action Redux action thrown
  * @returns updated state
  */
-const board = (state = initialState, action) => {
+export default (state = initialState, action) => {
   switch (action.type) {
-
   // changes the board size
   case CHANGE_SIZE:
     return changeSize(state, action.newSize);
@@ -74,61 +78,40 @@ const board = (state = initialState, action) => {
 
   // performs CSP stuff
   case CSP:
-    // create a variable for each cell on the fringe
-    const variables = setVariables(state.get('cells'));
-    // create a constraint for each revealed cell with a number
-    let constraints = [];
-    for (let i = 0; i < state.get('cells').size; i++) {
-      for (let j = 0; j < state.getIn(['cells', 0]).size; j++) {
-        if (!state.getIn(['cells', i, j, 'hidden']) && state.getIn(['cells', i, j, 'mines']) > Mines.ZERO) {
-          constraints.push(buildConstraint(variables, i, j, state.getIn(['cells', i, j, 'mines'])));
-        }
-      }
-    }
-    // normalize the constraints
-    constraints = normalize(constraints);
-    // enforce unary constraints
-    constraints = enforceUnary(constraints);
-    // separate variables and constraints into individual components
-    let newState = state.set('components', separateComponents(variables, constraints));
-    // color code all cells found to be part of a component
-    newState = newState.set('cells', colorCodeComponents(newState.get('cells'), newState.get('components')));
-    return newState;
+    return state.withMutations(s => {
+      // generate the csp model of the minefield
+      s.set('csp', generateCSP(s));
+
+      // enforce unary consistency
+      s.update('csp', c => unaryConsistency(c));
+      s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp'), 1));
+
+      // normalize the constraints
+      s.update('csp', c => normalize(c));
+
+      // separate variables and constraints into individual components
+      s.set('components', separateComponents(s.get('csp')));
+    });
 
   // reveals a random open cell
   case PEEK:
     if (state.get('gameIsRunning') || !state.get('hasMines')) {
       return state.withMutations(s => {
-        let row = Math.floor(Math.random() * state.get('cells').size);
-        let col = Math.floor(Math.random() * state.getIn(['cells', 0]).size);
+        let row = Math.floor(Math.random() * state.getIn(['minefield', 'cells']).size);
+        let col = Math.floor(Math.random() * state.getIn(['minefield', 'cells', 0]).size);
         // if there are no mines already, place mines and start the game
         if (!s.get('hasMines')) {
-          s.set('cells', placeMines(s.get('cells'), s.get('numMines'), row, col));
+          s.updateIn(['minefield', 'cells'], c => placeMines(c, s.get('numMines'), row, col));
           s.set('gameIsRunning', true);
           s.set('hasMines', true);
         } else {
-          while (!s.getIn(['cells', row, col, 'hidden']) || s.getIn(['cells', row, col, 'mines']) === Mines.MINE) {
-            row = Math.floor(Math.random() * s.get('cells').size);
-            col = Math.floor(Math.random() * s.getIn(['cells', 0]).size);
+          while (!s.getIn(['minefield', 'cells', row, col, 'hidden'])
+              || s.getIn(['minefield', 'cells', row, col, 'mines']) === -1) {
+            row = Math.floor(Math.random() * s.getIn(['minefield', 'cells']).size);
+            col = Math.floor(Math.random() * s.getIn(['minefield', 'cells', 0]).size);
           }
         }
-        // reveal the cell
-        s.setIn(['cells', row, col, 'hidden'], false);
-        s.set('numRevealed', s.get('numRevealed') + 1);
-        s.set('smile', 'SMILE');
-        // if that cell had zero mines nearby, reveal all neighbors
-        if (s.getIn(['cells', row, col, 'mines']) === Mines.ZERO) {
-          const temp = revealNeighbors(s.get('cells'), s.get('numRevealed'), row, col);
-          s.set('cells', temp.newCells);
-          s.set('numRevealed', temp.newNumRevealed);
-        }
-        // if all the non-bomb cells are revealed, win the game
-        if (s.get('numRevealed') === s.get('cells').size * s.getIn(['cells', 0]).size - s.get('numMines')) {
-          s.set('cells', flagMines(s.get('cells')));
-          s.set('numFlagged', s.get('numMines'));
-          s.set('gameIsRunning', false);
-          s.set('smile', 'WON');
-        }
+        return revealCell(s, row, col);
       });
     }
     return state;
@@ -139,57 +122,42 @@ const board = (state = initialState, action) => {
       return state;
     }
     return state.withMutations(s => {
-      for (let i = 0; i < s.get('cells').size; i++) {
-        for (let j = 0; j < s.getIn(['cells', 0]).size; j++) {
-          s.setIn(['cells', i, j], Immutable.Map({
+      for (let i = 0; i < s.getIn(['minefield', 'cells']).size; i++) {
+        for (let j = 0; j < s.getIn(['minefield', 'cells', 0]).size; j++) {
+          s.setIn(['minefield', 'cells', i, j], Immutable.Map({
             component: 0,
             flagged: false,
             hidden: true,
-            mines: Mines.ZERO,
+            mines: 0,
           }));
         }
       }
       s.set('gameIsRunning', false);
       s.set('hasMines', false);
-      s.set('numFlagged', 0);
-      s.set('numRevealed', 0);
+      s.setIn(['minefield', 'numFlagged'], 0);
+      s.setIn(['minefield', 'numRevealed'], 0);
       s.set('smile', 'SMILE');
     });
 
   // reveals the clicked cell
   case REVEAL_CELL:
     if (state.get('gameIsRunning') || !state.get('hasMines')) {
-      return state.withMutations(s => {
+      const newState = state.withMutations(s => {
         // if there are no mines already, place mines and start the game
         if (!s.get('hasMines')) {
-          s.set('cells', placeMines(s.get('cells'), s.get('numMines'), action.row, action.col));
+          s.updateIn(['minefield', 'cells'], c => placeMines(c, s.get('numMines'), action.row, action.col));
           s.set('gameIsRunning', true);
           s.set('hasMines', true);
         }
-        // reveal the cell
-        s.setIn(['cells', action.row, action.col, 'hidden'], false);
-        s.set('numRevealed', s.get('numRevealed') + 1);
-        s.set('smile', 'SMILE');
-        // if that cell had zero mines nearby, reveal all neighbors
-        if (s.getIn(['cells', action.row, action.col, 'mines']) === Mines.ZERO) {
-          const temp = revealNeighbors(s.get('cells'), s.get('numRevealed'), action.row, action.col);
-          s.set('cells', temp.newCells);
-          s.set('numRevealed', temp.newNumRevealed);
-        // else if that cell had a mine, end the game and reveal all mines
-        } else if (s.getIn(['cells', action.row, action.col, 'mines']) === Mines.MINE) {
-          s.set('cells', revealMines(s.get('cells')));
-          s.setIn(['cells', action.row, action.col, 'mines'], Mines.ERROR);
-          s.set('gameIsRunning', false);
-          s.set('smile', 'LOST');
-        }
-        // if all the non-bomb cells are revealed, win the game
-        if (s.get('numRevealed') === s.get('cells').size * s.getIn(['cells', 0]).size - s.get('numMines')) {
-          s.set('cells', flagMines(s.get('cells')));
-          s.set('numFlagged', s.get('numMines'));
-          s.set('gameIsRunning', false);
-          s.set('smile', 'WON');
-        }
       });
+      return revealCell(newState, action.row, action.col);
+    }
+    return state;
+
+  // solves all solvable cells
+  case SOLVE:
+    if (state.getIn(['csp', 'solvable']).size > 0) {
+      return solve(state);
     }
     return state;
 
@@ -197,13 +165,13 @@ const board = (state = initialState, action) => {
   case TOGGLE_FLAG:
     return state.withMutations(s => {
       if (s.get('gameIsRunning') === true) {
-        if (s.getIn(['cells', action.row, action.col, 'flagged']) === false
-            && s.get('numFlagged') < s.get('numMines')) {
-          s.setIn(['cells', action.row, action.col, 'flagged'], true);
-          s.set('numFlagged', s.get('numFlagged') + 1);
-        } else if (s.getIn(['cells', action.row, action.col, 'flagged']) === true) {
-          s.setIn(['cells', action.row, action.col, 'flagged'], false);
-          s.set('numFlagged', s.get('numFlagged') - 1);
+        if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged']) === false
+            && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
+          s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], true);
+          s.updateIn(['minefield', 'numFlagged'], n => n + 1);
+        } else if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged']) === true) {
+          s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], false);
+          s.updateIn(['minefield', 'numFlagged'], n => n - 1);
         }
       }
     });
@@ -212,5 +180,3 @@ const board = (state = initialState, action) => {
     return state;
   }
 };
-
-export default board;

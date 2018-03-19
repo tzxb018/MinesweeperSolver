@@ -133,27 +133,37 @@ const generatePossibilities = (minesLeft, numVariables) => {
 
 /**
  * Creates the constraint for a given cell
- * @param variables list of all variables found
- * @param x cell row
- * @param y cell col
+ * @param variables list of variable objects
+ * @param row cell row
+ * @param col cell col
  * @param numMines number of mines this constraint allows for
  * @returns matrix with variable keys in first row, and all possible solutions in subsequent rows
+ * @throws Error if there are too many flags near the constraint
  */
-export const buildConstraint = (variables, x, y, numMines) => {
+const buildConstraint = (variables, row, col, numMines) => {
   const constraint = [];
+  constraint.row = row;
+  constraint.col = col;
   constraint.push([]);
   let minesLeft = numMines;
 
   // find all variables in the scope and store their keys in the first row of the constraint
-  for (let key = 0; key < variables.length; key++) {
-    if (variables[key].row >= x - 1 && variables[key].row <= x + 1
-        && variables[key].col >= y - 1 && variables[key].col <= y + 1) {
-      constraint[0].push(key);
+  variables.forEach(variable => {
+    if (variable.row >= row - 1
+        && variable.row <= row + 1
+        && variable.col >= col - 1
+        && variable.col <= col + 1) {
+      constraint[0].push(variable.key);
       // adjust the number of mines to be placed if a cell is already flagged
-      if (variables[key].isFlagged) {
+      if (variable.isFlagged) {
         minesLeft--;
       }
     }
+  });
+
+  // throw error if too many flags around the constraint
+  if (minesLeft < 0) {
+    throw new Error();
   }
 
   // calculate all possible configurations of mines
@@ -186,29 +196,59 @@ export const buildConstraint = (variables, x, y, numMines) => {
 };
 
 /**
- * Find each fringe cell and create a variable for it
+ * Creates a variable for each fringe cell
  * @param cells matrix of cells
  * @returns list of variable objects
  */
-export const setVariables = cells => {
+const getVariables = cells => {
   const variables = [];
-  let count = 0;
+  let key = 0;
 
-  // find all fringe cells and create a variable for them
-  for (let i = 0; i < cells.size; i++) {
-    for (let j = 0; j < cells.get(0).size; j++) {
-      if (cells.getIn([i, j, 'hidden']) && isOnFringe(cells, i, j)) {
+  // find all fringe cells and create a variable object for them
+  for (let row = 0; row < cells.size; row++) {
+    for (let col = 0; col < cells.get(0).size; col++) {
+      if (cells.getIn([row, col, 'hidden']) && isOnFringe(cells, row, col)) {
         // variable object
         variables.push({
-          col: j,                                     // column of cell
-          isFlagged: cells.getIn([i, j, 'flagged']),  // state of cell
-          key: count,                                 // variable number
-          row: i,                                     // row of cell
+          col,                                            // column of cell
+          isFlagged: cells.getIn([row, col, 'flagged']),  // state of cell
+          key,                                            // variable number
+          row,                                            // row of cell
         });
-        count++;
+        key++;
       }
     }
   }
 
   return variables;
 };
+
+/**
+ * Generates the variables and constraints that represent the minesweeper game. If a constraint has too many mines
+ * around it, the row and col of that constraint are added to the inconsistencies.
+ * @param state state of the board
+ * @returns csp with constraints, variables, and any inconsitencies added
+ */
+export default state => state.get('csp').withMutations(csp => {
+  // get the variables
+  csp.set('variables', getVariables(state.getIn(['minefield', 'cells'])));
+
+  // get the constraints and handle any errors
+  const constraints = [];
+  for (let row = 0; row < state.getIn(['minefield', 'cells']).size; row++) {
+    state.getIn(['minefield', 'cells', row]).forEach((cell, col) => {
+      if (!cell.get('hidden') && cell.get('mines') > 0) {
+        try {
+          constraints.push(buildConstraint(csp.get('variables'), row, col, cell.get('mines')));
+        } catch (e) {
+          constraints.pop();
+          csp.update('inconsistent', list => list.push({
+            row,
+            col,
+          }));
+        }
+      }
+    });
+  }
+  csp.set('constraints', constraints);
+});

@@ -8,19 +8,19 @@ export default class CSPButton extends Component {
     // state props
     gameIsRunning: PropTypes.bool.isRequired,
     // dispatch props
-    csp: PropTypes.func.isRequired,
+    solve: PropTypes.func.isRequired,
   }
 
   clickHandler = () => {
     if (this.props.gameIsRunning) {
-      this.props.csp();
+      this.props.solve();
     }
   }
 
   render() {
     return (
       <button className={styles['button']} onClick={this.clickHandler}>
-        Find Solvable Cells
+        Solve
       </button>
     );
   }
