@@ -4,7 +4,7 @@ export const CSP = 'CSP';
 export const PEEK = 'PEEK';
 export const RESET_BOARD = 'RESET_BOARD';
 export const REVEAL_CELL = 'REVEAL_CELL';
-export const SOLVE = 'SOLVE';
+export const STEP = 'STEP';
 export const TOGGLE_FLAG = 'TOGGLE_FLAG';
 
 export const changeSize = newSize => ({
@@ -35,8 +35,8 @@ export const revealCell = (row, col) => ({
   row,
 });
 
-export const solve = () => ({
-  type: SOLVE,
+export const step = () => ({
+  type: STEP,
 });
 
 export const toggleFlag = (row, col) => ({
