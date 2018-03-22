@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 
 import BoardContainer from 'containers/BoardContainer';
-import CSPButtonContainer from 'containers/CSPButtonContainer';
+import CascadeButtonContainer from 'containers/CascadeButtonContainer';
 import PeekButtonContainer from 'containers/PeekButtonContainer';
 import SizeSelectorContainer from 'containers/SizeSelectorContainer';
-import SolveButtonContainer from 'containers/SolveButtonContainer';
+import StepButtonContainer from 'containers/StepButtonContainer';
 import UndoRedo from 'containers/UndoRedoContainer';
 
 import styles from './style';
@@ -16,9 +16,9 @@ export default class App extends Component {
         <UndoRedo />
         <BoardContainer />
         <SizeSelectorContainer />
-        <CSPButtonContainer />
+        <CascadeButtonContainer />
         <PeekButtonContainer />
-        <SolveButtonContainer />
+        <StepButtonContainer />
       </div>
     );
   }

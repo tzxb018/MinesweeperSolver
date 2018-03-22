@@ -3,24 +3,24 @@ import React, { Component } from 'react';
 
 import styles from './style';
 
-export default class CSPButton extends Component {
+export default class CascadeButton extends Component {
   static propTypes = {
     // state props
     gameIsRunning: PropTypes.bool.isRequired,
     // dispatch props
-    csp: PropTypes.func.isRequired,
+    cascade: PropTypes.func.isRequired,
   }
 
   clickHandler = () => {
     if (this.props.gameIsRunning) {
-      this.props.csp();
+      this.props.cascade();
     }
   }
 
   render() {
     return (
       <button className={styles['button']} onClick={this.clickHandler}>
-        Find Solvable Cells
+        Solve
       </button>
     );
   }

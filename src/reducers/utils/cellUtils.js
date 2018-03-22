@@ -173,6 +173,11 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
     }
     cells = cells.push(row);
   }
+  s.set('csp', Immutable.Map({
+    constraints: [],
+    solvable: Immutable.List(),
+    variables: [],
+  }));
   s.setIn(['minefield', 'cells'], cells);
   s.setIn(['minefield', 'numFlagged'], 0);
   s.setIn(['minefield', 'numRevealed'], 0);
@@ -182,6 +187,45 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
   s.set('hasMines', false);
   s.set('smile', 'SMILE');
 });
+
+/**
+ * Checks if the game has been lost and acts accordingly.
+ * @param state state of the board
+ * @param row row of revealed cell
+ * @param col column of revealed cell
+ */
+export const checkLossCondition = (state, row, col) => {
+  // if the revealed cell had a mine, lose the game
+  if (state.getIn(['minefield', 'cells', row, col, 'mines']) === -1) {
+    return state.withMutations(s => {
+      s.updateIn(['minefield', 'cells'], c => revealMines(c));
+      s.setIn(['minefield', 'cells', row, col, 'mines'], -2);
+      s.set('gameIsRunning', false);
+      s.set('smile', 'LOST');
+    });
+  }
+  return state;
+};
+
+/**
+ * Checks if the game has been won and acts accordingly.
+ * @param state state of the board
+ * @returns new state
+ */
+export const checkWinCondition = state => {
+  // if all the non-bomb cells are revealed, win the game
+  if (state.getIn(['minefield', 'numRevealed'])
+      === (state.getIn(['minefield', 'cells']).size * state.getIn(['minefield', 'cells', 0]).size)
+      - state.get('numMines')) {
+    return state.withMutations(s => {
+      s.updateIn(['minefield', 'cells'], c => flagMines(c));
+      s.setIn(['minefield', 'numFlagged'], s.get('numMines'));
+      s.set('gameIsRunning', false);
+      s.set('smile', 'WON');
+    });
+  }
+  return state;
+};
 
 /**
  * Places mines randomly on the board, avoiding the given safe cell.
@@ -218,35 +262,21 @@ export const placeMines = (cells, numMines, row, col) => {
 };
 
 /**
- * Reveals a cell and other required operations depending on state of that cell
- * @param state state of the board
+ * Reveals the cell.
+ * @param minefield state of the minefield
  * @param row row of cell
- * @param col col of cell
- * @returns updated state of board
+ * @param col column of cell
+ * @returns updated state of minefield
  */
-export const revealCell = (state, row, col) => state.withMutations(s => {
+export const revealCell = (minefield, row, col) => minefield.withMutations(m => {
   // reveal the cell
-  s.setIn(['minefield', 'cells', row, col, 'hidden'], false);
-  s.updateIn(['minefield', 'numRevealed'], n => n + 1);
-  s.set('smile', 'SMILE');
+  m.setIn(['cells', row, col, 'hidden'], false);
+  m.update('numRevealed', n => n + 1);
 
   // if that cell had zero mines nearby, reveal all neighbors
-  if (s.getIn(['minefield', 'cells', row, col, 'mines']) === 0) {
-    s.update('minefield', m => revealNeighbors(m, row, col));
-  // else if that cell had a mine, end the game and reveal all mines
-  } else if (s.getIn(['minefield', 'cells', row, col, 'mines']) === -1) {
-    s.updateIn(['minefield', 'cells'], c => revealMines(c));
-    s.setIn(['minefield', 'cells', row, col, 'mines'], -2);
-    s.set('gameIsRunning', false);
-    s.set('smile', 'LOST');
+  if (m.getIn(['cells', row, col, 'mines']) === 0) {
+    return revealNeighbors(m, row, col);
   }
 
-  // if all the non-bomb cells are revealed, win the game
-  if (s.getIn(['minefield', 'numRevealed'])
-      === s.getIn(['minefield', 'cells']).size * s.getIn(['minefield', 'cells', 0]).size - s.get('numMines')) {
-    s.updateIn(['minefield', 'cells'], c => flagMines(c));
-    s.setIn(['minefield', 'numFlagged'], s.get('numMines'));
-    s.set('gameIsRunning', false);
-    s.set('smile', 'WON');
-  }
+  return m;
 });

@@ -1,30 +1,25 @@
 import Immutable from 'immutable';
 
 import {
+  CASCADE,
   CHANGE_SIZE,
   CHANGE_SMILE,
-  CSP,
   PEEK,
   RESET_BOARD,
   REVEAL_CELL,
-  SOLVE,
+  STEP,
   TOGGLE_FLAG,
 } from 'actions/boardActions';
-import { Mines } from 'enums/mines';
 
 import {
   changeSize,
+  checkLossCondition,
+  checkWinCondition,
   placeMines,
   revealCell,
 } from './utils/cellUtils';
-import {
-  colorSolvable,
-  solve,
-} from './utils/cspSatisfaction';
-import unaryConsistency from './consistency algorithms/unary';
-import normalize from './consistency algorithms/normalize';
-import generateCSP from './utils/generateCSP';
-import separateComponents from './utils/separateComponents';
+import solveCSP from './csp/solve';
+import processCSP from './csp/index.js';
 
 // default state
 let cells = Immutable.List();
@@ -36,7 +31,7 @@ for (let i = 0; i < 16; i++) {
       component: 0,
       flagged: false,
       hidden: true,
-      mines: Mines.ZERO,
+      mines: 0,
     }));
   }
   cells = cells.push(row);
@@ -44,7 +39,7 @@ for (let i = 0; i < 16; i++) {
 const initialState = Immutable.Map({
   csp: Immutable.Map({
     constraints: [],
-    inconsistent: Immutable.List(),
+    isConsistent: true,
     solvable: Immutable.List(),
     variables: [],
   }),
@@ -68,6 +63,24 @@ const initialState = Immutable.Map({
  */
 export default (state = initialState, action) => {
   switch (action.type) {
+
+  // solves and advances the csp model until it can't go any further
+  case CASCADE:
+    if (state.get('gameIsRunning')
+    && state.getIn(['csp', 'isConsistent'])
+    && state.getIn(['csp', 'solvable']).size > 0) {
+      let newState = state;
+      while (newState.get('gameIsRunning')
+      && newState.getIn(['csp', 'isConsistent'])
+      && newState.getIn(['csp', 'solvable']).size > 0) {
+        newState = solveCSP(newState);
+        newState = checkWinCondition(newState);
+        newState = processCSP(newState);
+      }
+      return newState;
+    }
+    return state;
+
   // changes the board size
   case CHANGE_SIZE:
     return changeSize(state, action.newSize);
@@ -76,27 +89,10 @@ export default (state = initialState, action) => {
   case CHANGE_SMILE:
     return state.set('smile', action.newSmile);
 
-  // performs CSP stuff
-  case CSP:
-    return state.withMutations(s => {
-      // generate the csp model of the minefield
-      s.set('csp', generateCSP(s));
-
-      // enforce unary consistency
-      s.update('csp', c => unaryConsistency(c));
-      s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp'), 1));
-
-      // normalize the constraints
-      s.update('csp', c => normalize(c));
-
-      // separate variables and constraints into individual components
-      s.set('components', separateComponents(s.get('csp')));
-    });
-
   // reveals a random open cell
   case PEEK:
     if (state.get('gameIsRunning') || !state.get('hasMines')) {
-      return state.withMutations(s => {
+      const newState = state.withMutations(s => {
         let row = Math.floor(Math.random() * state.getIn(['minefield', 'cells']).size);
         let col = Math.floor(Math.random() * state.getIn(['minefield', 'cells', 0]).size);
         // if there are no mines already, place mines and start the game
@@ -111,8 +107,13 @@ export default (state = initialState, action) => {
             col = Math.floor(Math.random() * s.getIn(['minefield', 'cells', 0]).size);
           }
         }
-        return revealCell(s, row, col);
+        s.update('minefield', m => revealCell(m, row, col));
+        return checkWinCondition(s);
       });
+      if (newState.get('gameIsRunning')) {
+        return processCSP(newState);
+      }
+      return newState;
     }
     return state;
 
@@ -122,6 +123,11 @@ export default (state = initialState, action) => {
       return state;
     }
     return state.withMutations(s => {
+      s.set('csp', Immutable.Map({
+        constraints: [],
+        solvable: Immutable.List(),
+        variables: [],
+      }));
       for (let i = 0; i < s.getIn(['minefield', 'cells']).size; i++) {
         for (let j = 0; j < s.getIn(['minefield', 'cells', 0]).size; j++) {
           s.setIn(['minefield', 'cells', i, j], Immutable.Map({
@@ -142,22 +148,38 @@ export default (state = initialState, action) => {
   // reveals the clicked cell
   case REVEAL_CELL:
     if (state.get('gameIsRunning') || !state.get('hasMines')) {
-      const newState = state.withMutations(s => {
+      let newState = state.withMutations(s => {
         // if there are no mines already, place mines and start the game
         if (!s.get('hasMines')) {
           s.updateIn(['minefield', 'cells'], c => placeMines(c, s.get('numMines'), action.row, action.col));
           s.set('gameIsRunning', true);
           s.set('hasMines', true);
         }
+        s.update('minefield', m => revealCell(m, action.row, action.col));
+        s.set('smile', 'SMILE');
       });
-      return revealCell(newState, action.row, action.col);
+      // check the end conditions
+      newState = checkWinCondition(newState);
+      newState = checkLossCondition(newState, action.row, action.col);
+      // if the game isn't over then make the csp model
+      if (newState.get('gameIsRunning')) {
+        return processCSP(newState);
+      }
+      return newState;
     }
     return state;
 
-  // solves all solvable cells
-  case SOLVE:
-    if (state.getIn(['csp', 'solvable']).size > 0) {
-      return solve(state);
+  // solves the current csp model and advances it
+  case STEP:
+    if (state.get('gameIsRunning')
+        && state.getIn(['csp', 'isConsistent'])
+        && state.getIn(['csp', 'solvable']).size > 0) {
+      let newState = solveCSP(state);
+      newState = checkWinCondition(newState);
+      if (newState.get('gameIsRunning')) {
+        return processCSP(newState);
+      }
+      return newState;
     }
     return state;
 
