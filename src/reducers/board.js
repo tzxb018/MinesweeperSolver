@@ -1,9 +1,9 @@
 import Immutable from 'immutable';
 
 import {
+  CASCADE,
   CHANGE_SIZE,
   CHANGE_SMILE,
-  CSP,
   PEEK,
   RESET_BOARD,
   REVEAL_CELL,
@@ -19,7 +19,7 @@ import {
   revealCell,
 } from './utils/cellUtils';
 import solveCSP from './csp/solve';
-import processCSP from './csp';
+import processCSP from './csp/index.js';
 
 // default state
 let cells = Immutable.List();
@@ -63,6 +63,24 @@ const initialState = Immutable.Map({
  */
 export default (state = initialState, action) => {
   switch (action.type) {
+
+  // solves and advances the csp model until it can't go any further
+  case CASCADE:
+    if (state.get('gameIsRunning')
+    && state.getIn(['csp', 'isConsistent'])
+    && state.getIn(['csp', 'solvable']).size > 0) {
+      let newState = state;
+      while (newState.get('gameIsRunning')
+      && newState.getIn(['csp', 'isConsistent'])
+      && newState.getIn(['csp', 'solvable']).size > 0) {
+        newState = solveCSP(newState);
+        newState = checkWinCondition(newState);
+        newState = processCSP(newState);
+      }
+      return newState;
+    }
+    return state;
+
   // changes the board size
   case CHANGE_SIZE:
     return changeSize(state, action.newSize);
@@ -70,10 +88,6 @@ export default (state = initialState, action) => {
   // changes the smile
   case CHANGE_SMILE:
     return state.set('smile', action.newSmile);
-
-  // performs CSP stuff
-  case CSP:
-    return processCSP(state);
 
   // reveals a random open cell
   case PEEK:
@@ -155,7 +169,7 @@ export default (state = initialState, action) => {
     }
     return state;
 
-  // solves all solvable cells
+  // solves the current csp model and advances it
   case STEP:
     if (state.get('gameIsRunning')
         && state.getIn(['csp', 'isConsistent'])

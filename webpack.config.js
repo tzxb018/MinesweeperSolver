@@ -19,7 +19,7 @@ module.exports = {
   devtool: 'source-map',
   resolve: {
     modules: ['src/', 'node_modules/'],
-    extensions: ['.js', '.jsx', '/index.jsx', '.json', '.scss', '/index.scss', '.css'],
+    extensions: ['.js', '.jsx', '/index.js', '/index.jsx', '.json', '.scss', '/index.scss', '.css'],
   },
   module: {
     rules: [

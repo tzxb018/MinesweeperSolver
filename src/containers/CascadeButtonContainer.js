@@ -1,19 +1,19 @@
 import { connect } from 'react-redux';
 
-import CSPButton from 'components/CSPButton';
-import { csp } from 'actions/boardActions';
+import CascadeButton from 'components/CascadeButton';
+import { cascade } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
   gameIsRunning: state.board.present.get('gameIsRunning'),
 });
 
 const mapDispatchToProps = dispatch => ({
-  csp: () => {
-    dispatch(csp());
+  cascade: () => {
+    dispatch(cascade());
   },
 });
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(CSPButton);
+)(CascadeButton);
