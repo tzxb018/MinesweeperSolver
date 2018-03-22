@@ -174,7 +174,6 @@ export default (state = initialState, action) => {
     if (state.get('gameIsRunning')
         && state.getIn(['csp', 'isConsistent'])
         && state.getIn(['csp', 'solvable']).size > 0) {
-      console.log('waddup');
       let newState = solveCSP(state);
       newState = checkWinCondition(newState);
       if (newState.get('gameIsRunning')) {
