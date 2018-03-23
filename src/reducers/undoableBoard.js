@@ -9,6 +9,7 @@ import {
 import board from './board';
 
 export default undoable(board, {
+  clearHistoryType: [CHANGE_SIZE, RESET_BOARD],
   filter: excludeAction(CHANGE_SMILE),
-  initTypes: [CHANGE_SIZE, RESET_BOARD],
+  neverSkipReducer: true,
 });
