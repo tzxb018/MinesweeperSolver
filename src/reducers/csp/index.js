@@ -18,8 +18,8 @@ const checkConsistency = state => state.withMutations(s => {
         }
       }
     }
+    s.setIn(['csp', 'isConsistent'], true);
   }
-  s.setIn(['csp', 'isConsistent'], true);
 
   // color any inconsistent constraints
   s.getIn(['csp', 'components']).forEach(component => {
@@ -67,7 +67,7 @@ export default state => state.withMutations(s => {
   s.update('csp', c => normalize(c));
 
   // separate variables and constraints into individual components
-  s.set('csp', separateComponents(s.get('csp')));
+  s.update('csp', c => separateComponents(c));
 
   // check for consistency
   return checkConsistency(s);

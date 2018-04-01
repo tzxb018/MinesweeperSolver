@@ -34,7 +34,7 @@ const enforceUnary = (unary, oldConstraints) => {
       const index = constraint[0].indexOf(solvable.key);
       if (index !== -1) {
         for (let j = 1; j < constraint.length; j++) {
-          if (constraint[j].alive && constraint[j][index] !== solvable.value) {
+          if (constraints[i][j].alive && constraint[j][index] !== solvable.value) {
             // kill a solution if it does not match the unary constraint
             constraints[i][j].alive = false;
             constraints[i].alive--;

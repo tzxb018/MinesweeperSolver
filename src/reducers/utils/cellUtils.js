@@ -66,6 +66,7 @@ const revealMines = cells => cells.withMutations(c => {
         c.setIn([row, col, 'hidden'], false);
       } else if (c.getIn([row, col, 'flagged'])) {
         c.setIn([row, col, 'mines'], -2);
+        c.setIn([row, col, 'hidden'], false);
       }
       c.setIn([row, col, 'component'], 0);
     }

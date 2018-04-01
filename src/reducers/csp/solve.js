@@ -8,11 +8,12 @@ import { revealCell } from '../utils/cellUtils';
 export default state => state.withMutations(s => {
   s.getIn(['csp', 'solvable']).forEach(cell => {
     // if the cell has a mine, flag it
-    if (cell.value) {
+    if (cell.value
+    && !s.getIn(['minefield', 'cells', cell.row, cell.col, 'flagged'])) {
       s.setIn(['minefield', 'cells', cell.row, cell.col, 'flagged'], true);
       s.updateIn(['minefield', 'numFlagged'], n => n + 1);
     // else, reveal it
-    } else {
+    } else if (s.getIn(['minefield', 'cells', cell.row, cell.col, 'hidden'])) {
       s.update('minefield', m => revealCell(m, cell.row, cell.col));
     }
     s.updateIn(['csp', 'solvable'], o => o.clear());

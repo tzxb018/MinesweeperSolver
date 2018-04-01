@@ -14,7 +14,7 @@ export default class Timer extends Component {
   state = {
     counter: 0,
     timer: null,
-  };
+  }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.gameIsRunning === true) {
