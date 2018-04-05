@@ -14,6 +14,9 @@ export default class Board extends Component {
     size: PropTypes.string.isRequired,
   }
 
+  background = () => {
+  }
+
   render() {
     return (
       <div className={styles[this.props.size]} >

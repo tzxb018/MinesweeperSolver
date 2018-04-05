@@ -1,6 +1,6 @@
 :local {
   .beginner {
-    bottom: 26px;
+    bottom: 30px;
     display: grid;
     grid-template-columns: repeat(9, 16px);
     grid-template-rows: repeat(9, 16px);
@@ -11,7 +11,7 @@
   }
 
   .intermediate {
-    bottom: 27px;
+    bottom: 31px;
     display: grid;
     grid-template-columns: repeat(16, 16px);
     grid-template-rows: repeat(16, 16px);
@@ -22,7 +22,7 @@
   }
 
   .expert {
-    bottom: 27px;
+    bottom: 31px;
     display: grid;
     grid-template-columns: repeat(30, 16px);
     grid-template-rows: repeat(16, 16px);

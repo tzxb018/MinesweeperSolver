@@ -16,30 +16,4 @@
     left: 236px;
     position: relative;
   }
-
-  .SMILE {
-    background: url('../../images/smile/smile.png');
-    height: 26px;
-    width: 26px;
-  }
-
-  .LOST {
-    @extend .SMILE;
-    background: url('../../images/smile/smile_lost.png');
-  }
-
-  .PRESSED {
-    @extend .SMILE;
-    background: url('../../images/smile/smile_clicked.png');
-  }
-
-  .SCARED {
-    @extend .SMILE;
-    background: url('../../images/smile/smile_scared.png');
-  }
-
-  .WON {
-    @extend .SMILE;
-    background: url('../../images/smile/smile_won.png');
-  }
 }

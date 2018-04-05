@@ -120,7 +120,7 @@ export default (state = initialState, action) => {
   // resets the board
   case RESET_BOARD:
     if (!state.get('hasMines')) {
-      return state;
+      return state.set('smile', 'SMILE');
     }
     return state.withMutations(s => {
       s.set('csp', Immutable.Map({

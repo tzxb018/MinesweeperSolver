@@ -164,7 +164,7 @@ export default class Cell extends Component {
 
   render() {
     if (this.props.hidden) {
-      if (this.props.component > 0) {
+      if (this.props.component > 0 && !this.props.flagged) {
         return this.componentCell();
       }
       return this.hiddenCell();
