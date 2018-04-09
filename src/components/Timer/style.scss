@@ -9,39 +9,17 @@
 }
 
 :local {
-  .beginner {
+  .container {
+    justify-self: right;
     background-color: black;
-    bottom: 44px;
     color: red;
     font-family: 'Pixel-LCD-7';
     font-size: 20pt;
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
     height: 26px;
-    left: 95px;
-    position: relative;
-    width: 56px;
-  }
-
-  .intermediate {
-    background-color: black;
-    bottom: 44px;
-    color: red;
-    font-family: 'Pixel-LCD-7';
-    font-size: 20pt;
-    height: 26px;
-    left: 207px;
-    position: relative;
-    width: 56px;
-  }
-
-  .expert {
-    background-color: black;
-    bottom: 44px;
-    color: red;
-    font-family: 'Pixel-LCD-7';
-    font-size: 20pt;
-    height: 26px;
-    left: 431px;
-    position: relative;
+    margin-right: 3px;
+    margin-top: 13px;
     width: 56px;
   }
 }

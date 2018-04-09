@@ -1,19 +1,10 @@
 :local {
-  .beginner {
-    bottom: 14px;
-    left: 68px;
-    position: relative;
-  }
-
-  .intermediate {
-    bottom: 14px;
-    left: 124px;
-    position: relative;
-  }
-
-  .expert {
-    bottom: 14px;
-    left: 236px;
-    position: relative;
+  .container {
+    align-self: center;
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    justify-self: center;
+    margin-right: 0px;
+    margin-top: 10px;
   }
 }

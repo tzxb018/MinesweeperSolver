@@ -1,28 +1,17 @@
 :local {
   .container {
+    display: grid;
     grid-column: 1 / 2;
     grid-row: 2 / 5;
+    grid-row-gap: 10px;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: 42px auto;
     justify-self: center;
   }
 
-  .beginner {
-    @extend .container;
-    background: url('../../images/9x9board.png');
-    height: 206px;
-    width: 164px;
-  }
-
-  .intermediate {
-    @extend .container;
-    background: url('../../images/16x16board.png');
-    height: 317px;
-    width: 276px;
-  }
-
-  .expert {
-    @extend .container;
-    background: url('../../images/16x30board.png');
-    height: 317px;
-    width: 500px;
+  .svg {
+    grid-row: 1 / 3;
+    position: absolute;
+    z-index: -1;
   }
 }
