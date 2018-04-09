@@ -7,6 +7,7 @@ export default class Cell extends Component {
     component: PropTypes.number.isRequired,
     flagged: PropTypes.bool.isRequired,
     hidden: PropTypes.bool.isRequired,
+    isPeeking: PropTypes.bool.isRequired,
     mines: PropTypes.number.isRequired,
     // dispatch props
     changeSmile: PropTypes.func.isRequired,
@@ -75,7 +76,7 @@ export default class Cell extends Component {
       fill = this.gray;
     }
     return (
-      <svg height="16" width="16" onContextMenu={this.rightClickHandler}>
+      <svg height="16" width="16" onClick={this.clickHandler} onContextMenu={this.rightClickHandler}>
         <polygon points="0,0 16,0 0,16" style={this.lightBorderGray} />
         <polygon points="16,16 0,16 16,0" style={this.darkBorderGray} />
         <polygon points="2,2, 2,14, 14,14 14,2" style={fill} />
@@ -164,7 +165,7 @@ export default class Cell extends Component {
 
   render() {
     if (this.props.hidden) {
-      if (this.props.component > 0 && !this.props.flagged) {
+      if (this.props.isPeeking && this.props.component > 0 && !this.props.flagged) {
         return this.componentCell();
       }
       return this.hiddenCell();

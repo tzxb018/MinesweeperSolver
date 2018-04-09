@@ -1,14 +1,15 @@
 import Immutable from 'immutable';
 
 import {
-  CASCADE,
   CHANGE_SIZE,
   CHANGE_SMILE,
   CHEAT,
+  LOOP,
   RESET_BOARD,
   REVEAL_CELL,
   STEP,
   TOGGLE_FLAG,
+  TOGGLE_PEEK,
 } from 'actions/boardActions';
 
 import {
@@ -45,6 +46,7 @@ const initialState = Immutable.Map({
   }),
   gameIsRunning: false,
   hasMines: false,
+  isPeeking: false,
   minefield: Immutable.Map({
     cells,
     numFlagged: 0,
@@ -63,23 +65,6 @@ const initialState = Immutable.Map({
  */
 export default (state = initialState, action) => {
   switch (action.type) {
-
-  // solves and advances the csp model until it can't go any further
-  case CASCADE:
-    if (state.get('gameIsRunning')
-    && state.getIn(['csp', 'isConsistent'])
-    && state.getIn(['csp', 'solvable']).size > 0) {
-      let newState = state;
-      while (newState.get('gameIsRunning')
-      && newState.getIn(['csp', 'isConsistent'])
-      && newState.getIn(['csp', 'solvable']).size > 0) {
-        newState = solveCSP(newState);
-        newState = checkWinCondition(newState);
-        newState = processCSP(newState);
-      }
-      return newState;
-    }
-    return state;
 
   // changes the board size
   case CHANGE_SIZE:
@@ -116,6 +101,27 @@ export default (state = initialState, action) => {
       return newState;
     }
     return state;
+
+  // solves and advances the csp model until it can't go any further
+  case LOOP:
+    if (state.get('gameIsRunning')
+    && state.getIn(['csp', 'isConsistent'])
+    && state.getIn(['csp', 'solvable']).size > 0) {
+      let newState = state;
+      while (newState.get('gameIsRunning')
+      && newState.getIn(['csp', 'isConsistent'])
+      && newState.getIn(['csp', 'solvable']).size > 0) {
+        newState = solveCSP(newState);
+        newState = checkWinCondition(newState);
+        newState = processCSP(newState);
+      }
+      return newState;
+    }
+    return state;
+
+  // toggles the peeking feature
+  case TOGGLE_PEEK:
+    return state.update('isPeeking', isPeeking => !isPeeking);
 
   // resets the board
   case RESET_BOARD:

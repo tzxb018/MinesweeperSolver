@@ -11,6 +11,7 @@ const mapStateToProps = (state, ownProps) => ({
   component: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'component']),
   flagged: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'flagged']),
   hidden: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'hidden']),
+  isPeeking: state.board.present.get('isPeeking'),
   mines: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'mines']),
   ...ownProps,
 });
