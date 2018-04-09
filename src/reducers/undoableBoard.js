@@ -2,8 +2,8 @@ import undoable, { excludeAction } from 'redux-undo';
 
 import {
   CHANGE_SIZE,
-  RESET_BOARD,
   CHANGE_SMILE,
+  RESET_BOARD,
  } from 'actions/boardActions';
 
 import board from './board';

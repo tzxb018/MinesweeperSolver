@@ -1,19 +1,19 @@
 import { connect } from 'react-redux';
 
-import PeekButton from 'components/PeekButton';
-import { peek } from 'actions/boardActions';
+import CheatButton from 'components/CheatButton';
+import { cheat } from 'actions/boardActions';
 
 const mapStateToProps = () => ({
 
 });
 
 const mapDispatchToProps = dispatch => ({
-  peek: () => {
-    dispatch(peek());
+  cheat: () => {
+    dispatch(cheat());
   },
 });
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(PeekButton);
+)(CheatButton);

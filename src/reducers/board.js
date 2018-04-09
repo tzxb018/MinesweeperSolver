@@ -4,7 +4,7 @@ import {
   CASCADE,
   CHANGE_SIZE,
   CHANGE_SMILE,
-  PEEK,
+  CHEAT,
   RESET_BOARD,
   REVEAL_CELL,
   STEP,
@@ -90,7 +90,7 @@ export default (state = initialState, action) => {
     return state.set('smile', action.newSmile);
 
   // reveals a random open cell
-  case PEEK:
+  case CHEAT:
     if (state.get('gameIsRunning') || !state.get('hasMines')) {
       const newState = state.withMutations(s => {
         let row = Math.floor(Math.random() * state.getIn(['minefield', 'cells']).size);

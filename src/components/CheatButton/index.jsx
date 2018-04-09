@@ -3,20 +3,20 @@ import React, { Component } from 'react';
 
 import styles from './style';
 
-export default class peekButton extends Component {
+export default class cheatButton extends Component {
   static propTypes = {
     // dispatch props
-    peek: PropTypes.func.isRequired,
+    cheat: PropTypes.func.isRequired,
   }
 
   clickHandler = () => {
-    this.props.peek();
+    this.props.cheat();
   }
 
   render() {
     return (
       <button className={styles['button']} onClick={this.clickHandler} >
-        Peek
+        Cheat
       </button>
     );
   }

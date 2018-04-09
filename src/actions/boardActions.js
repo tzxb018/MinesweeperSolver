@@ -1,7 +1,7 @@
 export const CASCADE = 'CASCADE';
 export const CHANGE_SIZE = 'CHANGE_SIZE';
 export const CHANGE_SMILE = 'CHANGE_SMILE';
-export const PEEK = 'PEEK';
+export const CHEAT = 'CHEAT';
 export const RESET_BOARD = 'RESET_BOARD';
 export const REVEAL_CELL = 'REVEAL_CELL';
 export const STEP = 'STEP';
@@ -21,8 +21,8 @@ export const changeSmile = newSmile => ({
   newSmile,
 });
 
-export const peek = () => ({
-  type: PEEK,
+export const cheat = () => ({
+  type: CHEAT,
 });
 
 export const resetBoard = () => ({

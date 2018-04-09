@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import BoardContainer from 'containers/BoardContainer';
 import CascadeButtonContainer from 'containers/CascadeButtonContainer';
-import PeekButtonContainer from 'containers/PeekButtonContainer';
+import CheatButtonContainer from 'containers/CheatButtonContainer';
 import SizeSelectorContainer from 'containers/SizeSelectorContainer';
 import StepButtonContainer from 'containers/StepButtonContainer';
 import UndoRedo from 'containers/UndoRedoContainer';
@@ -17,7 +17,7 @@ export default class App extends Component {
         <BoardContainer />
         <SizeSelectorContainer />
         <CascadeButtonContainer />
-        <PeekButtonContainer />
+        <CheatButtonContainer />
         <StepButtonContainer />
       </div>
     );
