@@ -1,12 +1,14 @@
+// import backbone from './backbone';
 import generateCSP from './generateCSP';
 import normalize from './normalize';
 import separateComponents from './separateComponents';
 import unaryConsistency from './unary';
 
 /**
- * Checks csp model for any inconsistencies. Any unsatisfied constraints are highlighted red on the board.
+ * Checks csp model for any inconsistencies. Any unsatisfied constraints are highlighted red on the board and solving is
+ * disabled to avoid errors.
  * @param state state of the board
- * @returns updated state
+ * @returns updated state with any inconsistencies highlighted red and any solving disabled
  */
 const checkConsistency = state => state.withMutations(s => {
   // remove previous inconsistency if there was any
@@ -36,16 +38,34 @@ const checkConsistency = state => state.withMutations(s => {
  * Color codes all cells that are solvable.
  * @param cells matrix of cell objects
  * @param csp state of the csp model
- * @param color cell color to make the solvable cells
  * @returns updated version of cells
  */
-const colorSolvable = (cells, csp, color) => cells.withMutations(c => {
-  // color the solvable cells
-  csp.get('solvable').forEach(solution => {
-    if (c.getIn([solution.row, solution.col, 'component']) === 0) {
-      c.setIn([solution.row, solution.col, 'component'], color);
-    }
-  });
+const colorSolvable = (cells, csp) => cells.withMutations(c => {
+  // get the sets of solvable cells
+  const solvableSets = csp.get('solvable');
+  if (solvableSets === undefined) {
+    return cells;
+  }
+
+  // unary are colored blue (1)
+  let set = solvableSets.get('unary');
+  if (set !== undefined) {
+    set.forEach(solvableCell => {
+      if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
+        c.setIn([solvableCell.row, solvableCell.col, 'component'], 1);
+      }
+    });
+  }
+  // backbone are colored darkGreen (2)
+  set = solvableSets.get('backbone');
+  if (set !== undefined) {
+    set.forEach(solvableCell => {
+      if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
+        c.setIn([solvableCell.row, solvableCell.col, 'component'], 2);
+      }
+    });
+  }
+  return c;
 });
 
 /**
@@ -57,17 +77,22 @@ const colorSolvable = (cells, csp, color) => cells.withMutations(c => {
  */
 export default state => state.withMutations(s => {
   // generate the csp model of the minefield
-  s.set('csp', generateCSP(s));
+  s.set('csp', generateCSP(s.getIn(['minefield', 'cells'])));
 
   // enforce unary consistency
   s.update('csp', c => unaryConsistency(c));
-  s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp'), 1));
 
   // normalize the constraints
   s.update('csp', c => normalize(c));
 
   // separate variables and constraints into individual components
   s.update('csp', c => separateComponents(c));
+  /* Backbone is shutdown until STR is completed.
+  // find the backbone
+  s.update('csp', c => backbone(c));
+  */
+  // color the solvable cells
+  s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp')));
 
   // check for consistency
   return checkConsistency(s);

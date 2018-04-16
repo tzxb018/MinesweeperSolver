@@ -60,11 +60,14 @@ export default csp => {
 
   // find and enforce unary consistency
   const unary = findUnary(constraints);
+  if (unary.length === 0) {
+    return csp;
+  }
   constraints = enforceUnary(unary, constraints);
 
   return csp.withMutations(c => {
     c.set('constraints', constraints);
-    c.update('solvable', list => list.push(...unary.map(obj => {
+    c.setIn(['solvable', 'unary'], unary.map(obj => {
       const variable = c.get('variables').find(element => element.key === obj.key);
       return {
         col: variable.col,
@@ -72,6 +75,6 @@ export default csp => {
         row: variable.row,
         value: obj.value,
       };
-    })));
+    }));
   });
 };

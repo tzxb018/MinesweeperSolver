@@ -1,3 +1,5 @@
+import Immutable from 'immutable';
+
 /**
  * Determines whether a cell is on the fringe.
  * @param cells matrix of cells
@@ -132,8 +134,8 @@ const generatePossibilities = (minesLeft, numVariables) => {
 };
 
 /**
- * Creates the constraint for a given cell.
- * @param variables list of variable objects
+ * Creates the constraint object representing the given cell.
+ * @param variables array of variable objects
  * @param row cell row
  * @param col cell col
  * @param numMines number of mines this constraint allows for
@@ -185,7 +187,7 @@ const buildConstraint = (variables, row, col, numMines) => {
 /**
  * Creates a variable for each fringe cell
  * @param cells matrix of cells
- * @returns list of variable objects
+ * @returns array of variable objects
  */
 const getVariables = cells => {
   const variables = [];
@@ -212,21 +214,26 @@ const getVariables = cells => {
 
 /**
  * Generates the variables and constraints that form the csp model of the minesweeper game.
- * @param state state of the board
- * @returns csp with constraints and variables added
+ * @param cells state of the board cell matrix
+ * @returns csp model with list of constraints and variables
  */
-export default state => state.get('csp').withMutations(csp => {
+export default cells => {
   // get the variables
-  csp.set('variables', getVariables(state.getIn(['minefield', 'cells'])));
+  const variables = getVariables(cells);
 
-  // get the constraints
+  // generate the constraints
   const constraints = [];
-  for (let row = 0; row < state.getIn(['minefield', 'cells']).size; row++) {
-    state.getIn(['minefield', 'cells', row]).forEach((cell, col) => {
-      if (!cell.get('hidden') && cell.get('mines') > 0) {
-        constraints.push(buildConstraint(csp.get('variables'), row, col, cell.get('mines')));
+  for (let row = 0; row < cells.size; row++) {
+    for (let col = 0; col < cells.get(0).size; col++) {
+      if (!cells.getIn([row, col, 'hidden'])
+      && cells.getIn([row, col, 'mines']) > 0) {
+        constraints.push(buildConstraint(variables, row, col, cells.getIn([row, col, 'mines'])));
       }
-    });
+    }
   }
-  csp.set('constraints', constraints);
-});
+
+  return Immutable.Map({
+    constraints,
+    variables,
+  });
+};
