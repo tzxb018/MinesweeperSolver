@@ -2,13 +2,15 @@ import undoable, { excludeAction } from 'redux-undo';
 
 import {
   CHANGE_SIZE,
-  RESET_BOARD,
   CHANGE_SMILE,
+  RESET_BOARD,
+  TOGGLE_PEEK,
  } from 'actions/boardActions';
 
 import board from './board';
 
 export default undoable(board, {
-  filter: excludeAction(CHANGE_SMILE),
-  initTypes: [CHANGE_SIZE, RESET_BOARD],
+  clearHistoryType: [CHANGE_SIZE, RESET_BOARD],
+  filter: excludeAction([CHANGE_SMILE, TOGGLE_PEEK]),
+  neverSkipReducer: true,
 });

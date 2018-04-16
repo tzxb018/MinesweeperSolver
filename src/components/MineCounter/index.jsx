@@ -7,7 +7,6 @@ export default class MineCounter extends Component {
   static propTypes = {
     // state props
     numMinesLeft: PropTypes.number.isRequired,
-    size: PropTypes.string.isRequired,
   }
 
   render() {
@@ -21,7 +20,7 @@ export default class MineCounter extends Component {
     }
     output += this.props.numMinesLeft.toString();
     return (
-      <div className={styles[this.props.size]}>
+      <div className={styles['container']}>
         {output}
       </div>
     );

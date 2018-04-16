@@ -17,19 +17,3 @@ export const check = (solution, constraint) => {
   return support;
 };
 
-/**
- * Checks if a variable takes on the same value for every possibility in a constraint
- * @param constraint matrix of possible solutions
- * @param index index of variable to be checked
- * @returns boolean
- */
-export const isConstant = (constraint, index) => {
-  let j = 1;
-  const value = constraint[1][index];
-  let unary = true;
-  while (j < constraint.length && unary) {
-    unary = constraint[j][index] === value;
-    j++;
-  }
-  return unary;
-};

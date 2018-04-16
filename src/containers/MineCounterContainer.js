@@ -4,7 +4,6 @@ import MineCounter from 'components/MineCounter';
 
 const mapStateToProps = state => ({
   numMinesLeft: state.board.present.get('numMines') - state.board.present.getIn(['minefield', 'numFlagged']),
-  size: state.board.present.get('size'),
 });
 
 const mapDispatchToProps = () => ({

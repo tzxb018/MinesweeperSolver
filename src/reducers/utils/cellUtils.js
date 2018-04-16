@@ -62,10 +62,19 @@ const placeNumbers = (cells, mines) => {
 const revealMines = cells => cells.withMutations(c => {
   for (let row = 0; row < c.size; row++) {
     for (let col = 0; col < c.get(0).size; col++) {
+      // if the cell has a mine
       if (c.getIn([row, col, 'mines']) === -1) {
-        c.setIn([row, col, 'hidden'], false);
+        // if the mine is already revealed, show it as an error
+        if (!c.getIn([row, col, 'hidden'])) {
+          c.setIn([row, col, 'mines'], -2);
+        // else reveal the mine
+        } else {
+          c.setIn([row, col, 'hidden'], false);
+        }
+      // else if the cell is flagged, show it as an error
       } else if (c.getIn([row, col, 'flagged'])) {
         c.setIn([row, col, 'mines'], -2);
+        c.setIn([row, col, 'hidden'], false);
       }
       c.setIn([row, col, 'component'], 0);
     }
@@ -189,43 +198,34 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
 });
 
 /**
- * Checks if the game has been lost and acts accordingly.
- * @param state state of the board
+ * Checks if the game has been lost.
+ * @param minefield state of the minefield
  * @param row row of revealed cell
  * @param col column of revealed cell
+ * @returns boolean
  */
-export const checkLossCondition = (state, row, col) => {
-  // if the revealed cell had a mine, lose the game
-  if (state.getIn(['minefield', 'cells', row, col, 'mines']) === -1) {
-    return state.withMutations(s => {
-      s.updateIn(['minefield', 'cells'], c => revealMines(c));
-      s.setIn(['minefield', 'cells', row, col, 'mines'], -2);
-      s.set('gameIsRunning', false);
-      s.set('smile', 'LOST');
-    });
-  }
-  return state;
-};
+export const checkLossCondition = (minefield, row, col) =>
+  minefield.getIn(['cells', row, col, 'mines']) === -1;
 
 /**
- * Checks if the game has been won and acts accordingly.
+ * Checks if the game has been won.
+ * @param minefield state of the minefield
+ * @param numMines number of mines
+ * @returns boolean
+ */
+export const checkWinCondition = (minefield, numMines) =>
+  minefield.get('numRevealed') === (minefield.get('cells').size * minefield.getIn(['cells', 0]).size) - numMines;
+
+/**
+ * Loses the game.
  * @param state state of the board
  * @returns new state
  */
-export const checkWinCondition = state => {
-  // if all the non-bomb cells are revealed, win the game
-  if (state.getIn(['minefield', 'numRevealed'])
-      === (state.getIn(['minefield', 'cells']).size * state.getIn(['minefield', 'cells', 0]).size)
-      - state.get('numMines')) {
-    return state.withMutations(s => {
-      s.updateIn(['minefield', 'cells'], c => flagMines(c));
-      s.setIn(['minefield', 'numFlagged'], s.get('numMines'));
-      s.set('gameIsRunning', false);
-      s.set('smile', 'WON');
-    });
-  }
-  return state;
-};
+export const loseGame = state => state.withMutations(s => {
+  s.updateIn(['minefield', 'cells'], c => revealMines(c));
+  s.set('gameIsRunning', false);
+  s.set('smile', 'LOST');
+});
 
 /**
  * Places mines randomly on the board, avoiding the given safe cell.
@@ -277,6 +277,17 @@ export const revealCell = (minefield, row, col) => minefield.withMutations(m => 
   if (m.getIn(['cells', row, col, 'mines']) === 0) {
     return revealNeighbors(m, row, col);
   }
-
   return m;
+});
+
+/**
+ * Wins the game.
+ * @param state
+ * @return new state
+ */
+export const winGame = state => state.withMutations(s => {
+  s.updateIn(['minefield', 'cells'], c => flagMines(c));
+  s.setIn(['minefield', 'numFlagged'], s.get('numMines'));
+  s.set('gameIsRunning', false);
+  s.set('smile', 'WON');
 });

@@ -31,7 +31,7 @@ export default csp => {
         constraints.slice().forEach(constraint => {
           if (constraint[0].includes(stack[0])) {
             constraint[0].forEach(key => {
-              if (!variables.find(element => element.key === key).visited && key !== stack[0]) {
+              if (!variables.find(element => element.key === key).visited && !stack.includes(key)) {
                 stack.push(key);
               }
             });

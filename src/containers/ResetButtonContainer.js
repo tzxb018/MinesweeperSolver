@@ -7,7 +7,6 @@ import {
 } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
-  size: state.board.present.get('size'),
   smile: state.board.present.get('smile'),
 });
 

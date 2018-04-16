@@ -1,15 +1,12 @@
-export const CASCADE = 'CASCADE';
 export const CHANGE_SIZE = 'CHANGE_SIZE';
 export const CHANGE_SMILE = 'CHANGE_SMILE';
-export const PEEK = 'PEEK';
+export const CHEAT = 'CHEAT';
+export const LOOP = 'LOOP';
 export const RESET_BOARD = 'RESET_BOARD';
 export const REVEAL_CELL = 'REVEAL_CELL';
 export const STEP = 'STEP';
 export const TOGGLE_FLAG = 'TOGGLE_FLAG';
-
-export const cascade = () => ({
-  type: CASCADE,
-});
+export const TOGGLE_PEEK = 'PEEK';
 
 export const changeSize = newSize => ({
   type: CHANGE_SIZE,
@@ -21,8 +18,16 @@ export const changeSmile = newSmile => ({
   newSmile,
 });
 
+export const cheat = () => ({
+  type: CHEAT,
+});
+
+export const loop = () => ({
+  type: LOOP,
+});
+
 export const peek = () => ({
-  type: PEEK,
+  type: TOGGLE_PEEK,
 });
 
 export const resetBoard = () => ({

@@ -8,13 +8,12 @@ export default class Timer extends Component {
     // state props
     gameIsRunning: PropTypes.bool.isRequired,
     hasMines: PropTypes.bool.isRequired,
-    size: PropTypes.string.isRequired,
   }
 
   state = {
     counter: 0,
     timer: null,
-  };
+  }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.gameIsRunning === true) {
@@ -46,7 +45,7 @@ export default class Timer extends Component {
     }
     output += this.state.counter.toString();
     return (
-      <div className={styles[this.props.size]}>
+      <div className={styles['container']}>
         {output}
       </div>
     );

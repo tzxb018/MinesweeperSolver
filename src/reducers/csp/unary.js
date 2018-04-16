@@ -34,7 +34,7 @@ const enforceUnary = (unary, oldConstraints) => {
       const index = constraint[0].indexOf(solvable.key);
       if (index !== -1) {
         for (let j = 1; j < constraint.length; j++) {
-          if (constraint[j].alive && constraint[j][index] !== solvable.value) {
+          if (constraints[i][j].alive && constraint[j][index] !== solvable.value) {
             // kill a solution if it does not match the unary constraint
             constraints[i][j].alive = false;
             constraints[i].alive--;
@@ -60,11 +60,14 @@ export default csp => {
 
   // find and enforce unary consistency
   const unary = findUnary(constraints);
+  if (unary.length === 0) {
+    return csp;
+  }
   constraints = enforceUnary(unary, constraints);
 
   return csp.withMutations(c => {
     c.set('constraints', constraints);
-    c.update('solvable', list => list.push(...unary.map(obj => {
+    c.setIn(['solvable', 'unary'], unary.map(obj => {
       const variable = c.get('variables').find(element => element.key === obj.key);
       return {
         col: variable.col,
@@ -72,6 +75,6 @@ export default csp => {
         row: variable.row,
         value: obj.value,
       };
-    })));
+    }));
   });
 };
