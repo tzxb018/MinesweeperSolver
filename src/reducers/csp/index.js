@@ -56,8 +56,9 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
       }
     });
   }
-  // backbone are colored darkGreen (2)
-  set = solvableSets.get('backbone');
+
+  // STR are colored darkGreen (2)
+  set = solvableSets.get('STR');
   if (set !== undefined) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
@@ -65,6 +66,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
       }
     });
   }
+
   return c;
 });
 
