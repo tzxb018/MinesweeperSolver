@@ -234,6 +234,8 @@ export default cells => {
 
   return Immutable.Map({
     constraints,
+    isConsistent: true,
+    solvable: Immutable.Map(),
     variables,
   });
 };

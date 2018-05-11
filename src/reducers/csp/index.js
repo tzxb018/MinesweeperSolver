@@ -2,6 +2,7 @@
 import generateCSP from './generateCSP';
 import normalize from './normalize';
 import separateComponents from './separateComponents';
+import STR from './STR.js';
 import unaryConsistency from './unary';
 
 /**
@@ -89,10 +90,10 @@ export default state => state.withMutations(s => {
 
   // separate variables and constraints into individual components
   s.update('csp', c => separateComponents(c));
-  /* Backbone is shutdown until STR is completed.
-  // find the backbone
-  s.update('csp', c => backbone(c));
-  */
+
+  // reduce the constraints with STR
+  s.update('csp', c => STR(c));
+
   // color the solvable cells
   s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp')));
 

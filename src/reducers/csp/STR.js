@@ -11,7 +11,7 @@ const getDomains = csp => {
       for (let i = 1; i < constraint.length; i++) {
         // for each alive tuple, add the solution values to the domain set
         if (constraint[i].alive) {
-          for (let j = 0; j < constraint[i].length; j++) {
+          for (let j = 0; j < constraint[0].length; j++) {
             const varKey = constraint[0][j];
             if (domains[varKey] === undefined) {
               domains[varKey] = new Set();
@@ -35,14 +35,12 @@ const getDomains = csp => {
 const revise = (constraint, domains) => {
   // set up the new domain map
   const newDomains = new Map();
-  constraint[0].forEach(varKey => {
-    newDomains.set(varKey, new Set());
-  });
+  constraint[0].forEach(varKey => newDomains.set(varKey, new Set()));
 
   for (let i = 1; i < constraint.length; i++) {
     // revise the alive tuples with the old domain sets
     if (constraint[i].alive) {
-      for (let j = 1; j < constraint[0].length; i++) {
+      for (let j = 0; j < constraint[0].length; j++) {
         if (!domains[constraint[0][j]].has(constraint[i][j])) {
           constraint[i].alive = false;
           constraint.alive--;
@@ -51,8 +49,8 @@ const revise = (constraint, domains) => {
       }
       // populate the new domain sets with the consistent tuples
       if (constraint[i].alive) {
-        for (let j = 1; j < constraint[0].length; i++) {
-          newDomains[constraint[0][j]].add(constraint[i][j]);
+        for (let j = 0; j < constraint[0].length; j++) {
+          newDomains.get(constraint[0][j]).add(constraint[i][j]);
         }
       }
     }
@@ -117,5 +115,7 @@ export default csp => csp.withMutations(c => {
   });
 
   // add all STR cells to the list solvable cells
-  c.setIn(['solvable', 'STR'], STR);
+  if (STR.length > 0) {
+    c.setIn(['solvable', 'STR'], STR);
+  }
 });
