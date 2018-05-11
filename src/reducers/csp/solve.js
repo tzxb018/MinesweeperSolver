@@ -15,10 +15,10 @@ export default state => state.withMutations(s => {
         s.setIn(['minefield', 'cells', cell.row, cell.col, 'flagged'], true);
         s.updateIn(['minefield', 'numFlagged'], n => n + 1);
       // else if it is not already revealed, reveal it
-      } else if (s.getIn(['minefield', 'cells', cell.row, cell.col, 'hidden'])) {
+      } else if (!cell.value && s.getIn(['minefield', 'cells', cell.row, cell.col, 'hidden'])) {
         s.update('minefield', m => revealCell(m, cell.row, cell.col));
       }
     });
-    s.updateIn(['csp', 'solvable'], o => o.clear());
   });
+  s.updateIn(['csp', 'solvable'], o => o.clear());
 });

@@ -2,6 +2,7 @@
 import generateCSP from './generateCSP';
 import normalize from './normalize';
 import separateComponents from './separateComponents';
+import STR from './STR.js';
 import unaryConsistency from './unary';
 
 /**
@@ -56,8 +57,9 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
       }
     });
   }
-  // backbone are colored darkGreen (2)
-  set = solvableSets.get('backbone');
+
+  // STR are colored darkGreen (2)
+  set = solvableSets.get('STR');
   if (set !== undefined) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
@@ -65,6 +67,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
       }
     });
   }
+
   return c;
 });
 
@@ -87,10 +90,10 @@ export default state => state.withMutations(s => {
 
   // separate variables and constraints into individual components
   s.update('csp', c => separateComponents(c));
-  /* Backbone is shutdown until STR is completed.
-  // find the backbone
-  s.update('csp', c => backbone(c));
-  */
+
+  // reduce the constraints with STR
+  s.update('csp', c => STR(c));
+
   // color the solvable cells
   s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp')));
 

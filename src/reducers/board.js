@@ -107,10 +107,10 @@ export default (state = initialState, action) => {
   case LOOP:
     if (state.get('gameIsRunning')
     && state.getIn(['csp', 'isConsistent'])
-    && state.getIn(['csp', 'solvable']) !== undefined) {
+    && state.getIn(['csp', 'solvable']).size > 0) {
       let newState = state;
       while (newState.getIn(['csp', 'isConsistent'])
-      && newState.getIn(['csp', 'solvable']) !== undefined) {
+      && newState.getIn(['csp', 'solvable']).size > 0) {
         newState = solveCSP(newState);
         if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
           return winGame(newState);
@@ -182,7 +182,7 @@ export default (state = initialState, action) => {
   case STEP:
     if (state.get('gameIsRunning')
     && state.getIn(['csp', 'isConsistent'])
-    && state.getIn(['csp', 'solvable']) !== undefined) {
+    && state.getIn(['csp', 'solvable']).size > 0) {
       const newState = solveCSP(state);
       if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
         return winGame(newState);
@@ -204,6 +204,7 @@ export default (state = initialState, action) => {
           s.updateIn(['minefield', 'numFlagged'], n => n - 1);
         }
       }
+      return processCSP(s);
     });
 
   default:
