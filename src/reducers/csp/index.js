@@ -12,17 +12,8 @@ import unaryConsistency from './unary';
  * @returns updated state with any inconsistencies highlighted red and any solving disabled
  */
 const checkConsistency = state => state.withMutations(s => {
-  // remove previous inconsistency if there was any
-  if (!s.getIn(['csp', 'isConsistent'])) {
-    for (let row = 0; row < s.getIn(['minefield', 'cells']).size; row++) {
-      for (let col = 0; col < s.getIn(['minefield', 'cells', 0]).size; col++) {
-        if (s.getIn(['minefield', 'cells', row, col, 'component']) === -1) {
-          s.setIn(['minefield', 'cells', row, col, 'component'], 0);
-        }
-      }
-    }
-    s.setIn(['csp', 'isConsistent'], true);
-  }
+  // remove previous inconsistency
+  s.setIn(['csp', 'isConsistent'], true);
 
   // color any inconsistent constraints
   s.getIn(['csp', 'components']).forEach(component => {
@@ -30,6 +21,8 @@ const checkConsistency = state => state.withMutations(s => {
       if (constraint.alive === 0) {
         s.setIn(['minefield', 'cells', constraint.row, constraint.col, 'component'], -1);
         s.setIn(['csp', 'isConsistent'], false);
+      } else {
+        s.setIn(['minefield', 'cells', constraint.row, constraint.col, 'component'], 0);
       }
     });
   });
@@ -42,6 +35,13 @@ const checkConsistency = state => state.withMutations(s => {
  * @returns updated version of cells
  */
 const colorSolvable = (cells, csp) => cells.withMutations(c => {
+  // clear previous coloring
+  csp.get('components').forEach(component => {
+    component.variables.forEach(variable => {
+      c.setIn([variable.row, variable.col, 'component'], 0);
+    });
+  });
+
   // get the sets of solvable cells
   const solvableSets = csp.get('solvable');
   if (solvableSets === undefined) {
@@ -52,9 +52,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   let set = solvableSets.get('unary');
   if (set !== undefined) {
     set.forEach(solvableCell => {
-      if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'component'], 1);
-      }
+      c.setIn([solvableCell.row, solvableCell.col, 'component'], 1);
     });
   }
 

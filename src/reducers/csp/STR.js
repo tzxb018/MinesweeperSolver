@@ -74,26 +74,34 @@ export default csp => csp.withMutations(c => {
     const queue = [];
     component.constraints.forEach(element => queue.push(element));
 
-    // continually check constraints until no more changes can be made
-    while (queue.length > 0) {
-      // revise the next constraint in the queue
-      const constraint = queue.shift();
-      const newDomains = revise(constraint, domains);
+    try {
+      // continually check constraints until no more changes can be made
+      while (queue.length > 0) {
+        // revise the next constraint in the queue
+        const constraint = queue.shift();
+        const newDomains = revise(constraint, domains);
 
-      newDomains.forEach((domainSet, varKey) => {
-        // if the new domain set is different, intersect the new and old domain sets
-        if (domains[varKey].size !== domainSet.size) {
-          domains[varKey] = new Set([...domains[varKey]].filter(x => domainSet.has(x)));
-          // add any constraints affected by this variable back to the queue
-          component.constraints.forEach(element => {
-            if (element !== constraint && element[0].includes(varKey) && !queue.includes(element)) {
-              queue.push(element);
-            }
-          });
-        }
-        // if the domain is inconsistent, break
-        if (domains[varKey].size === 0) {
-          throw new Error();
+        newDomains.forEach((domainSet, varKey) => {
+          // if the new domain set is different, intersect the new and old domain sets
+          if (domains[varKey].size !== domainSet.size) {
+            domains[varKey] = new Set([...domains[varKey]].filter(x => domainSet.has(x)));
+            // add any constraints affected by this variable back to the queue
+            component.constraints.forEach(element => {
+              if (element !== constraint && element[0].includes(varKey) && !queue.includes(element)) {
+                queue.push(element);
+              }
+            });
+          }
+          // if the domain is inconsistent, break
+          if (domains[varKey].size === 0) {
+            throw varKey;
+          }
+        });
+      }
+    } catch (error) {
+      component.constraints.forEach(element => {
+        if (element[0].includes(error)) {
+          element.alive = 0;
         }
       });
     }
