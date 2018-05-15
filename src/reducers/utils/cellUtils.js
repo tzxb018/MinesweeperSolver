@@ -194,6 +194,7 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
   s.set('size', newSize);
   s.set('gameIsRunning', false);
   s.set('hasMines', false);
+  s.update('historyLog', h => h.clear());
   s.set('smile', 'SMILE');
 });
 

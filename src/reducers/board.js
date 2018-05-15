@@ -48,6 +48,7 @@ const initialState = Immutable.Map({
   }),
   gameIsRunning: false,
   hasMines: false,
+  historyLog: Immutable.List(),
   isPeeking: false,
   minefield: Immutable.Map({
     cells,
@@ -94,7 +95,12 @@ export default (state = initialState, action) => {
             col = Math.floor(Math.random() * s.getIn(['minefield', 'cells', 0]).size);
           }
         }
+        // post the action to the history log
+        const oldNumRevealed = s.getIn(['minefield', 'numRevealed']);
         s.update('minefield', m => revealCell(m, row, col));
+        const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
+        const logString = `Cheat revealed ${numCellsRevealed} cell(s) at [${row}, ${col}]`;
+        s.update('historyLog', h => h.push(logString));
         if (checkWinCondition(s.get('minefield'), s.get('numMines'))) {
           return winGame(s);
         }
@@ -148,6 +154,7 @@ export default (state = initialState, action) => {
       }
       s.set('gameIsRunning', false);
       s.set('hasMines', false);
+      s.update('historyLog', h => h.clear());
       s.setIn(['minefield', 'numFlagged'], 0);
       s.setIn(['minefield', 'numRevealed'], 0);
       s.set('smile', 'SMILE');
@@ -163,7 +170,12 @@ export default (state = initialState, action) => {
           s.set('gameIsRunning', true);
           s.set('hasMines', true);
         }
+        // post the action to the history log
+        const oldNumRevealed = s.getIn(['minefield', 'numRevealed']);
         s.update('minefield', m => revealCell(m, action.row, action.col));
+        const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
+        const logString = `User revealed ${numCellsRevealed} cell(s) at [${action.row}, ${action.col}]`;
+        s.update('historyLog', h => h.push(logString));
         s.set('smile', 'SMILE');
         // check the end conditions
         if (checkWinCondition(s.get('minefield'), s.get('numMines'))) {
@@ -193,19 +205,24 @@ export default (state = initialState, action) => {
 
   // toggles the flag of the cell
   case TOGGLE_FLAG:
-    return state.withMutations(s => {
-      if (s.get('gameIsRunning') === true) {
+    if (state.get('gameIsRunning') === true) {
+      return state.withMutations(s => {
         if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged']) === false
             && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
           s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], true);
           s.updateIn(['minefield', 'numFlagged'], n => n + 1);
+          const logString = `User flagged cell at [${action.row}, ${action.col}]`;
+          s.update('historyLog', h => h.push(logString));
         } else if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged']) === true) {
           s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], false);
           s.updateIn(['minefield', 'numFlagged'], n => n - 1);
+          const logString = `User unflagged cell at [${action.row}, ${action.col}]`;
+          s.update('historyLog', h => h.push(logString));
         }
-      }
-      return processCSP(s);
-    });
+        return processCSP(s);
+      });
+    }
+    return state;
 
   default:
     return state;
