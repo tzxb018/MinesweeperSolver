@@ -67,7 +67,7 @@ export default csp => {
 
   return csp.withMutations(c => {
     c.set('constraints', constraints);
-    c.setIn(['solvable', 'unary'], unary.map(obj => {
+    c.setIn(['solvable', 'Unary'], unary.map(obj => {
       const variable = c.get('variables').find(element => element.key === obj.key);
       return {
         col: variable.col,

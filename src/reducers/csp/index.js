@@ -49,7 +49,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   }
 
   // unary are colored blue (1)
-  let set = solvableSets.get('unary');
+  let set = solvableSets.get('Unary');
   if (set !== undefined) {
     set.forEach(solvableCell => {
       c.setIn([solvableCell.row, solvableCell.col, 'component'], 1);

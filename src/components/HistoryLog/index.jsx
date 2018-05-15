@@ -13,7 +13,13 @@ export default class HistoryLog extends Component {
     ]).isRequired,
   }
 
-  formatter = () => this.props.historyLog.map(logString => <div>{logString}</div>);
+  formatter = () => {
+    let key = -1;
+    return this.props.historyLog.map(logString => {
+      key++;
+      return <div key={key}>{logString}</div>;
+    });
+  }
 
   render() {
     return (
