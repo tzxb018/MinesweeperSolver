@@ -13,6 +13,12 @@ export default class HistoryLog extends Component {
     ]).isRequired,
   }
 
+  // auto-scrolls the history log
+  componentDidUpdate() {
+    this.scrollBottom.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // formats each history log for display
   formatter = () => {
     let key = -1;
     return this.props.historyLog.map(logString => {
@@ -24,11 +30,8 @@ export default class HistoryLog extends Component {
   render() {
     return (
       <div className={styles['container']}>
-        <svg className={styles['border']} height="335" width="450">
-          <polygon points="0,0 450,0 448,2 2,2 2,333 0,335" style={{ fill: '#808080' }} />
-          <polygon points="450,355 450,0 448,2 448,333 2,333 0,335" style={{ fill: 'white' }} />
-        </svg>
         {this.formatter()}
+        <div style={{ float: 'left', clear: 'both' }} ref={(element) => { this.scrollBottom = element; }} />
       </div>
     );
   }
