@@ -184,7 +184,8 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
   }
   s.set('csp', Immutable.Map({
     constraints: [],
-    solvable: Immutable.List(),
+    isConsistent: true,
+    solvable: Immutable.Map(),
     variables: [],
   }));
   s.setIn(['minefield', 'cells'], cells);

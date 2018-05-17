@@ -139,7 +139,8 @@ export default (state = initialState, action) => {
     return state.withMutations(s => {
       s.set('csp', Immutable.Map({
         constraints: [],
-        solvable: Immutable.List(),
+        isConsistent: true,
+        solvable: Immutable.Map(),
         variables: [],
       }));
       for (let i = 0; i < s.getIn(['minefield', 'cells']).size; i++) {
