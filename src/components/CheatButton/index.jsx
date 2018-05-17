@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 import styles from './style';
 
-export default class cheatButton extends Component {
+export default class CheatButton extends Component {
   static propTypes = {
     // dispatch props
     cheat: PropTypes.func.isRequired,

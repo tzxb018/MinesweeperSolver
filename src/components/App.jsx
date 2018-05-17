@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import BoardContainer from 'containers/BoardContainer';
 import LoopButtonContainer from 'containers/LoopButtonContainer';
 import CheatButtonContainer from 'containers/CheatButtonContainer';
+import HistoryLogContainer from 'containers/HistoryLogContainer';
 import PeekButtonContainer from 'containers/PeekButtonContainer';
 import SizeSelectorContainer from 'containers/SizeSelectorContainer';
 import StepButtonContainer from 'containers/StepButtonContainer';
@@ -21,6 +22,7 @@ export default class App extends Component {
         <CheatButtonContainer />
         <StepButtonContainer />
         <PeekButtonContainer />
+        <HistoryLogContainer />
       </div>
     );
   }

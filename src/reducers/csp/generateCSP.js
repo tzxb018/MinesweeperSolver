@@ -1,5 +1,3 @@
-import Immutable from 'immutable';
-
 /**
  * Determines whether a cell is on the fringe.
  * @param cells matrix of cells
@@ -214,10 +212,11 @@ const getVariables = cells => {
 
 /**
  * Generates the variables and constraints that form the csp model of the minesweeper game.
+ * @param csp the old csp model
  * @param cells state of the board cell matrix
  * @returns csp model with list of constraints and variables
  */
-export default cells => {
+export default (csp, cells) => {
   // get the variables
   const variables = getVariables(cells);
 
@@ -232,10 +231,9 @@ export default cells => {
     }
   }
 
-  return Immutable.Map({
-    constraints,
-    isConsistent: true,
-    solvable: Immutable.Map(),
-    variables,
+  return csp.withMutations(c => {
+    c.set('constraints', constraints);
+    c.set('variables', variables);
+    c.delete('components');
   });
 };
