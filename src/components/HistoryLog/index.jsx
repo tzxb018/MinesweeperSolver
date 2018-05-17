@@ -17,13 +17,17 @@ export default class HistoryLog extends Component {
     let key = -1;
     return this.props.historyLog.map(logString => {
       key++;
-      return <div key={key}>{logString}</div>;
+      return <div className={styles['log']} key={key}>{logString}</div>;
     });
   }
 
   render() {
     return (
       <div className={styles['container']}>
+        <svg className={styles['border']} height="335" width="450">
+          <polygon points="0,0 450,0 448,2 2,2 2,333 0,335" style={{ fill: '#808080' }} />
+          <polygon points="450,355 450,0 448,2 448,333 2,333 0,335" style={{ fill: 'white' }} />
+        </svg>
         {this.formatter()}
       </div>
     );

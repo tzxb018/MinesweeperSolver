@@ -39,5 +39,5 @@ export default state => state.withMutations(s => {
   solvedCellCounter.forEach((counter, setKey) => {
     logString += `\n\t${setKey} found ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
   });
-  s.update('historyLog', h => h.push(logString));
+  s.update('historyLog', h => h.pop().push(logString));
 });
