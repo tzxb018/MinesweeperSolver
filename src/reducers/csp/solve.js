@@ -32,12 +32,15 @@ export default state => state.withMutations(s => {
     });
   });
   s.updateIn(['csp', 'solvable'], o => o.clear());
-  // log the action
+
+  // log the action if it did anything in addition to previous algorithms
   const numCellsFlagged = s.getIn(['minefield', 'numFlagged']) - oldNumFlagged;
   const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
   let logString = `Found ${numCellsFlagged} mine(s) and revealed ${numCellsRevealed} cell(s)`;
   solvedCellCounter.forEach((counter, setKey) => {
-    logString += `\n\t${setKey} found ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
+    if (counter.numFlagged + counter.numRevealed > 0) {
+      logString += `\n\t${setKey} found ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
+    }
   });
   s.update('historyLog', h => h.pop().push(logString));
 });

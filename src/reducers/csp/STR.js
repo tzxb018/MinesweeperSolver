@@ -1,12 +1,12 @@
 /**
  * Gets the basic viable domain of each variable.
- * @param csp: the csp model of the minefield
+ * @param components: the constraint model of the minefield
  * @returns array containing the domain set for each variable
  */
-const getDomains = csp => {
+const getDomains = components => {
   const domains = [];
 
-  csp.get('components').forEach(component => {
+  components.forEach(component => {
     component.constraints.forEach(constraint => {
       for (let i = 1; i < constraint.length; i++) {
         // for each alive tuple, add the solution values to the domain set
@@ -64,11 +64,12 @@ const revise = (constraint, domains) => {
  * generalized arc consistency (GAC) across all constraint tables. Any variables with a domain of only one value are
  * added to the list of solvable cells.
  * @param csp csp model of the minefield
+ * @returns csp with GAC and any solvable cells identified
  */
 export default csp => csp.withMutations(c => {
   const STR = [];
   // get the initial variable domains
-  const domains = getDomains(c);
+  const domains = getDomains(c.get('components'));
 
   c.get('components').forEach(component => {
     const queue = [];
@@ -122,7 +123,7 @@ export default csp => csp.withMutations(c => {
     });
   });
 
-  // add all STR cells to the list solvable cells
+  // add all STR cells to the list of solvable cells
   if (STR.length > 0) {
     c.setIn(['solvable', 'STR'], STR);
   }

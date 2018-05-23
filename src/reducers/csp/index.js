@@ -1,6 +1,6 @@
-// import backbone from './backbone';
 import generateCSP from './generateCSP';
 import normalize from './normalize';
+import PWC from './pairwise';
 import separateComponents from './separateComponents';
 import STR from './STR.js';
 import unaryConsistency from './unary';
@@ -51,7 +51,9 @@ const checkConsistency = state => state.withMutations(s => {
     });
     logString = `Found ${solvableCells.length} solvable cell(s)`;
     solvableCount.forEach((count, setKey) => {
-      logString += `\n\t${setKey} found ${count} new solvable cell(s)`;
+      if (count > 0) {
+        logString += `\n\t${setKey} found ${count} new solvable cell(s)`;
+      }
     });
   }
   s.update('historyLog', h => h.push(logString));
@@ -95,6 +97,16 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     });
   }
 
+  // PWC are colored darkRed (5)
+  set = solvableSets.get('PWC');
+  if (set !== undefined) {
+    set.forEach(solvableCell => {
+      if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
+        c.setIn([solvableCell.row, solvableCell.col, 'component'], 5);
+      }
+    });
+  }
+
   return c;
 });
 
@@ -120,6 +132,9 @@ export default state => state.withMutations(s => {
 
   // reduce the constraints with STR
   s.update('csp', c => STR(c));
+
+  // reduce the contstraints with PWC
+  s.update('csp', c => PWC(c));
 
   // color the solvable cells
   s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp')));
