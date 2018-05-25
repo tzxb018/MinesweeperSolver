@@ -223,5 +223,7 @@ export default csp => csp.withMutations(c => {
   // add all PWC cells to the list of solvable cells
   if (PWC.length > 0) {
     c.setIn(['solvable', 'PWC'], PWC);
+  } else {
+    c.deleteIn(['solvable', 'PWC']);
   }
 });

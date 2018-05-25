@@ -27,8 +27,7 @@ const findUnary = constraints => {
  * @param constraints list of constraint objects
  * @returns constraints with unary consistency
  */
-const enforceUnary = (unary, oldConstraints) => {
-  const constraints = oldConstraints.slice();
+const enforceUnary = (unary, constraints) => {
   unary.forEach(solvable => {
     constraints.forEach((constraint, i) => {
       const index = constraint[0].indexOf(solvable.key);
@@ -61,7 +60,7 @@ export default csp => {
   // find and enforce unary consistency
   const unary = findUnary(constraints);
   if (unary.length === 0) {
-    return csp;
+    return csp.deleteIn(['solvable', 'Unary']);
   }
   constraints = enforceUnary(unary, constraints);
 

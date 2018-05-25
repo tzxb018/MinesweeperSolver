@@ -42,6 +42,11 @@ for (let i = 0; i < 16; i++) {
 const initialState = Immutable.Map({
   csp: Immutable.Map({
     constraints: [],
+    isActive: Immutable.Map({
+      Unary: true,
+      STR: true,
+      PWC: true,
+    }),
     isConsistent: true,
     solvable: Immutable.Map(),
     variables: [],
@@ -137,12 +142,11 @@ export default (state = initialState, action) => {
       return state.set('smile', 'SMILE');
     }
     return state.withMutations(s => {
-      s.set('csp', Immutable.Map({
-        constraints: [],
-        isConsistent: true,
-        solvable: Immutable.Map(),
-        variables: [],
-      }));
+      s.deleteIn(['csp', 'components']);
+      s.setIn(['csp', 'constraints'], []);
+      s.setIn(['csp', 'isConsistent'], true);
+      s.setIn(['csp', 'variables'], []);
+      s.updateIn(['csp', 'solvable'], o => o.clear());
       for (let i = 0; i < s.getIn(['minefield', 'cells']).size; i++) {
         for (let j = 0; j < s.getIn(['minefield', 'cells', 0]).size; j++) {
           s.setIn(['minefield', 'cells', i, j], Immutable.Map({

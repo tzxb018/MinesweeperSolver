@@ -182,12 +182,11 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
     }
     cells = cells.push(row);
   }
-  s.set('csp', Immutable.Map({
-    constraints: [],
-    isConsistent: true,
-    solvable: Immutable.Map(),
-    variables: [],
-  }));
+  s.deleteIn(['csp', 'components']);
+  s.setIn(['csp', 'constraints'], []);
+  s.setIn(['csp', 'isConsistent'], true);
+  s.setIn(['csp', 'variables'], []);
+  s.updateIn(['csp', 'solvable'], o => o.clear());
   s.setIn(['minefield', 'cells'], cells);
   s.setIn(['minefield', 'numFlagged'], 0);
   s.setIn(['minefield', 'numRevealed'], 0);

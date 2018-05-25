@@ -122,7 +122,9 @@ export default state => state.withMutations(s => {
   s.update('csp', c => generateCSP(c, s.getIn(['minefield', 'cells'])));
 
   // enforce unary consistency
-  s.update('csp', c => unaryConsistency(c));
+  if (s.getIn(['csp', 'isActive', 'Unary'])) {
+    s.update('csp', c => unaryConsistency(c));
+  }
 
   // normalize the constraints
   s.update('csp', c => normalize(c));
@@ -131,10 +133,14 @@ export default state => state.withMutations(s => {
   s.update('csp', c => separateComponents(c));
 
   // reduce the constraints with STR
-  s.update('csp', c => STR(c));
+  if (s.getIn(['csp', 'isActive', 'STR'])) {
+    s.update('csp', c => STR(c));
+  }
 
   // reduce the contstraints with PWC
-  s.update('csp', c => PWC(c));
+  if (s.getIn(['csp', 'isActive', 'PWC'])) {
+    s.update('csp', c => PWC(c));
+  }
 
   // color the solvable cells
   s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp')));
