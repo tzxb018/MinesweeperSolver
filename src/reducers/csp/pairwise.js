@@ -7,12 +7,12 @@
 const findKey = (map, pair) => {
   let key;
   const keys = Array.from(map.keys());
-  for (let i = 0; i < keys.length; i++) {
-    if (pair[0] === keys[i][0] && pair[1] === keys[i][1]) {
-      key = keys[i];
-      break;
+  keys.some(element => {
+    if (pair[0] === element[0] && pair[1] === element[1]) {
+      key = element;
     }
-  }
+    return key !== undefined;
+  });
   return key;
 };
 
@@ -196,9 +196,9 @@ export default csp => csp.withMutations(c => {
       if (pairDomain.length === 1) {
         var1 = component.variables.find(element => element.key === varPair[0]);
         var2 = component.variables.find(element => element.key === varPair[1]);
-      } else if (pairDomain.every(solution => solution[0] === pairDomain[0][0])) {
+      } else if (pairDomain.length > 0 && pairDomain.every(solution => solution[0] === pairDomain[0][0])) {
         var1 = component.variables.find(element => element.key === varPair[0]);
-      } else if (pairDomain.every(solution => solution[1] === pairDomain[0][1])) {
+      } else if (pairDomain.length > 0 && pairDomain.every(solution => solution[1] === pairDomain[0][1])) {
         var2 = component.variables.find(element => element.key === varPair[1]);
       }
       if (var1 !== undefined) {
