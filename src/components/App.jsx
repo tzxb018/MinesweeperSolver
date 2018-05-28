@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 
-import BoardContainer from 'containers/BoardContainer';
-import LoopButtonContainer from 'containers/LoopButtonContainer';
-import CheatButtonContainer from 'containers/CheatButtonContainer';
-import HistoryLogContainer from 'containers/HistoryLogContainer';
-import PeekButtonContainer from 'containers/PeekButtonContainer';
-import SizeSelectorContainer from 'containers/SizeSelectorContainer';
-import StepButtonContainer from 'containers/StepButtonContainer';
+import Board from 'containers/BoardContainer';
+import LoopButton from 'containers/LoopButtonContainer';
+import CheatButton from 'containers/CheatButtonContainer';
+import ColorCodedKey from 'containers/ColorCodedKeyContainer';
+import HistoryLog from 'containers/HistoryLogContainer';
+import PeekButton from 'containers/PeekButtonContainer';
+import SizeSelector from 'containers/SizeSelectorContainer';
+import StepButton from 'containers/StepButtonContainer';
 import UndoRedo from 'containers/UndoRedoContainer';
 
 import styles from './style';
@@ -16,13 +17,14 @@ export default class App extends Component {
     return (
       <div className={styles['container']}>
         <UndoRedo />
-        <BoardContainer />
-        <SizeSelectorContainer />
-        <LoopButtonContainer />
-        <CheatButtonContainer />
-        <StepButtonContainer />
-        <PeekButtonContainer />
-        <HistoryLogContainer />
+        <Board />
+        <SizeSelector />
+        <LoopButton />
+        <CheatButton />
+        <StepButton />
+        <PeekButton />
+        <ColorCodedKey />
+        <HistoryLog />
       </div>
     );
   }

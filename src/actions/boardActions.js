@@ -5,6 +5,7 @@ export const LOOP = 'LOOP';
 export const RESET_BOARD = 'RESET_BOARD';
 export const REVEAL_CELL = 'REVEAL_CELL';
 export const STEP = 'STEP';
+export const TOGGLE_ACTIVE = 'TOGGLE_ACTIVE';
 export const TOGGLE_FLAG = 'TOGGLE_FLAG';
 export const TOGGLE_PEEK = 'PEEK';
 
@@ -42,6 +43,11 @@ export const revealCell = (row, col) => ({
 
 export const step = () => ({
   type: STEP,
+});
+
+export const toggleActive = name => ({
+  type: TOGGLE_ACTIVE,
+  name,
 });
 
 export const toggleFlag = (row, col) => ({

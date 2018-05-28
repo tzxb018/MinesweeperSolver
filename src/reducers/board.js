@@ -8,6 +8,7 @@ import {
   RESET_BOARD,
   REVEAL_CELL,
   STEP,
+  TOGGLE_ACTIVE,
   TOGGLE_FLAG,
   TOGGLE_PEEK,
 } from 'actions/boardActions';
@@ -210,15 +211,15 @@ export default (state = initialState, action) => {
 
   // toggles the flag of the cell
   case TOGGLE_FLAG:
-    if (state.get('gameIsRunning') === true) {
+    if (state.get('gameIsRunning')) {
       return state.withMutations(s => {
-        if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged']) === false
+        if (!s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])
             && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
           s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], true);
           s.updateIn(['minefield', 'numFlagged'], n => n + 1);
           const logString = `User flagged cell at [${action.row}, ${action.col}]`;
           s.update('historyLog', h => h.push(logString));
-        } else if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged']) === true) {
+        } else if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])) {
           s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], false);
           s.updateIn(['minefield', 'numFlagged'], n => n - 1);
           const logString = `User unflagged cell at [${action.row}, ${action.col}]`;
@@ -229,6 +230,27 @@ export default (state = initialState, action) => {
     }
     return state;
 
+  // toggles the active algorithms
+  case TOGGLE_ACTIVE:
+    return state.withMutations(s => {
+      switch (action.name) {
+      case 'Unary':
+        s.updateIn(['csp', 'isActive', 'Unary'], a => !a);
+        break;
+      case 'STR':
+        s.updateIn(['csp', 'isActive', 'STR'], a => !a);
+        break;
+      case 'PWC':
+        s.updateIn(['csp', 'isActive', 'PWC'], a => !a);
+        break;
+      default:
+      }
+      if (s.get('gameIsRunning')) {
+        s.update('historyLog', h => h.pop());
+        return processCSP(s);
+      }
+      return s;
+    });
   default:
     return state;
   }

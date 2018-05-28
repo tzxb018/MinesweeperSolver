@@ -124,6 +124,8 @@ export default state => state.withMutations(s => {
   // enforce unary consistency
   if (s.getIn(['csp', 'isActive', 'Unary'])) {
     s.update('csp', c => unaryConsistency(c));
+  } else {
+    s.deleteIn(['csp', 'solvable', 'Unary']);
   }
 
   // normalize the constraints
@@ -135,11 +137,15 @@ export default state => state.withMutations(s => {
   // reduce the constraints with STR
   if (s.getIn(['csp', 'isActive', 'STR'])) {
     s.update('csp', c => STR(c));
+  } else {
+    s.deleteIn(['csp', 'solvable', 'STR']);
   }
 
   // reduce the contstraints with PWC
   if (s.getIn(['csp', 'isActive', 'PWC'])) {
     s.update('csp', c => PWC(c));
+  } else {
+    s.deleteIn(['csp', 'solvable', 'PWC']);
   }
 
   // color the solvable cells
