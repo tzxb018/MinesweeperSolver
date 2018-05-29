@@ -1,7 +1,11 @@
-import { revealCell } from '../utils/cellUtils';
+import {
+  checkLossCondition,
+  loseGame,
+  revealCell,
+} from '../utils/cellUtils';
 
 /**
- * Solves all cells found to be solvable
+ * Solves all cells found to be solvable, losing the game if a cell that had a mine was incorrectly revealed.
  * @param state state of board
  * @return updated state
  */
@@ -10,6 +14,7 @@ export default state => state.withMutations(s => {
   const solvedCellCounter = new Map();
   const oldNumFlagged = s.getIn(['minefield', 'numFlagged']);
   const oldNumRevealed = s.getIn(['minefield', 'numRevealed']);
+  let lostGame = false;
   s.getIn(['csp', 'solvable']).forEach((solvableSet, setKey) => {
     const numRevealed = s.getIn(['minefield', 'numRevealed']);
     let numFlagged = 0;
@@ -24,6 +29,9 @@ export default state => state.withMutations(s => {
       // else if it is not already revealed, reveal it
       } else if (!cell.value && s.getIn(['minefield', 'cells', cell.row, cell.col, 'hidden'])) {
         s.update('minefield', m => revealCell(m, cell.row, cell.col));
+        if (checkLossCondition(s.get('minefield'), cell.row, cell.col)) {
+          lostGame = true;
+        }
       }
     });
     solvedCellCounter.set(setKey, {
@@ -32,6 +40,10 @@ export default state => state.withMutations(s => {
     });
   });
   s.updateIn(['csp', 'solvable'], o => o.clear());
+  // if a mine was revealed, lose the game
+  if (lostGame) {
+    return loseGame(s);
+  }
 
   // log the action if it did anything in addition to previous algorithms
   const numCellsFlagged = s.getIn(['minefield', 'numFlagged']) - oldNumFlagged;
@@ -43,4 +55,5 @@ export default state => state.withMutations(s => {
     }
   });
   s.update('historyLog', h => h.pop().push(logString));
+  return s;
 });

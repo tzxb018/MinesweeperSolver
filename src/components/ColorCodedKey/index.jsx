@@ -15,10 +15,41 @@ export default class ColorCodedKey extends Component {
     this.props.toggleActive(e.target.value);
   }
 
+  colorCodedIcon = color => {
+    let fill;
+    switch (color) {
+    case 'blue':
+      fill = { fill: 'blue' };
+      break;
+    case 'darkGreen':
+      fill = { fill: 'rgb(0, 128, 0)' };
+      break;
+    case 'darkBlue':
+      fill = { fill: 'rgb(0, 0, 128)' };
+      break;
+    case 'darkRed':
+      fill = { fill: 'rgb(128, 0, 0)' };
+      break;
+    case 'darkCyan':
+      fill = { fill: 'rgb(0, 128, 128)' };
+      break;
+    default:
+      fill = { fill: 'rgb(192, 192, 192)' };
+    }
+    return (
+      <svg height="16" width="16">
+        <polygon points="0,0 16,0 0,16" style={{ fill: 'white' }} />
+        <polygon points="16,16 0,16 16,0" style={{ fill: 'rgb(128, 128, 128)' }} />
+        <polygon points="2,2 2,14 14,14 14,2" style={fill} />
+      </svg>
+    );
+  }
+
   render() {
     return (
       <div>
         <div>
+          {this.colorCodedIcon('blue')}
           <input type="checkbox"
             id="Unary"
             value="Unary"
@@ -28,6 +59,7 @@ export default class ColorCodedKey extends Component {
           <label htmlFor="Unary">Unary</label>
         </div>
         <div>
+          {this.colorCodedIcon('darkGreen')}
           <input type="checkbox"
             id="STR"
             value="STR"
@@ -37,6 +69,7 @@ export default class ColorCodedKey extends Component {
           <label htmlFor="STR">STR</label>
         </div>
         <div>
+          {this.colorCodedIcon('darkBlue')}
           <input type="checkbox"
             id="PWC"
             value="PWC"

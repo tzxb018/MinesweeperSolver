@@ -70,6 +70,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   csp.get('components').forEach(component => {
     component.variables.forEach(variable => {
       c.setIn([variable.row, variable.col, 'component'], 0);
+      c.deleteIn([variable.row, variable.col, 'solution']);
     });
   });
 
@@ -84,6 +85,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   if (set !== undefined) {
     set.forEach(solvableCell => {
       c.setIn([solvableCell.row, solvableCell.col, 'component'], 1);
+      c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
     });
   }
 
@@ -93,16 +95,18 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
         c.setIn([solvableCell.row, solvableCell.col, 'component'], 2);
+        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
       }
     });
   }
 
-  // PWC are colored darkRed (5)
+  // PWC are colored darkBlue (4)
   set = solvableSets.get('PWC');
   if (set !== undefined) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'component'], 5);
+        c.setIn([solvableCell.row, solvableCell.col, 'component'], 4);
+        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
       }
     });
   }

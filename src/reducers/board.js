@@ -124,6 +124,10 @@ export default (state = initialState, action) => {
       while (newState.getIn(['csp', 'isConsistent'])
       && newState.getIn(['csp', 'solvable']).size > 0) {
         newState = solveCSP(newState);
+        // check ending conditions
+        if (!newState.get('gameIsRunning')) {
+          return newState;
+        }
         if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
           return winGame(newState);
         }
@@ -184,11 +188,11 @@ export default (state = initialState, action) => {
         s.update('historyLog', h => h.push(logString));
         s.set('smile', 'SMILE');
         // check the end conditions
-        if (checkWinCondition(s.get('minefield'), s.get('numMines'))) {
-          return winGame(s);
-        }
         if (checkLossCondition(s.get('minefield'), action.row, action.col)) {
           return loseGame(s);
+        }
+        if (checkWinCondition(s.get('minefield'), s.get('numMines'))) {
+          return winGame(s);
         }
         // set the new csp model
         return processCSP(s);
@@ -202,6 +206,10 @@ export default (state = initialState, action) => {
     && state.getIn(['csp', 'isConsistent'])
     && state.getIn(['csp', 'solvable']).size > 0) {
       const newState = solveCSP(state);
+      // check ending conditions
+      if (!newState.get('gameIsRunning')) {
+        return newState;
+      }
       if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
         return winGame(newState);
       }
