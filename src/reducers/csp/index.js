@@ -15,7 +15,6 @@ const checkConsistency = state => state.withMutations(s => {
   // remove previous inconsistency
   if (!s.getIn(['csp', 'isConsistent'])) {
     s.setIn(['csp', 'isConsistent'], true);
-    s.update('historyLog', h => h.set(-2, h.last()).pop());
   }
 
   // color any inconsistent constraints

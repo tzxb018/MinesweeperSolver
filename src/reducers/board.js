@@ -106,7 +106,7 @@ export default (state = initialState, action) => {
         s.update('minefield', m => revealCell(m, row, col));
         const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
         const logString = `Cheat revealed ${numCellsRevealed} cell(s) at [${row}, ${col}]`;
-        s.update('historyLog', h => h.push(logString));
+        s.update('historyLog', h => h.pop().push(logString));
         if (checkWinCondition(s.get('minefield'), s.get('numMines'))) {
           return winGame(s);
         }
@@ -185,7 +185,7 @@ export default (state = initialState, action) => {
         s.update('minefield', m => revealCell(m, action.row, action.col));
         const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
         const logString = `User revealed ${numCellsRevealed} cell(s) at [${action.row}, ${action.col}]`;
-        s.update('historyLog', h => h.push(logString));
+        s.update('historyLog', h => h.pop().push(logString));
         s.set('smile', 'SMILE');
         // check the end conditions
         if (checkLossCondition(s.get('minefield'), action.row, action.col)) {
@@ -221,18 +221,18 @@ export default (state = initialState, action) => {
   case TOGGLE_FLAG:
     if (state.get('gameIsRunning')) {
       return state.withMutations(s => {
+        let logString;
         if (!s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])
-            && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
+        && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
           s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], true);
           s.updateIn(['minefield', 'numFlagged'], n => n + 1);
-          const logString = `User flagged cell at [${action.row}, ${action.col}]`;
-          s.update('historyLog', h => h.push(logString));
+          logString = `User flagged cell at [${action.row}, ${action.col}]`;
         } else if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])) {
           s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], false);
           s.updateIn(['minefield', 'numFlagged'], n => n - 1);
-          const logString = `User unflagged cell at [${action.row}, ${action.col}]`;
-          s.update('historyLog', h => h.push(logString));
+          logString = `User unflagged cell at [${action.row}, ${action.col}]`;
         }
+        s.update('historyLog', h => h.pop().push(logString));
         return processCSP(s);
       });
     }
