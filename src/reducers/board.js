@@ -115,25 +115,32 @@ export default (state = initialState, action) => {
     }
     return state;
 
-  // solves and advances the csp model until it can't go any further
+  // solves and advances the csp model until it can't go any further or the game ends
   case LOOP:
     if (state.get('gameIsRunning')
     && state.getIn(['csp', 'isConsistent'])
     && state.getIn(['csp', 'solvable']).size > 0) {
-      let newState = state;
+      let newState = state.setIn(['csp', 'count'], new Map());
       while (newState.getIn(['csp', 'isConsistent'])
       && newState.getIn(['csp', 'solvable']).size > 0) {
-        newState = solveCSP(newState);
+        newState = solveCSP(newState, false);
         // check ending conditions
         if (!newState.get('gameIsRunning')) {
           return newState;
         }
-        if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
-          return winGame(newState);
-        }
         newState = processCSP(newState);
       }
-      return newState;
+      const numFlagged = newState.getIn(['minefield', 'numFlagged']) - state.getIn(['minefield', 'numFlagged']);
+      const numRevealed = newState.getIn(['minefield', 'numRevealed']) - state.getIn(['minefield', 'numRevealed']);
+      let logString = `Flagged ${numFlagged} mine(s) and revealed ${numRevealed} cell(s)`;
+      newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
+        logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
+      });
+      newState = newState.update('historyLog', h => h.pop().push(logString));
+      if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
+        return winGame(newState);
+      }
+      return processCSP(newState);
     }
     return state;
 
@@ -205,7 +212,7 @@ export default (state = initialState, action) => {
     if (state.get('gameIsRunning')
     && state.getIn(['csp', 'isConsistent'])
     && state.getIn(['csp', 'solvable']).size > 0) {
-      const newState = solveCSP(state);
+      const newState = solveCSP(state, true);
       // check ending conditions
       if (!newState.get('gameIsRunning')) {
         return newState;

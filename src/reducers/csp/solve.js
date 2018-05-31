@@ -7,9 +7,10 @@ import {
 /**
  * Solves all cells found to be solvable, losing the game if a cell that had a mine was incorrectly revealed.
  * @param state state of board
+ * @param doLog true if the solve should be logged, false if it should be recorded instead of logged
  * @return updated state
  */
-export default state => state.withMutations(s => {
+export default (state, doLog) => state.withMutations(s => {
   // solve each cell, keeping track of which algorithm it was found by
   const solvedCellCounter = new Map();
   const oldNumFlagged = s.getIn(['minefield', 'numFlagged']);
@@ -45,15 +46,31 @@ export default state => state.withMutations(s => {
     return loseGame(s);
   }
 
-  // log the action if it did anything in addition to previous algorithms
-  const numCellsFlagged = s.getIn(['minefield', 'numFlagged']) - oldNumFlagged;
-  const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
-  let logString = `Flagged ${numCellsFlagged} mine(s) and revealed ${numCellsRevealed} cell(s)`;
-  solvedCellCounter.forEach((counter, setKey) => {
-    if (counter.numFlagged + counter.numRevealed > 0) {
-      logString += `\n\t${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
-    }
-  });
-  s.update('historyLog', h => h.pop().push(logString));
+  // log the action if doLog and it did anything in addition to previous algorithms
+  s.update('historyLog', h => h.pop());
+  if (doLog) {
+    const numCellsFlagged = s.getIn(['minefield', 'numFlagged']) - oldNumFlagged;
+    const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
+    let logString = `Flagged ${numCellsFlagged} mine(s) and revealed ${numCellsRevealed} cell(s)`;
+    solvedCellCounter.forEach((counter, setKey) => {
+      if (counter.numFlagged + counter.numRevealed > 0) {
+        logString += `\n\t${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
+      }
+    });
+    s.update('historyLog', h => h.push(logString));
+  } else {
+    solvedCellCounter.forEach((counter, setKey) => {
+      if (counter.numFlagged + counter.numRevealed > 0) {
+        if (!s.getIn(['csp', 'count']).has(setKey)) {
+          s.getIn(['csp', 'count']).set(setKey, {
+            numFlagged: 0,
+            numRevealed: 0,
+          });
+        }
+        s.getIn(['csp', 'count']).get(setKey).numFlagged += counter.numFlagged;
+        s.getIn(['csp', 'count']).get(setKey).numRevealed += counter.numRevealed;
+      }
+    });
+  }
   return s;
 });
