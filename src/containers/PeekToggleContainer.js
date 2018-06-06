@@ -1,10 +1,10 @@
 import { connect } from 'react-redux';
 
-import PeekButton from 'components/PeekButton';
+import PeekToggle from 'components/PeekToggle';
 import { peek } from 'actions/boardActions';
 
-const mapStateToProps = () => ({
-
+const mapStateToProps = state => ({
+  isPeeking: state.board.present.get('isPeeking'),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -16,4 +16,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(PeekButton);
+)(PeekToggle);

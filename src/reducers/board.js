@@ -8,6 +8,7 @@ import {
   RESET_BOARD,
   REVEAL_CELL,
   STEP,
+  TOGGLE_ACTIVE,
   TOGGLE_FLAG,
   TOGGLE_PEEK,
 } from 'actions/boardActions';
@@ -42,6 +43,11 @@ for (let i = 0; i < 16; i++) {
 const initialState = Immutable.Map({
   csp: Immutable.Map({
     constraints: [],
+    isActive: Immutable.Map({
+      Unary: true,
+      STR: true,
+      PWC: true,
+    }),
     isConsistent: true,
     solvable: Immutable.Map(),
     variables: [],
@@ -100,7 +106,7 @@ export default (state = initialState, action) => {
         s.update('minefield', m => revealCell(m, row, col));
         const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
         const logString = `Cheat revealed ${numCellsRevealed} cell(s) at [${row}, ${col}]`;
-        s.update('historyLog', h => h.push(logString));
+        s.update('historyLog', h => h.pop().push(logString));
         if (checkWinCondition(s.get('minefield'), s.get('numMines'))) {
           return winGame(s);
         }
@@ -109,27 +115,34 @@ export default (state = initialState, action) => {
     }
     return state;
 
-  // solves and advances the csp model until it can't go any further
+  // solves and advances the csp model until it can't go any further or the game ends
   case LOOP:
     if (state.get('gameIsRunning')
     && state.getIn(['csp', 'isConsistent'])
     && state.getIn(['csp', 'solvable']).size > 0) {
-      let newState = state;
+      let newState = state.setIn(['csp', 'count'], new Map());
       while (newState.getIn(['csp', 'isConsistent'])
       && newState.getIn(['csp', 'solvable']).size > 0) {
-        newState = solveCSP(newState);
-        if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
-          return winGame(newState);
+        newState = solveCSP(newState, false);
+        // check ending conditions
+        if (!newState.get('gameIsRunning')) {
+          return newState;
         }
         newState = processCSP(newState);
       }
-      return newState;
+      const numFlagged = newState.getIn(['minefield', 'numFlagged']) - state.getIn(['minefield', 'numFlagged']);
+      const numRevealed = newState.getIn(['minefield', 'numRevealed']) - state.getIn(['minefield', 'numRevealed']);
+      let logString = `Flagged ${numFlagged} mine(s) and revealed ${numRevealed} cell(s)`;
+      newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
+        logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
+      });
+      newState = newState.update('historyLog', h => h.pop().push(logString));
+      if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
+        return winGame(newState);
+      }
+      return processCSP(newState);
     }
     return state;
-
-  // toggles the peeking feature
-  case TOGGLE_PEEK:
-    return state.update('isPeeking', isPeeking => !isPeeking);
 
   // resets the board
   case RESET_BOARD:
@@ -137,12 +150,11 @@ export default (state = initialState, action) => {
       return state.set('smile', 'SMILE');
     }
     return state.withMutations(s => {
-      s.set('csp', Immutable.Map({
-        constraints: [],
-        isConsistent: true,
-        solvable: Immutable.Map(),
-        variables: [],
-      }));
+      s.deleteIn(['csp', 'components']);
+      s.setIn(['csp', 'constraints'], []);
+      s.setIn(['csp', 'isConsistent'], true);
+      s.setIn(['csp', 'variables'], []);
+      s.updateIn(['csp', 'solvable'], o => o.clear());
       for (let i = 0; i < s.getIn(['minefield', 'cells']).size; i++) {
         for (let j = 0; j < s.getIn(['minefield', 'cells', 0]).size; j++) {
           s.setIn(['minefield', 'cells', i, j], Immutable.Map({
@@ -176,14 +188,14 @@ export default (state = initialState, action) => {
         s.update('minefield', m => revealCell(m, action.row, action.col));
         const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
         const logString = `User revealed ${numCellsRevealed} cell(s) at [${action.row}, ${action.col}]`;
-        s.update('historyLog', h => h.push(logString));
+        s.update('historyLog', h => h.pop().push(logString));
         s.set('smile', 'SMILE');
         // check the end conditions
-        if (checkWinCondition(s.get('minefield'), s.get('numMines'))) {
-          return winGame(s);
-        }
         if (checkLossCondition(s.get('minefield'), action.row, action.col)) {
           return loseGame(s);
+        }
+        if (checkWinCondition(s.get('minefield'), s.get('numMines'))) {
+          return winGame(s);
         }
         // set the new csp model
         return processCSP(s);
@@ -196,7 +208,11 @@ export default (state = initialState, action) => {
     if (state.get('gameIsRunning')
     && state.getIn(['csp', 'isConsistent'])
     && state.getIn(['csp', 'solvable']).size > 0) {
-      const newState = solveCSP(state);
+      const newState = solveCSP(state, true);
+      // check ending conditions
+      if (!newState.get('gameIsRunning')) {
+        return newState;
+      }
       if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
         return winGame(newState);
       }
@@ -204,26 +220,52 @@ export default (state = initialState, action) => {
     }
     return state;
 
+  // toggles the active algorithms
+  case TOGGLE_ACTIVE:
+    return state.withMutations(s => {
+      switch (action.name) {
+      case 'Unary':
+        s.updateIn(['csp', 'isActive', 'Unary'], a => !a);
+        break;
+      case 'STR':
+        s.updateIn(['csp', 'isActive', 'STR'], a => !a);
+        break;
+      case 'PWC':
+        s.updateIn(['csp', 'isActive', 'PWC'], a => !a);
+        break;
+      default:
+      }
+      if (s.get('gameIsRunning')) {
+        s.update('historyLog', h => h.pop());
+        return processCSP(s);
+      }
+      return s;
+    });
+
   // toggles the flag of the cell
   case TOGGLE_FLAG:
-    if (state.get('gameIsRunning') === true) {
+    if (state.get('gameIsRunning')) {
       return state.withMutations(s => {
-        if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged']) === false
-            && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
+        let logString;
+        if (!s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])
+        && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
           s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], true);
           s.updateIn(['minefield', 'numFlagged'], n => n + 1);
-          const logString = `User flagged cell at [${action.row}, ${action.col}]`;
-          s.update('historyLog', h => h.push(logString));
-        } else if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged']) === true) {
+          logString = `User flagged cell at [${action.row}, ${action.col}]`;
+        } else if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])) {
           s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], false);
           s.updateIn(['minefield', 'numFlagged'], n => n - 1);
-          const logString = `User unflagged cell at [${action.row}, ${action.col}]`;
-          s.update('historyLog', h => h.push(logString));
+          logString = `User unflagged cell at [${action.row}, ${action.col}]`;
         }
+        s.update('historyLog', h => h.pop().push(logString));
         return processCSP(s);
       });
     }
     return state;
+
+  // toggles the peeking feature
+  case TOGGLE_PEEK:
+    return state.update('isPeeking', isPeeking => !isPeeking);
 
   default:
     return state;

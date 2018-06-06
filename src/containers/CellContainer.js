@@ -13,6 +13,7 @@ const mapStateToProps = (state, ownProps) => ({
   hidden: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'hidden']),
   isPeeking: state.board.present.get('isPeeking'),
   mines: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'mines']),
+  solution: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'solution']),
   ...ownProps,
 });
 

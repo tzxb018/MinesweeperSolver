@@ -1,6 +1,6 @@
-// import backbone from './backbone';
 import generateCSP from './generateCSP';
 import normalize from './normalize';
+import PWC from './pairwise';
 import separateComponents from './separateComponents';
 import STR from './STR.js';
 import unaryConsistency from './unary';
@@ -15,7 +15,6 @@ const checkConsistency = state => state.withMutations(s => {
   // remove previous inconsistency
   if (!s.getIn(['csp', 'isConsistent'])) {
     s.setIn(['csp', 'isConsistent'], true);
-    s.update('historyLog', h => h.set(-2, h.last()).pop());
   }
 
   // color any inconsistent constraints
@@ -51,7 +50,9 @@ const checkConsistency = state => state.withMutations(s => {
     });
     logString = `Found ${solvableCells.length} solvable cell(s)`;
     solvableCount.forEach((count, setKey) => {
-      logString += `\n\t${setKey} found ${count} new solvable cell(s)`;
+      if (count > 0) {
+        logString += `\n\t${setKey} found ${count} new solvable cell(s)`;
+      }
     });
   }
   s.update('historyLog', h => h.push(logString));
@@ -68,6 +69,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   csp.get('components').forEach(component => {
     component.variables.forEach(variable => {
       c.setIn([variable.row, variable.col, 'component'], 0);
+      c.deleteIn([variable.row, variable.col, 'solution']);
     });
   });
 
@@ -82,6 +84,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   if (set !== undefined) {
     set.forEach(solvableCell => {
       c.setIn([solvableCell.row, solvableCell.col, 'component'], 1);
+      c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
     });
   }
 
@@ -91,6 +94,18 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
         c.setIn([solvableCell.row, solvableCell.col, 'component'], 2);
+        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
+      }
+    });
+  }
+
+  // PWC are colored darkBlue (4)
+  set = solvableSets.get('PWC');
+  if (set !== undefined) {
+    set.forEach(solvableCell => {
+      if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
+        c.setIn([solvableCell.row, solvableCell.col, 'component'], 4);
+        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
       }
     });
   }
@@ -110,7 +125,11 @@ export default state => state.withMutations(s => {
   s.update('csp', c => generateCSP(c, s.getIn(['minefield', 'cells'])));
 
   // enforce unary consistency
-  s.update('csp', c => unaryConsistency(c));
+  if (s.getIn(['csp', 'isActive', 'Unary'])) {
+    s.update('csp', c => unaryConsistency(c));
+  } else {
+    s.deleteIn(['csp', 'solvable', 'Unary']);
+  }
 
   // normalize the constraints
   s.update('csp', c => normalize(c));
@@ -119,7 +138,18 @@ export default state => state.withMutations(s => {
   s.update('csp', c => separateComponents(c));
 
   // reduce the constraints with STR
-  s.update('csp', c => STR(c));
+  if (s.getIn(['csp', 'isActive', 'STR'])) {
+    s.update('csp', c => STR(c));
+  } else {
+    s.deleteIn(['csp', 'solvable', 'STR']);
+  }
+
+  // reduce the contstraints with PWC
+  if (s.getIn(['csp', 'isActive', 'PWC'])) {
+    s.update('csp', c => PWC(c));
+  } else {
+    s.deleteIn(['csp', 'solvable', 'PWC']);
+  }
 
   // color the solvable cells
   s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp')));

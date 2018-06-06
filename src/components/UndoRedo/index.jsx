@@ -16,11 +16,10 @@ export default class UndoRedo extends Component {
   render() {
     return (
       <div className={styles['container']} >
-        <button onClick={this.props.onUndo} disabled={!this.props.canUndo} >
+        <button className={styles['button']} onClick={this.props.onUndo} disabled={!this.props.canUndo} >
           Undo
         </button>
-        <div className={styles['gap']} />
-        <button onClick={this.props.onRedo} disabled={!this.props.canRedo} >
+        <button className={styles['button']} onClick={this.props.onRedo} disabled={!this.props.canRedo} >
           Redo
         </button>
       </div>
