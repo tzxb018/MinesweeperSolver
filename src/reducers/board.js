@@ -144,10 +144,6 @@ export default (state = initialState, action) => {
     }
     return state;
 
-  // toggles the peeking feature
-  case TOGGLE_PEEK:
-    return state.update('isPeeking', isPeeking => !isPeeking);
-
   // resets the board
   case RESET_BOARD:
     if (!state.get('hasMines')) {
@@ -224,27 +220,6 @@ export default (state = initialState, action) => {
     }
     return state;
 
-  // toggles the flag of the cell
-  case TOGGLE_FLAG:
-    if (state.get('gameIsRunning')) {
-      return state.withMutations(s => {
-        let logString;
-        if (!s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])
-        && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
-          s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], true);
-          s.updateIn(['minefield', 'numFlagged'], n => n + 1);
-          logString = `User flagged cell at [${action.row}, ${action.col}]`;
-        } else if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])) {
-          s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], false);
-          s.updateIn(['minefield', 'numFlagged'], n => n - 1);
-          logString = `User unflagged cell at [${action.row}, ${action.col}]`;
-        }
-        s.update('historyLog', h => h.pop().push(logString));
-        return processCSP(s);
-      });
-    }
-    return state;
-
   // toggles the active algorithms
   case TOGGLE_ACTIVE:
     return state.withMutations(s => {
@@ -266,6 +241,32 @@ export default (state = initialState, action) => {
       }
       return s;
     });
+
+  // toggles the flag of the cell
+  case TOGGLE_FLAG:
+    if (state.get('gameIsRunning')) {
+      return state.withMutations(s => {
+        let logString;
+        if (!s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])
+        && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
+          s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], true);
+          s.updateIn(['minefield', 'numFlagged'], n => n + 1);
+          logString = `User flagged cell at [${action.row}, ${action.col}]`;
+        } else if (s.getIn(['minefield', 'cells', action.row, action.col, 'flagged'])) {
+          s.setIn(['minefield', 'cells', action.row, action.col, 'flagged'], false);
+          s.updateIn(['minefield', 'numFlagged'], n => n - 1);
+          logString = `User unflagged cell at [${action.row}, ${action.col}]`;
+        }
+        s.update('historyLog', h => h.pop().push(logString));
+        return processCSP(s);
+      });
+    }
+    return state;
+
+  // toggles the peeking feature
+  case TOGGLE_PEEK:
+    return state.update('isPeeking', isPeeking => !isPeeking);
+
   default:
     return state;
   }

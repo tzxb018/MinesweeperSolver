@@ -1,20 +1,15 @@
 :local {
-  .border {
-    bottom: 0px;
-    grid-column: 4 / 5;
-    grid-row: 1 / 6;
-    position: absolute;
-    right: 0px;
-  }
-
   .container {
     background-color: #c0c0c0;
     grid-column: 4 / 5;
-    grid-row: 1 / 6;
+    grid-row: 2;
+    height: 335px;
+    top: -25px;
     overflow: auto;
     padding: 6px;
     position: relative;
     white-space: pre-wrap;
+    width: 500px;
   }
 
   .log {

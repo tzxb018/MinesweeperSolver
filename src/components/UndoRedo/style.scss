@@ -1,12 +1,13 @@
 :local {
   .container {
-    grid-column: 1 / 2;
+    grid-column: 4 / 5;
     grid-row: 1 / 2;
     justify-self: center;
   }
 
-  .gap {
-    display: inline-block;
-    width: 10px;
+  .button {
+    height: 35px;
+    margin: 10px;
+    width: 58px;
   }
 }

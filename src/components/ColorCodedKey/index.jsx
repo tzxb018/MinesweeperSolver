@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import styles from './style';
+
 export default class ColorCodedKey extends Component {
   static propTypes = {
     // state props
@@ -47,7 +49,7 @@ export default class ColorCodedKey extends Component {
 
   render() {
     return (
-      <div>
+      <div className={styles['container']}>
         <div>
           {this.colorCodedIcon('blue')}
           <input type="checkbox"
