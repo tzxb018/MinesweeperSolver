@@ -9,7 +9,7 @@ export default class ResetButton extends Component {
     smile: PropTypes.string.isRequired,
     // dispatch props
     changeSmile: PropTypes.func.isRequired,
-    resetBoard: PropTypes.func.isRequired,
+    reset: PropTypes.func.isRequired,
   };
 
   // colors
@@ -29,7 +29,7 @@ export default class ResetButton extends Component {
   }
 
   mouseUpHandler = () => {
-    this.props.resetBoard();
+    this.props.reset();
   }
 
   smile = () => {

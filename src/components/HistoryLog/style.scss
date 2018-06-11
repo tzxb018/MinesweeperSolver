@@ -20,4 +20,14 @@
   .log:hover {
     background-color: #808080;
   }
+
+  .log .cellHighlight {
+    background-color: rgb(0, 0, 255);
+    opacity: 0.5;
+    visibility: hidden;
+  }
+
+  .log:hover .cellHighlight {
+    visibility: visible;
+  }
 }

@@ -6,13 +6,13 @@ import styles from './style';
 export default class StepButton extends Component {
   static propTypes = {
     // state props
-    gameIsRunning: PropTypes.bool.isRequired,
+    isGameRunning: PropTypes.bool.isRequired,
     // dispatch props
     step: PropTypes.func.isRequired,
   }
 
   clickHandler = () => {
-    if (this.props.gameIsRunning) {
+    if (this.props.isGameRunning) {
       this.props.step();
     }
   }

@@ -5,6 +5,7 @@ import HistoryLog from 'components/HistoryLog';
 
 const mapStateToProps = state => ({
   historyLog: state.board.present.get('historyLog'),
+  size: state.board.present.get('size'),
 });
 
 const mapDispatchToProps = dispatch => ({

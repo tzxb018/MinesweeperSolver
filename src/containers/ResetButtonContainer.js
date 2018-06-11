@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import ResetButton from 'components/ResetButton';
 import {
   changeSmile,
-  resetBoard,
+  reset,
 } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
@@ -15,8 +15,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(changeSmile(newSmile));
   },
 
-  resetBoard: () => {
-    dispatch(resetBoard());
+  reset: () => {
+    dispatch(reset());
   },
 });
 

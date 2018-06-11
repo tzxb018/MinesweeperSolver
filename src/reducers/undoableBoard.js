@@ -7,7 +7,7 @@ import {
   TOGGLE_PEEK,
  } from 'actions/boardActions';
 
-import board from './board';
+import board from './board/index.js';
 
 export default undoable(board, {
   clearHistoryType: [CHANGE_SIZE, RESET_BOARD],

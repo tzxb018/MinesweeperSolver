@@ -11,6 +11,7 @@ export default class HistoryLog extends Component {
       PropTypes.instanceOf(Immutable.List),
       PropTypes.instanceOf(Array),
     ]).isRequired,
+    size: PropTypes.string.isRequired,
     // dispatch props
     jump: PropTypes.func.isRequired,
   }
@@ -28,13 +29,13 @@ export default class HistoryLog extends Component {
   // formats each history log for display
   formatter = () => {
     const size = this.props.historyLog.size;
-    return this.props.historyLog.map((logString, index) => {
+    return this.props.historyLog.map((log, index) => {
       const key = index - size + 1;
       return (<div className={styles['log']}
         key={key}
         onClick={(e) => this.clickHandler(e, key)}
       >
-        {logString}
+        {log.message}
       </div>
       );
     });

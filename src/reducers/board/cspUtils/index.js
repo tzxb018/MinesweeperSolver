@@ -22,11 +22,11 @@ const checkConsistency = state => state.withMutations(s => {
   s.getIn(['csp', 'components']).forEach(component => {
     component.constraints.forEach(constraint => {
       if (constraint.alive === 0) {
-        s.setIn(['minefield', 'cells', constraint.row, constraint.col, 'component'], -1);
+        s.setIn(['minefield', 'cells', constraint.row, constraint.col, 'color'], -1);
         s.setIn(['csp', 'isConsistent'], false);
         inconsistentCount++;
       } else {
-        s.setIn(['minefield', 'cells', constraint.row, constraint.col, 'component'], 0);
+        s.setIn(['minefield', 'cells', constraint.row, constraint.col, 'color'], 0);
       }
     });
   });
@@ -55,7 +55,10 @@ const checkConsistency = state => state.withMutations(s => {
       }
     });
   }
-  s.update('historyLog', h => h.push(logString));
+  s.update('historyLog', h => h.push({
+    cells: [],
+    message: logString,
+  }));
 });
 
 /**
@@ -68,7 +71,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   // clear previous coloring
   csp.get('components').forEach(component => {
     component.variables.forEach(variable => {
-      c.setIn([variable.row, variable.col, 'component'], 0);
+      c.setIn([variable.row, variable.col, 'color'], 0);
       c.deleteIn([variable.row, variable.col, 'solution']);
     });
   });
@@ -83,7 +86,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   let set = solvableSets.get('Unary');
   if (set !== undefined) {
     set.forEach(solvableCell => {
-      c.setIn([solvableCell.row, solvableCell.col, 'component'], 1);
+      c.setIn([solvableCell.row, solvableCell.col, 'color'], 1);
       c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
     });
   }
@@ -92,8 +95,8 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   set = solvableSets.get('STR');
   if (set !== undefined) {
     set.forEach(solvableCell => {
-      if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'component'], 2);
+      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
+        c.setIn([solvableCell.row, solvableCell.col, 'color'], 2);
         c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
       }
     });
@@ -103,8 +106,8 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   set = solvableSets.get('PWC');
   if (set !== undefined) {
     set.forEach(solvableCell => {
-      if (c.getIn([solvableCell.row, solvableCell.col, 'component']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'component'], 4);
+      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
+        c.setIn([solvableCell.row, solvableCell.col, 'color'], 4);
         c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
       }
     });

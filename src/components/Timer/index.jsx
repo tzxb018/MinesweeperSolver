@@ -6,8 +6,7 @@ import styles from './style';
 export default class Timer extends Component {
   static propTypes = {
     // state props
-    gameIsRunning: PropTypes.bool.isRequired,
-    hasMines: PropTypes.bool.isRequired,
+    isGameRunning: PropTypes.bool.isRequired,
   }
 
   state = {
@@ -16,15 +15,12 @@ export default class Timer extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.gameIsRunning === true) {
+    if (nextProps.isGameRunning === true) {
       this.setState({ counter: 0 });
       const timer = setInterval(this.incrementTimer.bind(this), 1000);
       this.setState({ timer });
     } else {
       clearInterval(this.state.timer);
-    }
-    if (nextProps.hasMines === false) {
-      this.setState({ counter: 0 });
     }
   }
 

@@ -4,7 +4,7 @@ import LoopButton from 'components/LoopButton';
 import { loop } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
-  gameIsRunning: state.board.present.get('gameIsRunning'),
+  isGameRunning: state.board.present.get('isGameRunning'),
 });
 
 const mapDispatchToProps = dispatch => ({
