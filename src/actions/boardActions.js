@@ -40,9 +40,9 @@ export const step = () => ({
   type: 'STEP',
 });
 
-export const toggleActive = name => ({
+export const toggleActive = algorithm => ({
   type: 'TOGGLE_ACTIVE',
-  name,
+  algorithm,
 });
 
 export const toggleFlag = (row, col) => ({

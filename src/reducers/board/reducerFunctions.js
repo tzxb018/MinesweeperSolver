@@ -4,12 +4,12 @@ import processCSP from './cspUtils/index';
 import solveCSP from './cspUtils/solve';
 import {
   checkWinCondition,
+  flagMines,
   getChangedCells,
   placeMines,
   revealMines,
   revealNeighbors,
-  winGame,
-} from '../utils/cellUtils';
+} from './cellUtils';
 
 /**
  * Handles the reset action by reverting the cells, csp model, and undo history to their starting states.
@@ -45,6 +45,18 @@ export const reset = state => state.withMutations(s => {
 });
 
 /**
+ * Wins the game.
+ * @param state
+ * @return new state
+ */
+export const winGame = state => state.withMutations(s => {
+  s.updateIn(['minefield', 'cells'], c => flagMines(c));
+  s.setIn(['minefield', 'numFlagged'], s.getIn(['minefield', 'numMines']));
+  s.set('isGameRunning', false);
+  s.set('smile', 'WON');
+});
+
+/**
  * Handles the reveal cell action as performed by the user or by cheat.
  * @param state state of the board
  * @param row row of the cell
@@ -55,7 +67,8 @@ export const revealCell = (state, row, col) => {
   // if there are no mines already, place mines and start the game
   let newState = state;
   if (newState.getIn(['minefield', 'numRevealed']) === 0) {
-    newState = newState.updateIn(['minefield', 'cells'], c => placeMines(c, newState.get('numMines'), row, col));
+    newState = newState.updateIn(['minefield', 'cells'], c =>
+      placeMines(c, newState.getIn(['minefield', 'numMines']), row, col));
     newState = newState.set('isGameRunning', true);
   }
 
@@ -80,7 +93,7 @@ export const revealCell = (state, row, col) => {
       s.set('smile', 'SMILE');
 
       // check if the game has been won, and reprocess the csp
-      if (checkWinCondition(s.get('minefield'), s.get('numMines'))) {
+      if (checkWinCondition(s.get('minefield'))) {
         return winGame(s);
       }
       // set the new csp model
@@ -93,7 +106,7 @@ export const revealCell = (state, row, col) => {
 /**
  * Handles the step action by solving and advancing the csp once if possible.
  * @param state state of the board
- * @param isLogged default solveCSP will be logged, false if log isn't wanted
+ * @param isLogged default solveCSP will be logged, false if log isn't wanted (optional)
  * @returns newState, or oldState if no changes could be made
  */
 export const step = (state, isLogged = true) => {
@@ -109,7 +122,7 @@ export const step = (state, isLogged = true) => {
     }
 
     // check if the game has been won and reprocess the csp
-    if (checkWinCondition(newState.get('minefield'), newState.get('numMines'))) {
+    if (checkWinCondition(newState.get('minefield'))) {
       return winGame(newState);
     }
     return processCSP(newState);
@@ -145,8 +158,10 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
     numMines = 40;
   }
   s.updateIn(['minefield', 'cells'], c => c.setSize(numRows));
-  s.updateIn(['minefield', 'cells', 0], c => c.setSize(numCols));
-  s.set('numMines', numMines);
+  for (let i = 0; i < numRows; i++) {
+    s.setIn(['minefield', 'cells', i], Immutable.List().setSize(numCols));
+  }
+  s.setIn(['minefield', 'numMines'], numMines);
   s.set('size', newSize);
 
   // reset the board
@@ -159,17 +174,75 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
  * @returns newState
  */
 export const cheat = state => {
-  // pick a random cell that can be safely revealed
-  let row = Math.floor(Math.random() * state.getIn(['minefield', 'cells']).size);
-  let col = Math.floor(Math.random() * state.getIn(['minefield', 'cells', 0]).size);
-  while (!state.getIn(['minefield', 'cells', row, col, 'isHidden'])
-  || state.getIn(['minefield', 'cells', row, col, 'content']) === -1) {
-    row = Math.floor(Math.random() * state.getIn(['minefield', 'cells']).size);
-    col = Math.floor(Math.random() * state.getIn(['minefield', 'cells', 0]).size);
-  }
+  if (state.get('isGameRunning') || state.getIn(['minefield', 'numRevealed']) === 0) {
+    // pick a random cell that can be safely revealed
+    let row = Math.floor(Math.random() * state.getIn(['minefield', 'cells']).size);
+    let col = Math.floor(Math.random() * state.getIn(['minefield', 'cells', 0]).size);
+    while (!state.getIn(['minefield', 'cells', row, col, 'isHidden'])
+    || state.getIn(['minefield', 'cells', row, col, 'content']) === -1) {
+      row = Math.floor(Math.random() * state.getIn(['minefield', 'cells']).size);
+      col = Math.floor(Math.random() * state.getIn(['minefield', 'cells', 0]).size);
+    }
 
-  // reveal the cell
-  return revealCell(state, row, col);
+    // reveal the cell
+    return revealCell(state, row, col);
+  }
+  return state;
+};
+
+/**
+ * Handles the default action that sets up the initial state of the board.
+ * @returns initial state
+ */
+export const initialize = () => {
+  // create the cell matrix
+  const cells = Immutable.List().withMutations(c => {
+    for (let i = 0; i < 16; i++) {
+      const row = Immutable.List().withMutations(r => {
+        for (let j = 0; j < 16; j++) {
+          r.push(Immutable.Map({
+            color: 0,
+            content: 0,
+            isFlagged: false,
+            isHidden: true,
+          }));
+        }
+      });
+      c.push(row);
+    }
+  });
+
+  // wrap the cells in the minefield
+  const minefield = Immutable.Map({
+    cells,
+    numFlagged: 0,
+    numMines: 40,
+    numRevealed: 0,
+  });
+
+  // create the csp model
+  const csp = Immutable.Map({
+    constraints: [],
+    isActive: Immutable.Map({
+      PWC: true,
+      STR: true,
+      Unary: true,
+    }),
+    isConsistent: true,
+    solvable: Immutable.Map(),
+    variables: [],
+  });
+
+  // return the initial state map
+  return Immutable.Map({
+    csp,
+    historyLog: Immutable.List(),
+    isGameRunning: false,
+    isPeeking: false,
+    minefield,
+    size: 'intermediate',
+    smile: 'SMILE',
+  });
 };
 
 /**
@@ -180,7 +253,12 @@ export const cheat = state => {
 export const loop = state => {
   // solve the csp until step can no longer make any changes
   let oldState = state;
-  let newState = state.setIn(['csp', 'count'], new Map());
+  let newState;
+  if (oldState.getIn(['csp', 'solvable']).size > 0) {
+    newState = state.setIn(['csp', 'count'], new Map());
+  } else {
+    return oldState;
+  }
   while (newState !== oldState) {
     oldState = newState;
     newState = step(oldState, false);
@@ -193,10 +271,22 @@ export const loop = state => {
   newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
     logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
   });
-  newState = newState.update('historyLog', h => h.pop().push({
-    cells: getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells'])),
-    message: logString,
-  }));
+  if (newState.get('isGameRunning')) {
+    newState = newState.update('historyLog', h => h.pop().push({
+      cells: getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells'])),
+      message: logString,
+    }));
+    logString = 'Found 0 solvable cell(s)';
+    newState = newState.update('historyLog', h => h.push({
+      cells: [],
+      message: logString,
+    }));
+  } else {
+    newState = newState.update('historyLog', h => h.push({
+      cells: getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells'])),
+      message: logString,
+    }));
+  }
 
   // clean up the results of the loop
   return newState.deleteIn(['csp', 'count']);
@@ -205,15 +295,37 @@ export const loop = state => {
 /**
  * Loses the game.
  * @param state state of the board
- * @param row row of the cell that caused the loss
- * @param col col of the cell that caused the loss
+ * @param row row of the cell that caused the loss (optional)
+ * @param col col of the cell that caused the loss (optional)
  * @returns newState
  */
-export const loseGame = (state, row, col) => state.withMutations(s => {
-  s.setIn(['minefield', 'cells', row, col, 'isHidden'], false);
+export const loseGame = (state, row = undefined, col = undefined) => state.withMutations(s => {
+  if (row !== undefined && col !== undefined) {
+    s.setIn(['minefield', 'cells', row, col, 'isHidden'], false);
+  }
   s.updateIn(['minefield', 'cells'], c => revealMines(c));
-  s.set('gameIsRunning', false);
+  s.set('isGameRunning', false);
   s.set('smile', 'LOST');
+});
+
+/**
+ * Handles the toggle active action by changed the active status of the specified algorithm.
+ * @param state state of the board
+ * @param algorithm name of the algorithm to toggle
+ * @returns newState
+ */
+export const toggleActive = (state, algorithm) => state.withMutations(s => {
+  switch (algorithm) {
+  case 'Unary': s.updateIn(['csp', 'isActive', 'Unary'], a => !a); break;
+  case 'STR': s.updateIn(['csp', 'isActive', 'STR'], a => !a); break;
+  case 'PWC': s.updateIn(['csp', 'isActive', 'PWC'], a => !a); break;
+  default:
+  }
+  if (s.get('gameIsRunning')) {
+    s.update('historyLog', h => h.pop());
+    return processCSP(s);
+  }
+  return s;
 });
 
 /**
@@ -230,7 +342,7 @@ export const toggleFlag = (state, row, col) => {
 
       // if the cell is not already flagged and there are flags available to be placed, place the flag
       if (!s.getIn(['minefield', 'cells', row, col, 'isFlagged'])
-      && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
+      && s.getIn(['minefield', 'numFlagged']) < s.getIn(['minefield', 'numMines'])) {
         s.setIn(['minefield', 'cells', row, col, 'isFlagged'], true);
         s.updateIn(['minefield', 'numFlagged'], n => n + 1);
         logString = `Flagged cell at [${row}, ${col}]`;

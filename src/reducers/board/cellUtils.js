@@ -1,19 +1,4 @@
 /**
- * Flags all hidden cells that have mines for when the game is won.
- * @param cells matrix of cell objects
- * @return new cells
- */
-const flagMines = cells => cells.withMutations(c => {
-  for (let row = 0; row < c.size; row++) {
-    for (let col = 0; col < c.get(0).size; col++) {
-      if (c.getIn([row, col, 'content']) === -1 && !c.getIn([row, col, 'isFlagged'])) {
-        c.setIn([row, col, 'isFlagged'], true);
-      }
-    }
-  }
-});
-
-/**
  * Updates the number of nearby mines of the cells around mines.
  * @param cells matrix of cell objects
  * @param mines list of mine locations
@@ -134,23 +119,12 @@ export const revealNeighbors = (minefield, row, col) => {
 };
 
 /**
- * Checks if the game has been lost.
- * @param minefield state of the minefield
- * @param row row of revealed cell
- * @param col column of revealed cell
- * @returns boolean
- */
-export const checkLossCondition = (minefield, row, col) =>
-  minefield.getIn(['cells', row, col, 'content']) === -1;
-
-/**
  * Checks if the game has been won.
  * @param minefield state of the minefield
- * @param numMines number of mines
  * @returns boolean
  */
-export const checkWinCondition = (minefield, numMines) =>
-  minefield.get('numRevealed') === (minefield.get('cells').size * minefield.getIn(['cells', 0]).size) - numMines;
+export const checkWinCondition = minefield => minefield.get('numRevealed') === (minefield.get('cells').size
+  * minefield.getIn(['cells', 0]).size) - minefield.get('numMines');
 
 /**
  * Gets all the cells that changed from the previous state to the current one. Returning their [row, col] pairs in an
@@ -209,13 +183,16 @@ export const placeMines = (cells, numMines, row, col) => {
 };
 
 /**
- * Wins the game.
- * @param state
- * @return new state
+ * Flags all hidden cells that have mines for when the game is won.
+ * @param cells matrix of cell objects
+ * @return new cells
  */
-export const winGame = state => state.withMutations(s => {
-  s.updateIn(['minefield', 'cells'], c => flagMines(c));
-  s.setIn(['minefield', 'numFlagged'], s.get('numMines'));
-  s.set('gameIsRunning', false);
-  s.set('smile', 'WON');
+export const flagMines = cells => cells.withMutations(c => {
+  for (let row = 0; row < c.size; row++) {
+    for (let col = 0; col < c.get(0).size; col++) {
+      if (c.getIn([row, col, 'content']) === -1 && !c.getIn([row, col, 'isFlagged'])) {
+        c.setIn([row, col, 'isFlagged'], true);
+      }
+    }
+  }
 });
