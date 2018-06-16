@@ -13,6 +13,8 @@ export default class HistoryLog extends Component {
     ]).isRequired,
     size: PropTypes.string.isRequired,
     // dispatch props
+    clear: PropTypes.func.isRequired,
+    highlight: PropTypes.func.isRequired,
     jump: PropTypes.func.isRequired,
   }
 
@@ -21,8 +23,8 @@ export default class HistoryLog extends Component {
     this.scrollBottom.scrollIntoView({ behavior: 'smooth' });
   }
 
-  // handles undo jumps when a log is clicked
-  clickHandler = (e, key) => {
+  clickHandler = key => {
+    this.props.clear();
     this.props.jump(key);
   }
 
@@ -33,7 +35,9 @@ export default class HistoryLog extends Component {
       const key = index - size + 1;
       return (<div className={styles['log']}
         key={key}
-        onClick={(e) => this.clickHandler(e, key)}
+        onClick={() => this.clickHandler(key)}
+        onMouseEnter={() => this.props.highlight(log.cells)}
+        onMouseLeave={this.props.clear}
       >
         {log.message}
       </div>

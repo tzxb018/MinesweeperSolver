@@ -81,7 +81,6 @@ export default class Cell extends Component {
   clickHandler = () => {
     if (this.props.content === -1) {
       this.props.loseGame(this.props.row, this.props.col);
-      this.props.changeSmile('LOST');
     } else {
       this.props.changeSmile('SMILE');
       this.props.revealCell(this.props.row, this.props.col);

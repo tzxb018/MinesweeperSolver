@@ -63,11 +63,13 @@ export const winGame = state => state.withMutations(s => {
  */
 export const revealCell = (state, row, col) => {
   // if there are no mines already, place mines and start the game
+  let oldCells = state.getIn(['minefield', 'cells']);
   let newState = state;
   if (newState.getIn(['minefield', 'numRevealed']) === 0) {
     newState = newState.updateIn(['minefield', 'cells'], c =>
       placeMines(c, newState.getIn(['minefield', 'numMines']), row, col));
     newState = newState.set('isGameRunning', true);
+    oldCells = newState.getIn(['minefield', 'cells']);
   }
 
   // if the game is running, reveal the cell, else do nothing and return the old state
@@ -85,7 +87,7 @@ export const revealCell = (state, row, col) => {
       // post the action to the history log
       const logString = `Revealed ${numCellsRevealed} cell(s) at [${row}, ${col}]`;
       s.update('historyLog', h => h.pop().push({
-        cells: getChangedCells(state.getIn(['minefield', 'cells']), s.getIn(['minefield', 'cells'])),
+        cells: getChangedCells(oldCells, s.getIn(['minefield', 'cells'])),
         message: logString,
       }));
 
