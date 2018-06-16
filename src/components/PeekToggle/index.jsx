@@ -3,16 +3,16 @@ import React, { Component } from 'react';
 
 import styles from './style';
 
-export default class PeakToggle extends Component {
+export default class PeekToggle extends Component {
   static propTypes = {
     // state props
     isPeeking: PropTypes.bool.isRequired,
     // dispatch props
-    peek: PropTypes.func.isRequired,
+    togglePeek: PropTypes.func.isRequired,
   }
 
   changeHandler = () => {
-    this.props.peek();
+    this.props.togglePeek();
   }
 
   render() {

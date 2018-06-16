@@ -6,6 +6,7 @@ import {
   revealCell,
   toggleFlag,
 } from 'actions/boardActions';
+import { changeSmile } from 'actions/smileActions';
 
 const mapStateToProps = (state, ownProps) => ({
   content: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'content']),
@@ -14,11 +15,15 @@ const mapStateToProps = (state, ownProps) => ({
   isFlagged: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'isFlagged']),
   isGameRunning: state.board.present.get('isGameRunning'),
   isHidden: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'isHidden']),
-  isPeeking: state.board.present.get('isPeeking'),
+  isPeeking: state.isPeeking,
   ...ownProps,
 });
 
 const mapDispatchToProps = dispatch => ({
+  changeSmile: newSmile => {
+    dispatch(changeSmile(newSmile));
+  },
+
   loseGame: (row, col) => {
     dispatch(loseGame(row, col));
   },

@@ -3,11 +3,6 @@ export const changeSize = newSize => ({
   newSize,
 });
 
-export const changeSmile = newSmile => ({
-  type: 'CHANGE_SMILE',
-  newSmile,
-});
-
 export const cheat = () => ({
   type: 'CHEAT',
 });
@@ -20,10 +15,6 @@ export const loseGame = (row, col) => ({
   type: 'LOSE_GAME',
   col,
   row,
-});
-
-export const peek = () => ({
-  type: 'TOGGLE_PEEK',
 });
 
 export const reset = () => ({

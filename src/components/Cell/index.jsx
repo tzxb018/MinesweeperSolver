@@ -17,6 +17,7 @@ export default class Cell extends Component {
     isHidden: PropTypes.bool.isRequired,
     isPeeking: PropTypes.bool.isRequired,
     // dispatch props
+    changeSmile: PropTypes.func.isRequired,
     loseGame: PropTypes.func.isRequired,
     revealCell: PropTypes.func.isRequired,
     toggleFlag: PropTypes.func.isRequired,
@@ -80,9 +81,15 @@ export default class Cell extends Component {
   clickHandler = () => {
     if (this.props.content === -1) {
       this.props.loseGame(this.props.row, this.props.col);
+      this.props.changeSmile('LOST');
     } else {
+      this.props.changeSmile('SMILE');
       this.props.revealCell(this.props.row, this.props.col);
     }
+  }
+
+  mouseDownHandler = () => {
+    this.props.changeSmile('SCARED');
   }
 
   rightClickHandler = e => {
@@ -143,7 +150,7 @@ export default class Cell extends Component {
 
   // tooltip for a solved cell
   tooltip = () => [
-    <span className={styles['tooltiptext']}>
+    <span key="tooltip" className={styles['tooltiptext']}>
       <svg height="16" width="16">
         <polygon points="0,0 16,0 16,16 0,16" style={{ fill: 'rgb(128, 128, 128' }} />
         <polygon points="1,1 16,1 16,16 1,16" style={{ fill: 'rgb(192, 192, 192)' }} />
@@ -157,6 +164,7 @@ export default class Cell extends Component {
       <div className={styles['tooltip']}
         onClick={this.props.isHidden && !this.props.isFlagged ? this.clickHandler : null}
         onContextMenu={this.props.isHidden ? this.rightClickHandler : null}
+        onMouseDown={this.props.isHidden && !this.props.isFlagged ? this.mouseDownHandler : null}
       >
         <svg height="16" width="16">
           {this.props.isHidden ? this.hiddenCell() : this.revealedCell()}

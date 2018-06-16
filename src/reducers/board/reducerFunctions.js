@@ -41,7 +41,6 @@ export const reset = state => state.withMutations(s => {
   s.set('isGameRunning', false);
   s.setIn(['minefield', 'numFlagged'], 0);
   s.setIn(['minefield', 'numRevealed'], 0);
-  s.set('smile', 'SMILE');
 });
 
 /**
@@ -53,7 +52,6 @@ export const winGame = state => state.withMutations(s => {
   s.updateIn(['minefield', 'cells'], c => flagMines(c));
   s.setIn(['minefield', 'numFlagged'], s.getIn(['minefield', 'numMines']));
   s.set('isGameRunning', false);
-  s.set('smile', 'WON');
 });
 
 /**
@@ -90,7 +88,6 @@ export const revealCell = (state, row, col) => {
         cells: getChangedCells(state.getIn(['minefield', 'cells']), s.getIn(['minefield', 'cells'])),
         message: logString,
       }));
-      s.set('smile', 'SMILE');
 
       // check if the game has been won, and reprocess the csp
       if (checkWinCondition(s.get('minefield'))) {
@@ -238,10 +235,8 @@ export const initialize = () => {
     csp,
     historyLog: Immutable.List(),
     isGameRunning: false,
-    isPeeking: false,
     minefield,
     size: 'intermediate',
-    smile: 'SMILE',
   });
 };
 
@@ -303,9 +298,8 @@ export const loseGame = (state, row = undefined, col = undefined) => state.withM
   if (row !== undefined && col !== undefined) {
     s.setIn(['minefield', 'cells', row, col, 'isHidden'], false);
   }
-  s.updateIn(['minefield', 'cells'], c => revealMines(c));
+  s.update('minefield', m => revealMines(m));
   s.set('isGameRunning', false);
-  s.set('smile', 'LOST');
 });
 
 /**

@@ -39,27 +39,28 @@ const placeNumbers = (cells, mines) => {
 
 /**
  * Reveals all mines that weren't found and any flags that were in the wrong place for when the game is lost.
- * @param cells matrix of cell objects
+ * @param minefield state of the minefield
  * @returns new cells
  */
-export const revealMines = cells => cells.withMutations(c => {
-  for (let row = 0; row < c.size; row++) {
-    for (let col = 0; col < c.get(0).size; col++) {
+export const revealMines = minefield => minefield.withMutations(m => {
+  for (let row = 0; row < m.get('cells').size; row++) {
+    for (let col = 0; col < m.getIn(['cells', 0]).size; col++) {
       // if the cell has a mine
-      if (c.getIn([row, col, 'content']) === -1) {
+      if (m.getIn(['cells', row, col, 'content']) === -1) {
         // if the mine is already revealed, show it as an error
-        if (!c.getIn([row, col, 'isHidden'])) {
-          c.setIn([row, col, 'content'], -2);
+        if (!m.getIn(['cells', row, col, 'isHidden'])) {
+          m.setIn(['cells', row, col, 'content'], -2);
         // else reveal the mine if it isn't flagged
-        } else if (!c.getIn([row, col, 'isFlagged'])) {
-          c.setIn([row, col, 'isHidden'], false);
+        } else if (!m.getIn(['cells', row, col, 'isFlagged'])) {
+          m.setIn(['cells', row, col, 'isHidden'], false);
         }
       // else if the cell is flagged, show it as an error
-      } else if (c.getIn([row, col, 'isFlagged'])) {
-        c.setIn([row, col, 'content'], -2);
-        c.setIn([row, col, 'isHidden'], false);
+      } else if (m.getIn(['cells', row, col, 'isFlagged'])) {
+        m.setIn(['cells', row, col, 'content'], -2);
+        m.setIn(['cells', row, col, 'isHidden'], false);
+        m.update('numFlagged', n => n - 1);
       }
-      c.setIn([row, col, 'color'], 0);
+      m.setIn(['cells', row, col, 'color'], 0);
     }
   }
 });
