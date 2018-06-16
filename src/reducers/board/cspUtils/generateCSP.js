@@ -7,21 +7,21 @@
  */
 const isOnFringe = (cells, i, j) => {
   // if the cell has any revealed cells adjacent to it, return true, else, return false
-  if (i - 1 >= 0 && j - 1 >= 0 && !cells.getIn([i - 1, j - 1, 'hidden'])) {
+  if (i - 1 >= 0 && j - 1 >= 0 && !cells.getIn([i - 1, j - 1, 'isHidden'])) {
     return true;
-  } else if (i - 1 >= 0 && !cells.getIn([i - 1, j, 'hidden'])) {
+  } else if (i - 1 >= 0 && !cells.getIn([i - 1, j, 'isHidden'])) {
     return true;
-  } else if (i - 1 >= 0 && j + 1 < cells.get(0).size && !cells.getIn([i - 1, j + 1, 'hidden'])) {
+  } else if (i - 1 >= 0 && j + 1 < cells.get(0).size && !cells.getIn([i - 1, j + 1, 'isHidden'])) {
     return true;
-  } else if (j + 1 < cells.get(0).size && !cells.getIn([i, j + 1, 'hidden'])) {
+  } else if (j + 1 < cells.get(0).size && !cells.getIn([i, j + 1, 'isHidden'])) {
     return true;
-  } else if (i + 1 < cells.size && j + 1 < cells.get(0).size && !cells.getIn([i + 1, j + 1, 'hidden'])) {
+  } else if (i + 1 < cells.size && j + 1 < cells.get(0).size && !cells.getIn([i + 1, j + 1, 'isHidden'])) {
     return true;
-  } else if (i + 1 < cells.size && !cells.getIn([i + 1, j, 'hidden'])) {
+  } else if (i + 1 < cells.size && !cells.getIn([i + 1, j, 'isHidden'])) {
     return true;
-  } else if (i + 1 < cells.size && j - 1 >= 0 && !cells.getIn([i + 1, j - 1, 'hidden'])) {
+  } else if (i + 1 < cells.size && j - 1 >= 0 && !cells.getIn([i + 1, j - 1, 'isHidden'])) {
     return true;
-  } else if (j - 1 >= 0 && !cells.getIn([i, j - 1, 'hidden'])) {
+  } else if (j - 1 >= 0 && !cells.getIn([i, j - 1, 'isHidden'])) {
     return true;
   }
   return false;
@@ -194,13 +194,13 @@ const getVariables = cells => {
   // find all fringe cells and create a variable object for them
   for (let row = 0; row < cells.size; row++) {
     for (let col = 0; col < cells.get(0).size; col++) {
-      if (cells.getIn([row, col, 'hidden']) && isOnFringe(cells, row, col)) {
+      if (cells.getIn([row, col, 'isHidden']) && isOnFringe(cells, row, col)) {
         // variable object
         variables.push({
-          col,                                            // column of cell
-          isFlagged: cells.getIn([row, col, 'flagged']),  // state of cell
-          key,                                            // variable number
-          row,                                            // row of cell
+          col,                                              // column of cell
+          isFlagged: cells.getIn([row, col, 'isFlagged']),  // state of cell
+          key,                                              // variable number
+          row,                                              // row of cell
         });
         key++;
       }
@@ -224,9 +224,9 @@ export default (csp, cells) => {
   const constraints = [];
   for (let row = 0; row < cells.size; row++) {
     for (let col = 0; col < cells.get(0).size; col++) {
-      if (!cells.getIn([row, col, 'hidden'])
-      && cells.getIn([row, col, 'mines']) > 0) {
-        constraints.push(buildConstraint(variables, row, col, cells.getIn([row, col, 'mines'])));
+      if (!cells.getIn([row, col, 'isHidden'])
+      && cells.getIn([row, col, 'content']) > 0) {
+        constraints.push(buildConstraint(variables, row, col, cells.getIn([row, col, 'content'])));
       }
     }
   }

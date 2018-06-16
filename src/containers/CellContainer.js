@@ -2,24 +2,30 @@ import { connect } from 'react-redux';
 
 import Cell from 'components/Cell';
 import {
-  changeSmile,
+  loseGame,
   revealCell,
   toggleFlag,
 } from 'actions/boardActions';
+import { changeSmile } from 'actions/smileActions';
 
 const mapStateToProps = (state, ownProps) => ({
-  component: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'component']),
-  flagged: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'flagged']),
-  hidden: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'hidden']),
-  isPeeking: state.board.present.get('isPeeking'),
-  mines: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'mines']),
-  solution: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'solution']),
+  content: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'content']),
+  cspColor: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'color']),
+  cspSolution: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'solution']),
+  isFlagged: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'isFlagged']),
+  isGameRunning: state.board.present.get('isGameRunning'),
+  isHidden: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'isHidden']),
+  isPeeking: state.isPeeking,
   ...ownProps,
 });
 
 const mapDispatchToProps = dispatch => ({
   changeSmile: newSmile => {
     dispatch(changeSmile(newSmile));
+  },
+
+  loseGame: (row, col) => {
+    dispatch(loseGame(row, col));
   },
 
   revealCell: (row, col) => {

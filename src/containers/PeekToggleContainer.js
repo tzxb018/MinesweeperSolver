@@ -1,15 +1,15 @@
 import { connect } from 'react-redux';
 
 import PeekToggle from 'components/PeekToggle';
-import { peek } from 'actions/boardActions';
+import { togglePeek } from 'actions/peekActions';
 
 const mapStateToProps = state => ({
-  isPeeking: state.board.present.get('isPeeking'),
+  isPeeking: state.isPeeking,
 });
 
 const mapDispatchToProps = dispatch => ({
-  peek: () => {
-    dispatch(peek());
+  togglePeek: () => {
+    dispatch(togglePeek());
   },
 });
 

@@ -2,12 +2,17 @@ import { connect } from 'react-redux';
 
 import LoopButton from 'components/LoopButton';
 import { loop } from 'actions/boardActions';
+import { changeSmile } from 'actions/smileActions';
 
 const mapStateToProps = state => ({
-  gameIsRunning: state.board.present.get('gameIsRunning'),
+  isGameRunning: state.board.present.get('isGameRunning'),
 });
 
 const mapDispatchToProps = dispatch => ({
+  changeSmile: newSmile => {
+    dispatch(changeSmile(newSmile));
+  },
+
   loop: () => {
     dispatch(loop());
   },

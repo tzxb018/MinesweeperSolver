@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import MineCounterContainer from 'containers/MineCounterContainer';
-import MinefieldContainer from 'containers/MinefieldContainer';
-import ResetButtonContainer from 'containers/ResetButtonContainer';
-import TimerContainer from 'containers/TimerContainer';
+import CellHighlight from 'containers/CellHighlightContainer';
+import MineCounter from 'containers/MineCounterContainer';
+import Minefield from 'containers/MinefieldContainer';
+import ResetButton from 'containers/ResetButtonContainer';
+import Timer from 'containers/TimerContainer';
 
 import styles from './style';
 
@@ -61,10 +62,11 @@ export default class Board extends Component {
     return (
       <div className={styles['container']} >
         {this.background()}
-        <MineCounterContainer />
-        <ResetButtonContainer />
-        <TimerContainer />
-        <MinefieldContainer />
+        <MineCounter />
+        <ResetButton />
+        <Timer />
+        <Minefield />
+        <CellHighlight />
       </div>
     );
   }

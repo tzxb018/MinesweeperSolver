@@ -6,44 +6,32 @@ import styles from './style';
 export default class Timer extends Component {
   static propTypes = {
     // state props
-    gameIsRunning: PropTypes.bool.isRequired,
-    hasMines: PropTypes.bool.isRequired,
-  }
-
-  state = {
-    counter: 0,
-    timer: null,
+    counter: PropTypes.number.isRequired,
+    isGameRunning: PropTypes.bool.isRequired,
+    // dispatch props
+    increment: PropTypes.func.isRequired,
+    start: PropTypes.func.isRequired,
+    stop: PropTypes.func.isRequired,
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.gameIsRunning === true) {
-      this.setState({ counter: 0 });
-      const timer = setInterval(this.incrementTimer.bind(this), 1000);
-      this.setState({ timer });
-    } else {
-      clearInterval(this.state.timer);
-    }
-    if (nextProps.hasMines === false) {
-      this.setState({ counter: 0 });
-    }
-  }
-
-  incrementTimer() {
-    if (this.state.counter < 999) {
-      this.setState({ counter: this.state.counter + 1 });
+    if (nextProps.isGameRunning && !this.props.isGameRunning) {
+      this.props.start(setInterval(this.props.increment, 1000));
+    } else if (!nextProps.isGameRunning && this.props.isGameRunning) {
+      this.props.stop();
     }
   }
 
   render() {
     let length = 1;
-    if (this.state.counter > 0) {
-      length = Math.log(this.state.counter) * Math.LOG10E + 1;
+    if (this.props.counter > 0) {
+      length = Math.log(this.props.counter) * Math.LOG10E + 1;
     }
     let output = '';
     for (length; length < 3; length++) {
       output += '0';
     }
-    output += this.state.counter.toString();
+    output += this.props.counter <= 999 ? this.props.counter.toString() : '999';
     return (
       <div className={styles['container']}>
         {output}

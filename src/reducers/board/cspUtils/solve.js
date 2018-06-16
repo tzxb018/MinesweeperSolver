@@ -1,8 +1,9 @@
 import {
-  checkLossCondition,
+  revealNeighbors,
+} from '../cellUtils';
+import {
   loseGame,
-  revealCell,
-} from '../utils/cellUtils';
+} from '../reducerFunctions';
 
 /**
  * Solves all cells found to be solvable, losing the game if a cell that had a mine was incorrectly revealed.
@@ -12,6 +13,7 @@ import {
  */
 export default (state, doLog) => state.withMutations(s => {
   // solve each cell, keeping track of which algorithm it was found by
+  const changedCells = [];
   const solvedCellCounter = new Map();
   const oldNumFlagged = s.getIn(['minefield', 'numFlagged']);
   const oldNumRevealed = s.getIn(['minefield', 'numRevealed']);
@@ -22,17 +24,28 @@ export default (state, doLog) => state.withMutations(s => {
     solvableSet.forEach(cell => {
       // if the cell should have a mine and isn't already flagged and there are not too many flags already, flag it
       if (cell.value
-      && !s.getIn(['minefield', 'cells', cell.row, cell.col, 'flagged'])
-      && s.getIn(['minefield', 'numFlagged']) < s.get('numMines')) {
-        s.setIn(['minefield', 'cells', cell.row, cell.col, 'flagged'], true);
+      && !s.getIn(['minefield', 'cells', cell.row, cell.col, 'isFlagged'])
+      && s.getIn(['minefield', 'numFlagged']) < s.getIn(['minefield', 'numMines'])) {
+        s.setIn(['minefield', 'cells', cell.row, cell.col, 'isFlagged'], true);
         s.updateIn(['minefield', 'numFlagged'], n => n + 1);
         numFlagged++;
+        changedCells.push({
+          col: cell.col,
+          row: cell.row,
+        });
       // else if it is not already revealed, reveal it
-      } else if (!cell.value && s.getIn(['minefield', 'cells', cell.row, cell.col, 'hidden'])) {
-        s.update('minefield', m => revealCell(m, cell.row, cell.col));
-        if (checkLossCondition(s.get('minefield'), cell.row, cell.col)) {
+      } else if (!cell.value && s.getIn(['minefield', 'cells', cell.row, cell.col, 'isHidden'])) {
+        s.setIn(['minefield', 'cells', cell.row, cell.col, 'isHidden'], false);
+        s.updateIn(['minefield', 'numRevealed'], n => n + 1);
+        if (s.getIn(['minefield', 'cells', cell.row, cell.col, 'content']) === 0) {
+          s.update('minefield', m => revealNeighbors(m, cell.row, cell.col));
+        } else if (s.getIn(['minefield', 'cells', cell.row, cell.col, 'content']) === -1) {
           lostGame = true;
         }
+        changedCells.push({
+          col: cell.col,
+          row: cell.row,
+        });
       }
     });
     solvedCellCounter.set(setKey, {
@@ -57,7 +70,10 @@ export default (state, doLog) => state.withMutations(s => {
         logString += `\n\t${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
       }
     });
-    s.update('historyLog', h => h.push(logString));
+    s.update('historyLog', h => h.push({
+      cells: changedCells,
+      message: logString,
+    }));
   } else {
     solvedCellCounter.forEach((counter, setKey) => {
       if (counter.numFlagged + counter.numRevealed > 0) {
