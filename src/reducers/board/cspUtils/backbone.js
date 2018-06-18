@@ -1,8 +1,8 @@
 /**
  * Checks if a variable takes on the same value for every alive possibility in a constraint
- * @param constraint matrix of possible solutions
- * @param index index of variable to be checked
- * @returns array of possible values for the variable
+ * @param {Array<Array<boolean>>} constraint matrix of possible solutions
+ * @param {number} index index of variable to be checked
+ * @returns {Array<boolean>} array of possible values for the variable
  */
 const getVariableDomain = (constraint, index) => {
   let i = 1;
@@ -92,5 +92,6 @@ export default csp => csp.withMutations(c => {
         value: varDomain[0],
       };
     }));
+    return c;
   });
 });

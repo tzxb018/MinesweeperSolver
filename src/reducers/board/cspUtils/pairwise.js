@@ -1,8 +1,9 @@
 /**
  * Finds whether the given map contains the given pair as a key using deep equality, returning the key if it is found or
  * undefined if it does not exist in the map.
- * @param map
- * @param pair variable pair
+ * @param {Map<Array<number>, Array<Array<boolean>>>} map
+ * @param {Array<number>} pair variable pair
+ * @returns {Array<number>} matching map key or else undefined
  */
 const findKey = (map, pair) => {
   let key;
@@ -19,8 +20,8 @@ const findKey = (map, pair) => {
 /**
  * Finds all possible pairings of variables that appear in at least two constraints and stores the possible domains that
  * those variables could take on as a pair.
- * @param components constraint model of the minesweeper board
- * @returns map of variable pairs and their domains
+ * @param {Immutable.Map} components constraint model of the minesweeper board
+ * @returns {Map<Array<number>, Array<Array<boolean>>>} map of variable pairs and their domains
  */
 const getDomains = components => {
   const pairs = new Map();
@@ -83,9 +84,10 @@ const getDomains = components => {
 
 /**
  * Revises a constraint with the given domains. Returning a mpa of the new domain sets that the constraint agrees with.
- * @param constraint a table constraint to be revised
- * @param domains the map of variable pair domains
- * @returns map of the new domains sets that the revised constraint allows for
+ * @param {Array<Array<boolean>>} constraint a table constraint to be revised
+ * @param {Map<Array<number>, Array<Array<boolean>>>} domains the map of variable pair domains
+ * @returns {Map<Array<number>, Array<Array<boolean>>>}
+ * map of the new domains sets that the revised constraint allows for
  */
 const revise = (constraint, domains) => {
   // set up the domain map
@@ -143,8 +145,8 @@ const revise = (constraint, domains) => {
  * Implementation of pair-wise consistency (PWC) using a similar method to simple tabular reduction. Revises constraint
  * tuples and variable pair domain sets, enforcing PWC across all constraint tables. Any pairs with a domain of only one
  * combination are added to the list of solvable cells.
- * @param csp model of the minefield
- * @returns csp with PWC and any solvable cells identified
+ * @param {Immutable.Map} csp model of the minefield
+ * @returns {Immutable.Map} csp with PWC and any solvable cells identified
  */
 export default csp => csp.withMutations(c => {
   const PWC = [];

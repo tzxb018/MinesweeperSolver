@@ -1,17 +1,13 @@
-import {
-  revealNeighbors,
-} from '../cellUtils';
-import {
-  loseGame,
-} from '../reducerFunctions';
+import { revealNeighbors } from '../cellUtils';
+import { loseGame } from '../reducerFunctions';
 
 /**
  * Solves all cells found to be solvable, losing the game if a cell that had a mine was incorrectly revealed.
- * @param state state of board
- * @param doLog true if the solve should be logged, false if it should be recorded instead of logged
- * @return updated state
+ * @param {Immutable.Map} state state of board
+ * @param {boolean} doLog false if solve should be recorded instead of logged, true otherwise
+ * @return {Immutable.Map} updated state
  */
-export default (state, doLog) => state.withMutations(s => {
+export default (state, doLog = true) => state.withMutations(s => {
   // solve each cell, keeping track of which algorithm it was found by
   const changedCells = [];
   const solvedCellCounter = new Map();

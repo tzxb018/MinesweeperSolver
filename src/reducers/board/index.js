@@ -15,9 +15,9 @@ const initialState = initialize();
 
 /**
  * Reducer for the board
- * @param state Redux state
- * @param action Redux action thrown
- * @returns updated state
+ * @param {Immutable.Map<string, any>} state Redux state
+ * @param {{type: string, ...}} action Redux action thrown
+ * @returns {Immutable.Map<string, any>} updated state
  */
 export default (state = initialState, action) => {
   switch (action.type) {

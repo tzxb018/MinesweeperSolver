@@ -1,7 +1,7 @@
 /**
  * Gets the basic viable domain of each variable.
- * @param components: the constraint model of the minefield
- * @returns array containing the domain set for each variable
+ * @param {Immutable.Map} components: the constraint model of the minefield
+ * @returns {Array<Set<boolean>>} array containing the domain set for each variable
  */
 const getDomains = components => {
   const domains = [];
@@ -28,9 +28,9 @@ const getDomains = components => {
 
 /**
  * Revises a constraint with the given domains. Returning a map of the new domain sets that the constraint agrees with.
- * @param constraint a table constraint to be revised
- * @param domains the set of variable domains
- * @returns map of the new domain sets that the revised constraint allows for
+ * @param {Array<Array<boolean>>} constraint a table constraint to be revised
+ * @param {Set<boolean>} domains the set of variable domains
+ * @returns {Map<number, Set<boolean>>} map of the new domain sets that the revised constraint allows for
  */
 const revise = (constraint, domains) => {
   // set up the new domain map
@@ -63,8 +63,8 @@ const revise = (constraint, domains) => {
  * Implementation of simple tabular reduction algorithm. Revises constraint tuples and variable domain sets, enforcing
  * generalized arc consistency (GAC) across all constraint tables. Any variables with a domain of only one value are
  * added to the list of solvable cells.
- * @param csp csp model of the minefield
- * @returns csp with GAC and any solvable cells identified
+ * @param {Immutable.Map} csp csp model of the minefield
+ * @returns {Immutable.Map} csp with GAC and any solvable cells identified
  */
 export default csp => csp.withMutations(c => {
   const STR = [];

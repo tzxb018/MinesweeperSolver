@@ -8,8 +8,8 @@ import unaryConsistency from './unary';
 /**
  * Checks csp model for any inconsistencies. Any unsatisfied constraints are highlighted red on the board and solving is
  * disabled to avoid errors.
- * @param state state of the board
- * @returns updated state with any inconsistencies highlighted red and solving disabled if inconsistent
+ * @param {Immutable.Map} state state of the board
+ * @returns {Immutable.Map} updated state with any inconsistencies highlighted red and solving disabled if inconsistent
  */
 const checkConsistency = state => state.withMutations(s => {
   // remove previous inconsistency
@@ -63,9 +63,9 @@ const checkConsistency = state => state.withMutations(s => {
 
 /**
  * Color codes all cells that are solvable.
- * @param cells matrix of cell objects
- * @param csp state of the csp model
- * @returns updated version of cells
+ * @param {Immutable.List<Immutable.List<Immutable.Map>>} cells matrix of cell objects
+ * @param {Immutable.Map} csp state of the csp model
+ * @returns {Immutable.List<Immutable.List<Immutable.Map>>} updated version of cells
  */
 const colorSolvable = (cells, csp) => cells.withMutations(c => {
   // clear previous coloring
@@ -120,8 +120,8 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
  * Generates the csp model of the minefield. Enforces unary consistency and normalizes the constraints. Separates the
  * model into its distinct component problems. Enforces any further consistency algorithms specified by the state.
  * Checks that the proposed solution is consistent with all constraints.
- * @param state state of the board
- * @returns state with csp model, solvable cells colored, and any inconsistencies colored
+ * @param {Immutable.Map} state state of the board
+ * @returns {Immutable.Map} state with csp model, solvable cells colored, and any inconsistencies colored
  */
 export default state => state.withMutations(s => {
   // generate the csp model of the minefield

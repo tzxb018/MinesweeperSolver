@@ -1,8 +1,8 @@
 /**
  * Checks if a given solution is supported by a given constraint
- * @param solution possible solution
- * @param constraint miatrix of possible solutions
- * @returns boolean
+ * @param {Array<boolean>} solution possible solution
+ * @param {Array<Array<boolean>>} constraint miatrix of possible solutions
+ * @returns {boolean} true if supported, false otherwise
  */
 const check = (solution, constraint) => {
   let i = 1;
@@ -22,8 +22,8 @@ const check = (solution, constraint) => {
  * Any constraint that is a subset of another constraint is removed, reducing the total number of constraints. Any
  * constraint that completely envelopes that subset has its solutions reduced to only those that also satisfy the
  * subset.
- * @param csp constraint model of the minesweeper board
- * @returns normalized csp
+ * @param {Immutable.Map} csp constraint model of the minesweeper board
+ * @returns {Immutable.Map} normalized csp
  */
 export default csp => {
   // create a mutable copy of the constraints

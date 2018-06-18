@@ -57,8 +57,8 @@ export const winGame = state => state.withMutations(s => {
 /**
  * Handles the reveal cell action as performed by the user or by cheat.
  * @param state state of the board
- * @param row row of the cell
- * @param col col of the cell
+ * @param {number} row row of the cell
+ * @param {number} col col of the cell
  * @returns newState
  */
 export const revealCell = (state, row, col) => {
@@ -105,7 +105,7 @@ export const revealCell = (state, row, col) => {
 /**
  * Handles the step action by solving and advancing the csp once if possible.
  * @param state state of the board
- * @param isLogged default solveCSP will be logged, false if log isn't wanted (optional)
+ * @param {boolean} isLogged default solveCSP will be logged, false if log isn't wanted (optional)
  * @returns newState, or oldState if no changes could be made
  */
 export const step = (state, isLogged = true) => {
@@ -132,7 +132,7 @@ export const step = (state, isLogged = true) => {
 /**
  * Converts the change size action to a reset action.
  * @param state state of the board
- * @param newSize new size to make the board
+ * @param {string} newSize new size to make the board
  * @return newState
  */
 export const changeSize = (state, newSize) => state.withMutations(s => {
@@ -292,8 +292,8 @@ export const loop = state => {
 /**
  * Loses the game.
  * @param state state of the board
- * @param row row of the cell that caused the loss (optional)
- * @param col col of the cell that caused the loss (optional)
+ * @param {number} row row of the cell that caused the loss (optional)
+ * @param {number} col col of the cell that caused the loss (optional)
  * @returns newState
  */
 export const loseGame = (state, row = undefined, col = undefined) => state.withMutations(s => {
@@ -307,7 +307,7 @@ export const loseGame = (state, row = undefined, col = undefined) => state.withM
 /**
  * Handles the toggle active action by changed the active status of the specified algorithm.
  * @param state state of the board
- * @param algorithm name of the algorithm to toggle
+ * @param {string} algorithm name of the algorithm to toggle
  * @returns newState
  */
 export const toggleActive = (state, algorithm) => state.withMutations(s => {
@@ -327,8 +327,8 @@ export const toggleActive = (state, algorithm) => state.withMutations(s => {
 /**
  * Handles the toggle flag action by changing the flag status of the cell if possible
  * @param state state of the board
- * @param row row of the cell
- * @param col col of the cell
+ * @param {number} row row of the cell
+ * @param {number} col col of the cell
  * @returns newState
  */
 export const toggleFlag = (state, row, col) => {

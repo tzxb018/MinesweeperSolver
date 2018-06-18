@@ -87,8 +87,10 @@ export default class Cell extends Component {
     }
   }
 
-  mouseDownHandler = () => {
-    this.props.changeSmile('SCARED');
+  mouseDownHandler = e => {
+    if (e.nativeEvent.which === 1) {
+      this.props.changeSmile('SCARED');
+    }
   }
 
   rightClickHandler = e => {

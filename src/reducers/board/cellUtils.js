@@ -1,8 +1,8 @@
 /**
  * Updates the number of nearby mines of the cells around mines.
- * @param cells matrix of cell objects
- * @param mines list of mine locations
- * @return new cells
+ * @param {Immutable.List<Immutable.List<Immutable.Map>>>} cells matrix of cell objects
+ * @param {Array<{x: number, y: number}>} mines list of mine locations
+ * @return {Immutable.List<Immutable.List<Immutable.Map>>>} new cells
  */
 const placeNumbers = (cells, mines) => {
   const coords = [
@@ -39,8 +39,8 @@ const placeNumbers = (cells, mines) => {
 
 /**
  * Reveals all mines that weren't found and any flags that were in the wrong place for when the game is lost.
- * @param minefield state of the minefield
- * @returns new cells
+ * @param {Immutable.Map} minefield state of the minefield
+ * @returns {Immutable.List<Immutable.List<Immutable.Map>>>} new cells
  */
 export const revealMines = minefield => minefield.withMutations(m => {
   for (let row = 0; row < m.get('cells').size; row++) {
@@ -67,10 +67,10 @@ export const revealMines = minefield => minefield.withMutations(m => {
 
 /**
  * Reveals all hidden cells near a cell that was revealed and found to be blank.
- * @param minefield state of the minefield
- * @param row row of revealed cell
- * @param col column of revealed cell
- * @returns new minefield
+ * @param {Immutable.Map} minefield state of the minefield
+ * @param {number} row row of revealed cell
+ * @param {number} col column of revealed cell
+ * @returns {Immutable.Map} new minefield
  */
 export const revealNeighbors = (minefield, row, col) => {
   const cellQueue = [];
@@ -121,8 +121,8 @@ export const revealNeighbors = (minefield, row, col) => {
 
 /**
  * Checks if the game has been won.
- * @param minefield state of the minefield
- * @returns boolean
+ * @param {Immutable.Map} minefield state of the minefield
+ * @returns {boolean} true if game has been won, false otherwise
  */
 export const checkWinCondition = minefield => minefield.get('numRevealed') === (minefield.get('cells').size
   * minefield.getIn(['cells', 0]).size) - minefield.get('numMines');
@@ -130,9 +130,9 @@ export const checkWinCondition = minefield => minefield.get('numRevealed') === (
 /**
  * Gets all the cells that changed from the previous state to the current one. Returning their [row, col] pairs in an
  * array.
- * @param oldCells old matrix of cells
- * @param newCells new matrix of cells
- * @returns array of [row, col] object pairs
+ * @param {Immutable.List<Immutable.List<Immutable.Map>>>} oldCells old matrix of cells
+ * @param {Immutable.List<Immutable.List<Immutable.Map>>>} newCells new matrix of cells
+ * @returns {Array<{col: number, row: number}>} array of cell locations that are different
  */
 export const getChangedCells = (oldCells, newCells) => {
   const changedCells = [];
@@ -151,11 +151,11 @@ export const getChangedCells = (oldCells, newCells) => {
 
 /**
  * Places mines randomly on the board, avoiding the given safe cell.
- * @param cells matrix of cell objects
- * @param numMines number of mines to be placed
- * @param row row of safe cell
- * @param col column of safe cell
- * @returns new cells
+ * @param {Immutable.List<Immutable.List<Immutable.Map>>>} cells matrix of cell objects
+ * @param {number} numMines number of mines to be placed
+ * @param {number} row row of safe cell
+ * @param {number} col column of safe cell
+ * @returns {Immutable.List<Immutable.List<Immutable.Map>>>} new cells
  */
 export const placeMines = (cells, numMines, row, col) => {
   let minesLeft = numMines;
@@ -185,8 +185,8 @@ export const placeMines = (cells, numMines, row, col) => {
 
 /**
  * Flags all hidden cells that have mines for when the game is won.
- * @param cells matrix of cell objects
- * @return new cells
+ * @param {Immutable.List<Immutable.List<Immutable.Map>>>} cells matrix of cell objects
+ * @return {Immutable.List<Immutable.List<Immutable.Map>>>} new cells
  */
 export const flagMines = cells => cells.withMutations(c => {
   for (let row = 0; row < c.size; row++) {

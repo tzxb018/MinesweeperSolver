@@ -1,7 +1,7 @@
 /**
  * Separates variables and constraints into individual components
- * @param csp csp model of the minefield
- * @returns csp with constraints and variables deleted and consolidated into components
+ * @param {Immutable.Map} csp csp model of the minefield
+ * @returns {Immutable.Map} csp with constraints and variables deleted and consolidated into components
  */
 export default csp => {
   // create copy of variables and constraints

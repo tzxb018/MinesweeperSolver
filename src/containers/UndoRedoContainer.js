@@ -4,7 +4,7 @@ import { ActionCreators } from 'redux-undo';
 import UndoRedo from 'components/UndoRedo';
 
 const mapStateToProps = state => ({
-  canUndo: state.board.past.length > 0,
+  canUndo: state.board.past.length > 1,
   canRedo: state.board.future.length > 0,
 });
 
