@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 
-import processCSP from './cspUtils/index';
-import solveCSP from './cspUtils/solve';
+import processCSP from './csp/index';
+import solveCSP from './csp/solve';
 import {
   checkWinCondition,
   flagMines,

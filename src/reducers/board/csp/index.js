@@ -1,9 +1,9 @@
+import PWC from 'algorithms/pairwise';
+import STR from 'algorithms/STR';
+import Unary from 'algorithms/unary';
+
 import generateCSP from './generateCSP';
-import normalize from './normalize';
-import PWC from './pairwise';
-import separateComponents from './separateComponents';
-import STR from './STR.js';
-import unaryConsistency from './unary';
+import reduceComponents from './reduceComponents';
 
 /**
  * Checks csp model for any inconsistencies. Any unsatisfied constraints are highlighted red on the board and solving is
@@ -117,6 +117,39 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
 });
 
 /**
+ * Gets the basic viable domains of each variable.
+ * @param {Array<Array<boolean>>} constraints the constraint model of the minefield
+ * @returns {Map<number, Set<boolean>>} map containing the allowed domain set for each variable
+ */
+const getDomains = constraints => {
+  const domains = new Map();
+
+  constraints.forEach(constraint => {
+    const newDomains = new Map();
+    for (let i = 1; i < constraint.length; i++) {
+      // for each alive tuple, add the solution values to the domain set
+      if (constraint[i].alive) {
+        for (let j = 0; j < constraint[0].length; j++) {
+          const key = constraint[0][j];
+          if (!newDomains.has(key)) {
+            newDomains.set(key, new Set());
+          }
+          newDomains.get(key).add(constraint[i][j]);
+        }
+      }
+    }
+    newDomains.forEach((values, key) => {
+      if (!domains.has(key)) {
+        domains.set(key, new Set([true, false]));
+      }
+      domains.set(key, new Set([...domains.get(key)].filter(x => values.has(x))));
+    });
+  });
+
+  return domains;
+};
+
+/**
  * Generates the csp model of the minefield. Enforces unary consistency and normalizes the constraints. Separates the
  * model into its distinct component problems. Enforces any further consistency algorithms specified by the state.
  * Checks that the proposed solution is consistent with all constraints.
@@ -129,16 +162,14 @@ export default state => state.withMutations(s => {
 
   // enforce unary consistency
   if (s.getIn(['csp', 'isActive', 'Unary'])) {
-    s.update('csp', c => unaryConsistency(c));
+    s.update('csp', c => Unary(c));
   } else {
     s.deleteIn(['csp', 'solvable', 'Unary']);
   }
-
-  // normalize the constraints
-  s.update('csp', c => normalize(c));
-
-  // separate variables and constraints into individual components
-  s.update('csp', c => separateComponents(c));
+  // get the variable domains
+  s.setIn(['csp', 'domains'], getDomains(s.getIn(['csp', 'constraints'])));
+  // normalize and separate variables and constraints into individual components
+  s.update('csp', c => reduceComponents(c));
 
   // reduce the constraints with STR
   if (s.getIn(['csp', 'isActive', 'STR'])) {

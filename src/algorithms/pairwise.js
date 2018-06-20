@@ -18,16 +18,14 @@ const findKey = (map, pair) => {
 };
 
 /**
- * Finds all possible pairings of variables that appear in at least two constraints and stores the possible domains that
- * those variables could take on as a pair.
+ * Finds all possible pairings of variables and store the possible domains that those variables could take on as a pair.
  * @param {Immutable.Map} components constraint model of the minesweeper board
  * @returns {Map<Array<number>, Array<Array<boolean>>>} map of variable pairs and their domains
  */
 const getDomains = components => {
-  const pairs = new Map();
   const domains = new Map();
 
-  // get all the possible variables pairings and the domains of their pairs
+  // get all the possible variable pairings and the domains of their pairs
   components.forEach(component => {
     component.constraints.forEach(constraint => {
       for (let i = 0; i < constraint[0].length - 1; i++) {
@@ -44,13 +42,10 @@ const getDomains = components => {
             j = temp;
           }
           const pair = [var1, var2];
-          let key = findKey(pairs, pair);
+          let key = findKey(domains, pair);
           if (key === undefined) {
-            pairs.set(pair, false);
             key = pair;
             domains.set(key, []);
-          } else {
-            pairs.set(key, true);
           }
           // add all the possible pair solutions to the map
           for (let k = 1; k < constraint.length; k++) {
@@ -73,17 +68,11 @@ const getDomains = components => {
     });
   });
 
-  // remove any variable pairs that only appear in one constraint
-  pairs.forEach((value, key) => {
-    if (!value) {
-      domains.delete(key);
-    }
-  });
   return domains;
 };
 
 /**
- * Revises a constraint with the given domains. Returning a mpa of the new domain sets that the constraint agrees with.
+ * Revises a constraint with the given domains. Returning a map of the new domain sets that the constraint agrees with.
  * @param {Array<Array<boolean>>} constraint a table constraint to be revised
  * @param {Map<Array<number>, Array<Array<boolean>>>} domains the map of variable pair domains
  * @returns {Map<Array<number>, Array<Array<boolean>>>}
@@ -104,9 +93,7 @@ const revise = (constraint, domains) => {
       }
       const pair = [var1, var2];
       const key = findKey(domains, pair);
-      if (key !== undefined) {
-        newDomains.set(key, []);
-      }
+      newDomains.set(key, []);
     }
   }
 
@@ -171,7 +158,7 @@ export default csp => csp.withMutations(c => {
             // add any constraints affected by this pair back to the queue
             component.constraints.forEach(element => {
               if (element !== constraint
-              && element[0].includes(varPair[0]) && element[0].includes(varPair[1])
+              && (element[0].includes(varPair[0]) && element[0].includes(varPair[1]))
               && !queue.includes(element)) {
                 queue.push(element);
               }
@@ -210,6 +197,7 @@ export default csp => csp.withMutations(c => {
           row: var1.row,
           value: pairDomain[0][0],
         });
+        c.get('domains').set(var1, new Set([...c.get('domains').get(var1)].filter(x => x === pairDomain[0][0])));
       }
       if (var2 !== undefined) {
         PWC.push({
@@ -218,6 +206,7 @@ export default csp => csp.withMutations(c => {
           row: var2.row,
           value: pairDomain[0][1],
         });
+        c.get('domains').set(var2, new Set([...c.get('domains').get(var2)].filter(x => x === pairDomain[0][1])));
       }
     });
   });

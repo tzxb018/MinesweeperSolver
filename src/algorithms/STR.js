@@ -1,35 +1,7 @@
 /**
- * Gets the basic viable domain of each variable.
- * @param {Immutable.Map} components: the constraint model of the minefield
- * @returns {Array<Set<boolean>>} array containing the domain set for each variable
- */
-const getDomains = components => {
-  const domains = [];
-
-  components.forEach(component => {
-    component.constraints.forEach(constraint => {
-      for (let i = 1; i < constraint.length; i++) {
-        // for each alive tuple, add the solution values to the domain set
-        if (constraint[i].alive) {
-          for (let j = 0; j < constraint[0].length; j++) {
-            const varKey = constraint[0][j];
-            if (domains[varKey] === undefined) {
-              domains[varKey] = new Set();
-            }
-            domains[varKey].add(constraint[i][j]);
-          }
-        }
-      }
-    });
-  });
-
-  return domains;
-};
-
-/**
  * Revises a constraint with the given domains. Returning a map of the new domain sets that the constraint agrees with.
  * @param {Array<Array<boolean>>} constraint a table constraint to be revised
- * @param {Set<boolean>} domains the set of variable domains
+ * @param {Map<number, Set<boolean>>} domains the set of variable domains
  * @returns {Map<number, Set<boolean>>} map of the new domain sets that the revised constraint allows for
  */
 const revise = (constraint, domains) => {
@@ -41,7 +13,7 @@ const revise = (constraint, domains) => {
     // revise the alive tuples with the old domain sets
     if (constraint[i].alive) {
       for (let j = 0; j < constraint[0].length; j++) {
-        if (!domains[constraint[0][j]].has(constraint[i][j])) {
+        if (!domains.get(constraint[0][j]).has(constraint[i][j])) {
           constraint[i].alive = false;
           constraint.alive--;
           break;
@@ -68,9 +40,7 @@ const revise = (constraint, domains) => {
  */
 export default csp => csp.withMutations(c => {
   const STR = [];
-  // get the initial variable domains
-  const domains = getDomains(c.get('components'));
-
+  const domains = c.get('domains');
   c.get('components').forEach(component => {
     const queue = [];
     component.constraints.forEach(element => queue.push(element));
@@ -82,20 +52,20 @@ export default csp => csp.withMutations(c => {
         const constraint = queue.shift();
         const newDomains = revise(constraint, domains);
 
-        newDomains.forEach((domainSet, varKey) => {
+        newDomains.forEach((values, key) => {
           // if the new domain set is different, intersect the new and old domain sets
-          if (domains[varKey].size !== domainSet.size) {
-            domains[varKey] = new Set([...domains[varKey]].filter(x => domainSet.has(x)));
+          if (domains.get(key).size !== values.size) {
+            domains.set(key, new Set([...domains.get(key)].filter(x => values.has(x))));
             // add any constraints affected by this variable back to the queue
             component.constraints.forEach(element => {
-              if (element !== constraint && element[0].includes(varKey) && !queue.includes(element)) {
+              if (element !== constraint && element[0].includes(key) && !queue.includes(element)) {
                 queue.push(element);
               }
             });
           }
           // if the domain is inconsistent, break
-          if (domains[varKey].size === 0) {
-            throw varKey;
+          if (domains.get(key).size === 0) {
+            throw key;
           }
         });
       }
@@ -108,15 +78,15 @@ export default csp => csp.withMutations(c => {
     }
 
     // solve any variables with a domain of only one value
-    domains.forEach((varDomain, varKey) => {
-      if (varDomain.size === 1) {
-        const variable = component.variables.find(element => element.key === varKey);
+    domains.forEach((values, key) => {
+      if (values.size === 1) {
+        const variable = component.variables.find(element => element.key === key);
         if (variable !== undefined) {
           STR.push({
             col: variable.col,
-            key: varKey,
+            key,
             row: variable.row,
-            value: [...varDomain][0],
+            value: [...values][0],
           });
         }
       }
