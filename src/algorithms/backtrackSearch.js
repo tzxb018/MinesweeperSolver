@@ -47,44 +47,153 @@ const backcheck = (stack, constraintMap) => {
 };
 
 /**
- * Attempts to assign the next available value to the current variable.
+ * Attempts to assign the current variable a consistent value.
  * @param {Array<{key: number, value: boolean}>} stack past variable assignments
- * @param {number} index current variable index
  * @param {number} key variable to be assigned
- * @param {boolean} value assignment to be attempted
- * @returns {number} next level of the stack to assign
+ * @param {Map<number, Set<Array<Array<boolean>>>} constraintMap variables mapped to the constraints that contian them
+ * @param {Set<boolean>} domain current variable domains
+ * @returns {boolean} true if label was successful, false if impossible
  */
-const label = (stack, index, key, value) => {
-  stack[index] = {
-    key,
-    value,
-  };
-  return index + 1;
+const label = (stack, key, constraintMap, domain) => {
+  let consistent = false;
+  while (!consistent && domain.size > 0) {
+    stack.push({
+      key,
+      value: [...domain][0],
+    });
+    if (backcheck(stack, constraintMap)) {
+      consistent = true;
+    } else {
+      domain.delete(stack.pop().value);
+    }
+  }
+  return consistent;
 };
 
 /**
- * Removes the current variable assignment from the stack and restores its domains.
+ * Restores the domain of the current variable and removes the previous variable assignment from the stack.
  * @param {Array<{key: number, value: boolean}>} stack variable assignments
+ * @param {number} key variable to be restored
  * @param {Map<number, Set<boolean>} domains current variable domains
  * @param {Map<number, Set<boolean>} globalDomains starting variable domains
- * @returns {number} level of the stack
+ * @returns {boolean} true if previous variable can be relabeled, false if more unlabeling is needed
  */
-const unlabel = (stack, domains, globalDomains) => {
-  const key = stack.pop().key;
-  domains.set(key, globalDomains.get(key));
-  return stack.length - 1;
+const unlabel = (stack, key, domains, globalDomains) => {
+  domains.set(key, new Set([...globalDomains.get(key)]));
+  const variable = stack.pop();
+  if (variable !== undefined) {
+    domains.get(variable.key).delete(variable.value);
+    if (domains.get(variable.key).size > 0) {
+      return true;
+    }
+  }
+  return false;
 };
 
-// populate current domains with the domains from c.get('domains')
-// start the stack with the first assignment
-// set the current variable to the next assignment
-// while the stack is not empty or as tall as the number of variables
-  // label the current variable with next available assignment
-  // if no available assignment, unlabel
-  // else if backcheck
-    // advance to the next variable
-  // else remove current assignment from available domain
+/**
+ * Performs a backtracking search on the csp until a viable solution is found or the entire search tree is traversed,
+ * indicating that the problem is impossible.
+ * @param {Immutable.Map} csp constraint model of the minefield
+ * @returns {Immutable.Map} updated constraint model
+ */
+export default csp => {
+  // map the variables to the constraints that contain them
+  const constraints = [];
+  csp.get('components').forEach(component => constraints.push(...component.constraints));
+  const constraintMap = mapVariablesToConstraints(constraints);
+  // create a separate copy of the domains
+  const globalDomains = new Map();
+  csp.get('domains').forEach((values, key) => globalDomains.set(key, new Set([...values])));
+  // set the variable assignment order
+  const assignmentOrder = [];
+  for (let i = 0; i < constraintMap.size; i++) {
+    assignmentOrder.push(i);
+  }
 
-// if backchecking passes, label the next variable
-// else relabel, remove the old assignment from the domain and grab next assignment
-// if all the assignments have run out, unlabel
+  let fullySearched = false;
+  const solutions = [];
+  while (!fullySearched) {
+    // start the stack
+    let consistent = true;
+    const currentDomains = new Map();
+    globalDomains.forEach((values, key) => currentDomains.set(key, new Set([...values])));
+    const stack = [];
+    assignmentOrder.every(key => {
+      if (globalDomains.get(key).size === 1) {
+        stack.push({
+          key,
+          value: [...globalDomains.get(key)][0],
+        });
+        return true;
+      }
+      return false;
+    });
+    const startingLevel = stack.length;
+    stack.push({
+      key: assignmentOrder[startingLevel],
+      value: [...globalDomains.get(assignmentOrder[startingLevel])][0],
+    });
+    let currentLevel = startingLevel + 1;
+
+    // begin the search
+    while (currentLevel >= startingLevel && currentLevel < assignmentOrder.length) {
+      const currentVariable = assignmentOrder[currentLevel];
+      if (consistent) {
+        if (label(stack, currentVariable, constraintMap, currentDomains.get(currentVariable))) {
+          currentLevel++;
+        } else {
+          consistent = false;
+        }
+      } else {
+        if (unlabel(stack, currentVariable, currentDomains, globalDomains)) {
+          consistent = true;
+        }
+        currentLevel--;
+      }
+    }
+    if (stack.length === assignmentOrder.length) {
+      solutions.push(stack);
+      if (currentDomains.get(stack[startingLevel].key) > 1) {
+        globalDomains.get(stack[startingLevel].key).delete(stack[startingLevel].value);
+        for (let i = startingLevel + 1; i < stack.length; i++) {
+          currentDomains.set(stack[i].key, new Set([...globalDomains.get(stack[i].key)]));
+        }
+      } else if (Array.from(globalDomains.values()).every(set => set.size === 1)) {
+        fullySearched = true;
+      }
+    } else {
+      fullySearched = true;
+    }
+  }
+
+  // update the domains and solvable based on the solutions found
+  return csp.withMutations(c => {
+    const BTS = [];
+    assignmentOrder.forEach((key, index) => {
+      const newDomain = new Set();
+      solutions.forEach(solution => newDomain.add(solution[index].value));
+      c.get('domains').set(key, newDomain);
+      if (newDomain.size === 1) {
+        let variable;
+        c.get('components').some(component => {
+          variable = component.variables.find(element => element.key === key);
+          if (variable !== undefined) {
+            return true;
+          }
+          return false;
+        });
+        BTS.push({
+          col: variable.col,
+          key,
+          row: variable.row,
+          value: [...newDomain][0],
+        });
+      }
+    });
+    if (BTS.length > 0) {
+      c.setIn(['solvable', 'BTS'], BTS);
+    } else {
+      c.deleteIn(['solvable', 'BTS']);
+    }
+  });
+};
