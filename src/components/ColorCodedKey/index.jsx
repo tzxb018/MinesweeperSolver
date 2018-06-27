@@ -6,6 +6,7 @@ import styles from './style';
 export default class ColorCodedKey extends Component {
   static propTypes = {
     // state props
+    BTS: PropTypes.bool.isRequired,
     PWC: PropTypes.bool.isRequired,
     STR: PropTypes.bool.isRequired,
     Unary: PropTypes.bool.isRequired,
@@ -20,23 +21,12 @@ export default class ColorCodedKey extends Component {
   colorCodedIcon = color => {
     let fill;
     switch (color) {
-    case 'blue':
-      fill = { fill: 'blue' };
-      break;
-    case 'darkGreen':
-      fill = { fill: 'rgb(0, 128, 0)' };
-      break;
-    case 'darkBlue':
-      fill = { fill: 'rgb(0, 0, 128)' };
-      break;
-    case 'darkRed':
-      fill = { fill: 'rgb(128, 0, 0)' };
-      break;
-    case 'darkCyan':
-      fill = { fill: 'rgb(0, 128, 128)' };
-      break;
-    default:
-      fill = { fill: 'rgb(192, 192, 192)' };
+    case 'blue': fill = { fill: 'blue' }; break;
+    case 'darkGreen': fill = { fill: 'rgb(0, 128, 0)' }; break;
+    case 'darkBlue': fill = { fill: 'rgb(0, 0, 128)' }; break;
+    case 'darkRed': fill = { fill: 'rgb(128, 0, 0)' }; break;
+    case 'darkCyan': fill = { fill: 'rgb(0, 128, 128)' }; break;
+    default: fill = { fill: 'rgb(192, 192, 192)' };
     }
     return (
       <svg height="16" width="16">
@@ -63,6 +53,16 @@ export default class ColorCodedKey extends Component {
         <div>
           {this.colorCodedIcon('darkGreen')}
           <input type="checkbox"
+            id="BTS"
+            value="BTS"
+            checked={this.props.BTS}
+            onChange={this.changeHandler}
+          />
+          <label htmlFor="BTS">BTS</label>
+        </div>
+        <div>
+          {this.colorCodedIcon('darkBlue')}
+          <input type="checkbox"
             id="STR"
             value="STR"
             checked={this.props.STR}
@@ -71,7 +71,7 @@ export default class ColorCodedKey extends Component {
           <label htmlFor="STR">STR</label>
         </div>
         <div>
-          {this.colorCodedIcon('darkBlue')}
+          {this.colorCodedIcon('darkRed')}
           <input type="checkbox"
             id="PWC"
             value="PWC"

@@ -197,7 +197,8 @@ export default csp => csp.withMutations(c => {
           row: var1.row,
           value: pairDomain[0][0],
         });
-        c.get('domains').set(var1, new Set([...c.get('domains').get(var1)].filter(x => x === pairDomain[0][0])));
+        c.get('domains').set(varPair[0],
+          new Set([...c.get('domains').get(varPair[0])].filter(x => x === pairDomain[0][0])));
       }
       if (var2 !== undefined) {
         PWC.push({
@@ -206,7 +207,8 @@ export default csp => csp.withMutations(c => {
           row: var2.row,
           value: pairDomain[0][1],
         });
-        c.get('domains').set(var2, new Set([...c.get('domains').get(var2)].filter(x => x === pairDomain[0][1])));
+        c.get('domains').set(varPair[1],
+          new Set([...c.get('domains').get(varPair[1])].filter(x => x === pairDomain[0][1])));
       }
     });
   });

@@ -223,9 +223,10 @@ export const initialize = () => {
   const csp = Immutable.Map({
     constraints: [],
     isActive: Immutable.Map({
-      PWC: true,
-      STR: true,
-      Unary: true,
+      BTS: true,
+      PWC: false,
+      STR: false,
+      Unary: false,
     }),
     isConsistent: true,
     solvable: Immutable.Map(),
@@ -313,11 +314,12 @@ export const loseGame = (state, row = undefined, col = undefined) => state.withM
 export const toggleActive = (state, algorithm) => state.withMutations(s => {
   switch (algorithm) {
   case 'Unary': s.updateIn(['csp', 'isActive', 'Unary'], a => !a); break;
+  case 'BTS': s.updateIn(['csp', 'isActive', 'BTS'], a => !a); break;
   case 'STR': s.updateIn(['csp', 'isActive', 'STR'], a => !a); break;
   case 'PWC': s.updateIn(['csp', 'isActive', 'PWC'], a => !a); break;
   default:
   }
-  if (s.get('gameIsRunning')) {
+  if (s.get('isGameRunning')) {
     s.update('historyLog', h => h.pop());
     return processCSP(s);
   }

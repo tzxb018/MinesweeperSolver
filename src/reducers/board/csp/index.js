@@ -1,3 +1,4 @@
+import BTS from 'algorithms/backtrackSearch';
 import PWC from 'algorithms/pairwise';
 import STR from 'algorithms/STR';
 import Unary from 'algorithms/unary';
@@ -91,8 +92,8 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     });
   }
 
-  // STR are colored darkGreen (2)
-  set = solvableSets.get('STR');
+  // BTS are colored darkGreen (2)
+  set = solvableSets.get('BTS');
   if (set !== undefined) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
@@ -102,12 +103,23 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     });
   }
 
-  // PWC are colored darkBlue (4)
-  set = solvableSets.get('PWC');
+  // STR are colored darkBlue (4)
+  set = solvableSets.get('STR');
   if (set !== undefined) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
         c.setIn([solvableCell.row, solvableCell.col, 'color'], 4);
+        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
+      }
+    });
+  }
+
+  // PWC are colored darkRed (5)
+  set = solvableSets.get('PWC');
+  if (set !== undefined) {
+    set.forEach(solvableCell => {
+      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
+        c.setIn([solvableCell.row, solvableCell.col, 'color'], 5);
         c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
       }
     });
@@ -170,6 +182,13 @@ export default state => state.withMutations(s => {
   s.setIn(['csp', 'domains'], getDomains(s.getIn(['csp', 'constraints'])));
   // normalize and separate variables and constraints into individual components
   s.update('csp', c => reduceComponents(c));
+
+  // reduce the domains with BTS
+  if (s.getIn(['csp', 'isActive', 'BTS'])) {
+    s.update('csp', c => BTS(c));
+  } else {
+    s.deleteIn(['csp', 'solvable', 'BTS']);
+  }
 
   // reduce the constraints with STR
   if (s.getIn(['csp', 'isActive', 'STR'])) {
