@@ -138,18 +138,18 @@ const getDomains = constraints => {
 
   constraints.forEach(constraint => {
     const newDomains = new Map();
-    for (let i = 1; i < constraint.length; i++) {
-      // for each alive tuple, add the solution values to the domain set
-      if (constraint[i].alive) {
-        for (let j = 0; j < constraint[0].length; j++) {
-          const key = constraint[0][j];
+    // for each alive tuple, add the solution values to the domain set
+    constraint.forEach(tuple => {
+      if (tuple.alive) {
+        tuple.forEach((value, index) => {
+          const key = constraint[0][index];
           if (!newDomains.has(key)) {
             newDomains.set(key, new Set());
           }
-          newDomains.get(key).add(constraint[i][j]);
-        }
+          newDomains.get(key).add(value);
+        });
       }
-    }
+    });
     newDomains.forEach((values, key) => {
       if (!domains.has(key)) {
         domains.set(key, new Set([true, false]));
@@ -178,10 +178,14 @@ export default state => state.withMutations(s => {
   } else {
     s.deleteIn(['csp', 'solvable', 'Unary']);
   }
-  // get the variable domains
-  s.setIn(['csp', 'domains'], getDomains(s.getIn(['csp', 'constraints'])));
+
   // normalize and separate variables and constraints into individual components
   s.update('csp', c => reduceComponents(c));
+
+  // get the variable domains
+  const constraints = [];
+  s.getIn(['csp', 'components']).forEach(component => constraints.push(...component.constraints));
+  s.setIn(['csp', 'domains'], getDomains(constraints));
 
   // reduce the domains with BTS
   if (s.getIn(['csp', 'isActive', 'BTS'])) {

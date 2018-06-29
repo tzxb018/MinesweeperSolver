@@ -4,5 +4,5 @@
  * @param {Array<Array<boolean>>} constraint set of allowed solutions
  * @returns {boolean} true if supported, false otherwise
  */
-export const check = (solution, constraint) => constraint.some(tuple => tuple.alive !== undefined
-  && tuple.alive && solution.every(variable => tuple[constraint[0].indexOf(variable.key)] === variable.value));
+export const check = (solution, constraint) => constraint.some(tuple =>
+  tuple.alive && solution.every(variable => tuple[constraint[0].indexOf(variable.key)] === variable.value));
