@@ -77,11 +77,22 @@ export default csp => {
       // grab all relevant variables and constraints until the component is completed
       while (stack.length > 0) {
         const currentKey = stack.shift();
+        const currentVariable = variables.get(currentKey);
         // check all relevant constraints for unvisited variables
         constraints.slice().forEach(constraint => {
-          if (constraint[0].includes(currentKey)) {
+          // if the constraint includes the variable or the variable is one of its neighbors
+          if (constraint[0].includes(currentKey)
+          || ((currentVariable.row >= constraint.row - 1 && currentVariable.row <= constraint.row + 1)
+          && (currentVariable.col >= constraint.col - 1 && currentVariable.col <= constraint.col + 1))) {
             constraint[0].forEach(varKey => {
               if (varKey !== currentKey && !isVisited.get(varKey) && !stack.includes(varKey)) {
+                stack.push(varKey);
+              }
+            });
+            variables.forEach((variable, varKey) => {
+              if (varKey !== currentKey && !isVisited.get(varKey) && !stack.includes(varKey)
+              && (variable.row >= constraint.row - 1 && variable.row <= constraint.row + 1)
+              && (variable.col >= constraint.col - 1 && variable.col <= constraint.col + 1)) {
                 stack.push(varKey);
               }
             });
@@ -89,8 +100,14 @@ export default csp => {
             component.constraints.push(constraints.splice(constraints.indexOf(constraint), 1)[0]);
           }
         });
+        variables.forEach((variable, varKey) => {
+          if (varKey !== currentKey && !isVisited.get(varKey) && !stack.includes(varKey)
+          && (variable.row >= currentVariable.row - 1 && variable.row <= currentVariable.row + 1)
+          && (variable.col >= currentVariable.col - 1 && variable.col <= currentVariable.col + 1)) {
+            stack.push(varKey);
+          }
+        });
         isVisited.set(currentKey, true);
-        const currentVariable = variables.get(currentKey);
         component.variables.push({
           col: currentVariable.col,
           key: currentKey,

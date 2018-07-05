@@ -53,12 +53,13 @@ const backcheck = (stack, constraintMap) => {
 /**
  * Attempts to assign the current variable a consistent value.
  * @param {Array<{key: number, value: boolean}>} stack past variable assignments
+ * @param {number} currentLevel current level to label
  * @param {number} key variable to be assigned
  * @param {Map<number, Set<Array<Array<boolean>>>>} constraintMap variables mapped to the constraints that contian them
  * @param {Set<boolean>} domain current variable domain
- * @returns {boolean} true if label was successful, false if impossible
+ * @returns {number} next level to try labeling
  */
-const label = (stack, key, constraintMap, domain) => {
+const label = (stack, currentLevel, key, constraintMap, domain) => {
   let consistent = false;
   while (!consistent && domain.size > 0) {
     stack.push({
@@ -71,27 +72,25 @@ const label = (stack, key, constraintMap, domain) => {
       domain.delete(stack.pop().value);
     }
   }
-  return consistent;
+  return consistent ? currentLevel + 1 : currentLevel;
 };
 
 /**
  * Restores the domain of the current variable and removes the previous variable assignment from the stack.
  * @param {Array<{key: number, value: boolean}>} stack variable assignments
+ * @param {number} currentLevel current level to unlabel
  * @param {number} key variable to be restored
  * @param {Map<number, Set<boolean>} domains current variable domains
  * @param {Map<number, Set<boolean>} globalDomains starting variable domains
- * @returns {boolean} true if previous variable can be relabeled, false if more unlabeling is needed
+ * @returns {number} next level to label or unlabel
  */
-const unlabel = (stack, key, domains, globalDomains) => {
+const unlabel = (stack, currentLevel, key, domains, globalDomains) => {
   domains.set(key, new Set([...globalDomains.get(key)]));
   const variable = stack.pop();
-  if (variable !== undefined) {
+  if (variable) {
     domains.get(variable.key).delete(variable.value);
-    if (domains.get(variable.key).size > 0) {
-      return true;
-    }
   }
-  return false;
+  return currentLevel - 1;
 };
 
 /**
@@ -112,16 +111,16 @@ const search = (stack, startingLevel, currentDomains, globalDomains, constraintM
   while (currentLevel >= startingLevel && currentLevel < assignmentOrder.length) {
     const currentVariable = assignmentOrder[currentLevel];
     if (consistent) {
-      if (label(stack, currentVariable, constraintMap, currentDomains.get(currentVariable))) {
-        currentLevel++;
-      } else {
+      const oldLevel = currentLevel;
+      currentLevel = label(stack, currentLevel, currentVariable, constraintMap, currentDomains.get(currentVariable));
+      if (currentLevel === oldLevel) {
         consistent = false;
       }
     } else {
-      if (unlabel(stack, currentVariable, currentDomains, globalDomains)) {
+      currentLevel = unlabel(stack, currentLevel, currentVariable, currentDomains, globalDomains);
+      if (currentLevel >= 0 && currentDomains.get(assignmentOrder[currentLevel]).size > 0) {
         consistent = true;
       }
-      currentLevel--;
     }
   }
   return stack.length === assignmentOrder.length;
@@ -148,7 +147,7 @@ export default csp => csp.withMutations(c => {
 
     let fullySearched = false;
     const solutions = [];
-    const swiped = [];
+    let swiped = [];
     while (!fullySearched) {
       // set up the stack for the search
       const currentDomains = new Map();
@@ -178,28 +177,42 @@ export default csp => csp.withMutations(c => {
       // if a solution was found, add it to the list and advance the starting position
       if (success) {
         solutions.push(stack);
-        assignmentOrder.every(key => {
+        let nextSwipe;
+        const isLastSolution = assignmentOrder.every(key => {
           if (currentDomains.get(key).size === 1) {
             globalDomains.set(key, new Set([...currentDomains.get(key)]));
             return true;
           }
+          nextSwipe = key;
           return false;
         });
         // if this was the last possible solution, try to unswipe or the tree is fully searched
-        if (startingLevel === assignmentOrder.length) {
-          if (swiped.length === 0) {
+        if (isLastSolution) {
+          if (swiped.length <= 1) {
             fullySearched = true;
           } else {
-            const unswipe = swiped.shift();
+            let unswipe = swiped.shift();
             globalDomains.set(unswipe.key, new Set([unswipe.value]));
+            unswipe = swiped.shift();
+            swiped = [];
+            let passed = false;
+            assignmentOrder.forEach(key => {
+              if (passed) {
+                globalDomains.set(key, new Set([...c.get('domains').get(key)]));
+              } else if (key === unswipe.key) {
+                passed = true;
+                swiped.push(unswipe);
+              }
+            });
           }
-        // if the starting variable was never unlabeled, temporarily swipe its domain
-        } else if (currentDomains.get(stack[startingLevel].key).size > 1) {
+        // else, swipe the next available variable
+        } else {
+          const value = [...globalDomains.get(nextSwipe)][0];
           swiped.push({
-            key: stack[startingLevel].key,
-            value: stack[startingLevel].value,
+            key: nextSwipe,
+            value,
           });
-          globalDomains.get(stack[startingLevel].key).delete(stack[startingLevel].value);
+          globalDomains.get(nextSwipe).delete(value);
         }
       // if no solution was found and no cells can be unswiped, the tree is fully searched
       } else if (swiped.length === 0) {
@@ -207,11 +220,11 @@ export default csp => csp.withMutations(c => {
       // unswipe the most recent variable and swipe the next variable
       } else {
         let unswipe = swiped.pop();
-        globalDomains.get(unswipe.key).add(unswipe.value);
+        globalDomains.set(unswipe.key, new Set([unswipe.value]));
         let swipe;
         let passed = false;
         let canUnswipe = true;
-        while (swipe === undefined && canUnswipe) {
+        while (!swipe && canUnswipe) {
           const canSwipe = assignmentOrder.some(key => {
             if (passed && globalDomains.get(key).size > 1) {
               swipe = {
@@ -220,20 +233,29 @@ export default csp => csp.withMutations(c => {
               };
               globalDomains.get(key).delete(swipe.value);
               return true;
-            }
-            if (key === unswipe.key) {
+            } else if (key === unswipe.key) {
               passed = true;
             }
             return false;
           });
           if (canSwipe) {
             swiped.push(swipe);
-          } else if (swiped.length !== 0) {
+          } else if (swiped.length > 0) {
             unswipe = swiped.pop();
-            globalDomains.get(unswipe.key).add(unswipe.value);
+            globalDomains.set(unswipe.key, new Set([unswipe.value]));
           } else {
             canUnswipe = false;
           }
+        }
+        if (swipe) {
+          passed = false;
+          assignmentOrder.forEach(key => {
+            if (passed) {
+              globalDomains.set(key, new Set([...c.get('domains').get(key)]));
+            } else if (key === swipe.key) {
+              passed = true;
+            }
+          });
         }
       }
     }

@@ -312,13 +312,7 @@ export const loseGame = (state, row = undefined, col = undefined) => state.withM
  * @returns newState
  */
 export const toggleActive = (state, algorithm) => state.withMutations(s => {
-  switch (algorithm) {
-  case 'Unary': s.updateIn(['csp', 'isActive', 'Unary'], a => !a); break;
-  case 'BTS': s.updateIn(['csp', 'isActive', 'BTS'], a => !a); break;
-  case 'STR': s.updateIn(['csp', 'isActive', 'STR'], a => !a); break;
-  case 'PWC': s.updateIn(['csp', 'isActive', 'PWC'], a => !a); break;
-  default:
-  }
+  s.updateIn(['csp', 'isActive', algorithm], a => !a);
   if (s.get('isGameRunning')) {
     s.update('historyLog', h => h.pop());
     return processCSP(s);
