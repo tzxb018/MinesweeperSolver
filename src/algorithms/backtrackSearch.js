@@ -164,10 +164,10 @@ export default csp => csp.withMutations(c => {
         return false;
       });
       const startingLevel = stack.length;
-      if (startingLevel === 0 && assignmentOrder.length >= 1) {
+      if (stack.length === 0 && assignmentOrder.length > 0) {
         stack.push({
-          key: assignmentOrder[startingLevel],
-          value: [...currentDomains.get(assignmentOrder[startingLevel])][0],
+          key: assignmentOrder[0],
+          value: [...currentDomains.get(assignmentOrder[0])][0],
         });
       }
 
@@ -177,8 +177,9 @@ export default csp => csp.withMutations(c => {
       // if a solution was found, add it to the list and advance the starting position
       if (success) {
         solutions.push(stack);
+        // find the next variable with a domain > 1
         let nextSwipe;
-        const isLastSolution = assignmentOrder.every(key => {
+        assignmentOrder.slice(startingLevel).every(key => {
           if (currentDomains.get(key).size === 1) {
             globalDomains.set(key, new Set([...currentDomains.get(key)]));
             return true;
@@ -187,23 +188,27 @@ export default csp => csp.withMutations(c => {
           return false;
         });
         // if this was the last possible solution, try to unswipe or the tree is fully searched
-        if (isLastSolution) {
-          if (swiped.length <= 1) {
+        if (nextSwipe === undefined) {
+          if (swiped.length === 0) {
             fullySearched = true;
           } else {
-            let unswipe = swiped.shift();
+            const unswipe = swiped.shift();
             globalDomains.set(unswipe.key, new Set([unswipe.value]));
-            unswipe = swiped.shift();
-            swiped = [];
-            let passed = false;
-            assignmentOrder.forEach(key => {
-              if (passed) {
-                globalDomains.set(key, new Set([...c.get('domains').get(key)]));
-              } else if (key === unswipe.key) {
-                passed = true;
-                swiped.push(unswipe);
+            assignmentOrder.slice(assignmentOrder.indexOf(unswipe.key) + 1).forEach(key => {
+              globalDomains.set(key, new Set([...c.get('domains').get(key)]));
+              if (nextSwipe === undefined && globalDomains.get(key).size > 1) {
+                nextSwipe = {
+                  key,
+                  value: [...globalDomains.get(key)][0],
+                };
               }
             });
+            if (nextSwipe === undefined) {
+              fullySearched = 0;
+            } else {
+              globalDomains.get(nextSwipe.key).delete(nextSwipe.value);
+              swiped = [nextSwipe];
+            }
           }
         // else, swipe the next available variable
         } else {
@@ -219,43 +224,25 @@ export default csp => csp.withMutations(c => {
         fullySearched = true;
       // unswipe the most recent variable and swipe the next variable
       } else {
-        let unswipe = swiped.pop();
-        globalDomains.set(unswipe.key, new Set([unswipe.value]));
         let swipe;
-        let passed = false;
-        let canUnswipe = true;
-        while (!swipe && canUnswipe) {
-          const canSwipe = assignmentOrder.some(key => {
-            if (passed && globalDomains.get(key).size > 1) {
+        while (swipe === undefined && swiped.length > 0) {
+          const unswipe = swiped.pop();
+          globalDomains.set(unswipe.key, new Set([unswipe.value]));
+          assignmentOrder.slice(assignmentOrder.indexOf(unswipe.key) + 1).forEach(key => {
+            globalDomains.set(key, new Set([...c.get('domains').get(key)]));
+            if (swipe === undefined && globalDomains.get(key).size > 1) {
               swipe = {
                 key,
                 value: [...globalDomains.get(key)][0],
               };
-              globalDomains.get(key).delete(swipe.value);
-              return true;
-            } else if (key === unswipe.key) {
-              passed = true;
             }
-            return false;
           });
-          if (canSwipe) {
-            swiped.push(swipe);
-          } else if (swiped.length > 0) {
-            unswipe = swiped.pop();
-            globalDomains.set(unswipe.key, new Set([unswipe.value]));
-          } else {
-            canUnswipe = false;
-          }
         }
-        if (swipe) {
-          passed = false;
-          assignmentOrder.forEach(key => {
-            if (passed) {
-              globalDomains.set(key, new Set([...c.get('domains').get(key)]));
-            } else if (key === swipe.key) {
-              passed = true;
-            }
-          });
+        if (swipe !== undefined) {
+          swiped.push(swipe);
+          globalDomains.get(swipe.key).delete(swipe.value);
+        } else {
+          fullySearched = true;
         }
       }
     }
