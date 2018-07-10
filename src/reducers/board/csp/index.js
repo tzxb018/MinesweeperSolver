@@ -152,9 +152,10 @@ const getDomains = constraints => {
     });
     newDomains.forEach((values, key) => {
       if (!domains.has(key)) {
-        domains.set(key, new Set([true, false]));
+        domains.set(key, new Set([...values]));
+      } else {
+        domains.set(key, new Set([...domains.get(key)].filter(x => values.has(x))));
       }
-      domains.set(key, new Set([...domains.get(key)].filter(x => values.has(x))));
     });
   });
 

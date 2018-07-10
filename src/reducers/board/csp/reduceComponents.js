@@ -114,7 +114,9 @@ export default csp => {
           row: currentVariable.row,
         });
       }
-      components.push(component);
+      if (component.constraints.length > 0) {
+        components.push(component);
+      }
     }
   });
 
