@@ -31,6 +31,11 @@ export const step = () => ({
   type: 'STEP',
 });
 
+export const test = numIterations => ({
+  type: 'TEST',
+  numIterations,
+});
+
 export const toggleActive = algorithm => ({
   type: 'TOGGLE_ACTIVE',
   algorithm,

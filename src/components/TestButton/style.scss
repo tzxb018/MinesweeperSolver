@@ -1,0 +1,19 @@
+:local {
+  .container {
+    grid-column: 1 / 2;
+    grid-row: 3 / 4;
+    height: 70px;
+    width: 115px;
+  }
+  
+  .button {
+    height: 70px;
+    width: 62px;
+  }
+
+  .selector {
+    align-self: center;
+    margin-left: 5px;
+    width: 48px;
+  }
+}

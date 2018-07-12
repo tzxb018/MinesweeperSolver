@@ -127,6 +127,32 @@ const search = (stack, startingLevel, currentDomains, globalDomains, constraintM
 };
 
 /**
+ * Unswipes variables in swiped order until a new possible swipe is found.
+ * @param {Array<{key: number, value: boolean}>} swiped list of swiped variable domains
+ * @param {Array<number>} assignmentOrder order of variable assignments
+ * @param {Map<number, Set<boolean>} globalDomains variables mapped to the backup values of the subspace
+ * @param {Map<number, Set<boolean>} startingDomains variables mapped to their default domain values
+ * @returns {boolean} true if unswipe was successful, false if no more solutions can be found
+ */
+const unswipe = (swiped, assignmentOrder, globalDomains, startingDomains) => {
+  let canSwipe = false;
+  let searchEnd = assignmentOrder.length;
+  while (!canSwipe && swiped.length > 0) {
+    const unswiped = swiped.pop();
+    const searchBegin = assignmentOrder.indexOf(unswiped.key) + 1;
+    globalDomains.set(unswiped.key, new Set([unswiped.value]));
+    assignmentOrder.slice(searchBegin, searchEnd).forEach(key => {
+      globalDomains.set(key, new Set([...startingDomains.get(key)]));
+      if (!canSwipe && globalDomains.get(key).size > 1) {
+        canSwipe = true;
+      }
+    });
+    searchEnd = searchBegin;
+  }
+  return canSwipe;
+};
+
+/**
  * Performs a backtracking search on the csp until a viable solution is found or the entire search tree is traversed,
  * indicating that the problem is impossible.
  * @param {Immutable.Map} csp constraint model of the minefield
@@ -187,15 +213,14 @@ export default csp => csp.withMutations(c => {
           nextSwipe = key;
           return false;
         });
-        // if this was the last possible solution, try to unswipe or the tree is fully searched
+        // if this was the last possible solution, attempt to unswipe
         if (nextSwipe === undefined) {
           if (swiped.length === 0) {
             fullySearched = true;
           } else {
-            const unswipe = swiped.pop();
-            globalDomains.set(unswipe.key, new Set([unswipe.value]));
-            assignmentOrder.slice(assignmentOrder.indexOf(unswipe.key) + 1).forEach(key =>
-              globalDomains.set(key, new Set([...c.get('domains').get(key)])));
+            if (!unswipe(swiped, assignmentOrder, globalDomains, c.get('domains'))) {
+              fullySearched = true;
+            }
           }
         // else, swipe the next available variable
         } else {
@@ -206,12 +231,11 @@ export default csp => csp.withMutations(c => {
       // if no solution was found and no cells can be unswiped, the tree is fully searched
       } else if (swiped.length === 0) {
         fullySearched = true;
-      // unswipe the most recent variable
+      // attempt to unswipe
       } else {
-        const unswipe = swiped.pop();
-        globalDomains.set(unswipe.key, new Set([unswipe.value]));
-        assignmentOrder.slice(assignmentOrder.indexOf(unswipe.key) + 1).forEach(key =>
-          globalDomains.set(key, new Set([...c.get('domains').get(key)])));
+        if (!unswipe(swiped, assignmentOrder, globalDomains, c.get('domains'))) {
+          fullySearched = true;
+        }
       }
     }
 

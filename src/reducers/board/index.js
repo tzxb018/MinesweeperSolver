@@ -7,6 +7,7 @@ import {
   reset,
   revealCell,
   step,
+  test,
   toggleActive,
   toggleFlag,
 } from './reducerFunctions';
@@ -28,6 +29,7 @@ export default (state = initialState, action) => {
   case 'RESET': return reset(state);
   case 'REVEAL_CELL': return revealCell(state, action.row, action.col);
   case 'STEP': return step(state);
+  case 'TEST': return test(state, action.numIterations);
   case 'TOGGLE_ACTIVE': return toggleActive(state, action.algorithm);
   case 'TOGGLE_FLAG': return toggleFlag(state, action.row, action.col);
   default: return state;

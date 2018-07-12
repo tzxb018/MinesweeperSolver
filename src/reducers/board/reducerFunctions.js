@@ -246,14 +246,20 @@ export const initialize = () => {
 /**
  * Converts the loop action into a series of step actions that advance the csp as far as possible.
  * @param state state of the board
+ * @param {boolean} isLogged true (default) solve action will be logged, false if logging should be ignored
  * @returns newState, or oldState if no changes could be made
  */
-export const loop = state => {
+export const loop = (state, isLogged = true) => {
   // solve the csp until step can no longer make any changes
   let oldState = state;
   let newState;
   if (oldState.getIn(['csp', 'solvable']).size > 0) {
-    newState = state.setIn(['csp', 'count'], new Map());
+    if (oldState.getIn(['csp', 'count']) === undefined) {
+      newState = oldState.setIn(['csp', 'count'], new Map());
+    } else {
+      newState = oldState;
+      oldState = "You're a wizard Harry!";
+    }
   } else {
     return oldState;
   }
@@ -263,31 +269,33 @@ export const loop = state => {
   }
 
   // record the action in the history log
-  const numFlagged = newState.getIn(['minefield', 'numFlagged']) - state.getIn(['minefield', 'numFlagged']);
-  const numRevealed = newState.getIn(['minefield', 'numRevealed']) - state.getIn(['minefield', 'numRevealed']);
-  let logString = `Flagged ${numFlagged} mine(s) and revealed ${numRevealed} cell(s)`;
-  newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
-    logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
-  });
-  if (newState.get('isGameRunning')) {
-    newState = newState.update('historyLog', h => h.pop().push({
-      cells: getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells'])),
-      message: logString,
-    }));
-    logString = 'Found 0 solvable cell(s)';
-    newState = newState.update('historyLog', h => h.push({
-      cells: [],
-      message: logString,
-    }));
-  } else {
-    newState = newState.update('historyLog', h => h.push({
-      cells: getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells'])),
-      message: logString,
-    }));
+  if (isLogged) {
+    const numFlagged = newState.getIn(['minefield', 'numFlagged']) - state.getIn(['minefield', 'numFlagged']);
+    const numRevealed = newState.getIn(['minefield', 'numRevealed']) - state.getIn(['minefield', 'numRevealed']);
+    let logString = `Flagged ${numFlagged} mine(s) and revealed ${numRevealed} cell(s)`;
+    newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
+      logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
+    });
+    if (newState.get('isGameRunning')) {
+      newState = newState.update('historyLog', h => h.pop().push({
+        cells: getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells'])),
+        message: logString,
+      }));
+      logString = 'Found 0 solvable cell(s)';
+      newState = newState.update('historyLog', h => h.push({
+        cells: [],
+        message: logString,
+      }));
+    } else {
+      newState = newState.update('historyLog', h => h.push({
+        cells: getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells'])),
+        message: logString,
+      }));
+    }
+    // clean up the results of the loop
+    return newState.deleteIn(['csp', 'count']);
   }
-
-  // clean up the results of the loop
-  return newState.deleteIn(['csp', 'count']);
+  return newState;
 };
 
 /**
@@ -304,6 +312,107 @@ export const loseGame = (state, row = undefined, col = undefined) => state.withM
   s.update('minefield', m => revealMines(m));
   s.set('isGameRunning', false);
 });
+
+/**
+ * Handles the test action by running the game multiple times and recording how efficiently the active algorithms solved
+ * each problem.
+ * @param state state of the board
+ * @param {number} numIterations number of times to run the game
+ * @param {boolean} allowCheats true (default) if cheats are allowed, false if processing should be stopped when cheats
+ * are needed to continue
+ * @param {boolean} stopOnError true if processing should be stopped on error, false (default) if failure should be
+ * recorded but skipped
+ * @returns newState
+ */
+export const test = (state, numIterations, allowCheats = true, stopOnError = false) => {
+  let newState = state;
+  const logMessages = [];
+  for (let i = 0; i < numIterations; i++) {
+    try {
+      // reveal the initial cell
+      newState = cheat(newState);
+      // solve the puzzle
+      newState = loop(newState, false);
+      let numCheats = 0;
+      if (allowCheats) {
+        while (newState.get('isGameRunning') && newState.getIn(['csp', 'isConsistent'])) {
+          newState = cheat(newState);
+          numCheats++;
+          newState = loop(newState, false);
+        }
+      }
+      let logString = '';
+      // if the algorithms failed to solve the puzzle
+      if (newState.get('isGameRunning')) {
+        if (!newState.getIn(['csp', 'isConsistent'])) {
+          logString = newState.get('historyLog').last().message;
+          newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
+            logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} `;
+            logString += 'cell(s)';
+          });
+          if (numCheats > 0) {
+            logString += `\n\t Cheat used ${numCheats} time(s)`;
+          }
+          logMessages.push(logString);
+          if (stopOnError) {
+            newState = newState.update('historyLog', h => h.pop());
+            break;
+          }
+        } else {
+          logString = `Flagged ${newState.getIn(['minefield', 'numFlagged'])} mine(s) and revealed
+            ${newState.getIn(['minefield', 'numRevealed'])} cell(s)`;
+          newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
+            logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} `;
+            logString += 'cell(s)';
+          });
+          logString += '\n\t Cheats needed to advance further';
+          logMessages.push(logString);
+        }
+        newState = newState.update('historyLog', h => h.pop());
+      } else {
+        if (checkWinCondition(newState.get('minefield'))) {
+          logString = 'Successfully solved the puzzle';
+        } else {
+          logString = 'Error made during solving';
+          if (stopOnError) {
+            newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
+              logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} `;
+              logString += 'cell(s)';
+            });
+            if (numCheats > 0) {
+              logString += `\n\t Cheat used ${numCheats} time(s)`;
+            }
+            logMessages.push(logString);
+            break;
+          }
+        }
+        newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
+          logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} `;
+          logString += 'cell(s)';
+        });
+        if (numCheats > 0) {
+          logString += `\n\t Cheat used ${numCheats} time(s)`;
+        }
+      }
+      newState = newState.update('historyLog', h => h.pop());
+      logMessages.push(logString);
+    } catch (e) {
+      let logString = 'Error thrown during solving';
+      logString += `\n\t ${e.toString()}`;
+      logMessages.push(logString);
+      if (stopOnError) {
+        break;
+      }
+      throw e;
+    }
+    newState = newState.deleteIn(['csp', 'count']);
+    newState = reset(newState);
+  }
+  return newState.update('historyLog', h => h.push(...logMessages.map(message => ({
+    cells: [],
+    message,
+  }))));
+};
 
 /**
  * Handles the toggle active action by changed the active status of the specified algorithm.
