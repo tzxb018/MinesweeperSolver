@@ -34,8 +34,10 @@ const checkConsistency = state => state.withMutations(s => {
 
   // log the processing message
   let logString;
+  let logColor;
   if (inconsistentCount > 0) {
     logString = `Processing stopped, ${inconsistentCount} inconsistencies found`;
+    logColor = 'red';
   } else {
     const solvableCount = new Map();
     const solvableCells = [];
@@ -58,7 +60,9 @@ const checkConsistency = state => state.withMutations(s => {
   }
   s.update('historyLog', h => h.push({
     cells: [],
+    color: logColor,
     message: logString,
+    undoable: true,
   }));
 });
 

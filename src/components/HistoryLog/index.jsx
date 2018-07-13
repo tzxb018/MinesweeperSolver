@@ -11,7 +11,6 @@ export default class HistoryLog extends Component {
       PropTypes.instanceOf(Immutable.List),
       PropTypes.instanceOf(Array),
     ]).isRequired,
-    size: PropTypes.string.isRequired,
     // dispatch props
     clear: PropTypes.func.isRequired,
     highlight: PropTypes.func.isRequired,
@@ -33,9 +32,9 @@ export default class HistoryLog extends Component {
     const size = this.props.historyLog.size;
     return this.props.historyLog.map((log, index) => {
       const key = index - size + 1;
-      return (<div className={styles['log']}
+      return (<div className={styles[log.color ? log.color : 'log']}
         key={key}
-        onClick={() => this.clickHandler(key)}
+        onClick={log.undoable ? () => this.clickHandler(key) : null}
         onMouseEnter={() => this.props.highlight(log.cells)}
         onMouseLeave={this.props.clear}
       >

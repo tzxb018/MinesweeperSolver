@@ -1,31 +1,4 @@
-/**
- * Determines whether a cell is on the fringe.
- * @param {Immutable.List<Immutable.List<{}>>} cells matrix of cells
- * @param {number} i row of cell
- * @param {number } j col of cell
- * @returns {boolean} true if the cell is on the fringe, else otherwise
- */
-const isOnFringe = (cells, i, j) => {
-  // if the cell has any revealed cells adjacent to it, return true, else, return false
-  if (i - 1 >= 0 && j - 1 >= 0 && !cells.getIn([i - 1, j - 1, 'isHidden'])) {
-    return true;
-  } else if (i - 1 >= 0 && !cells.getIn([i - 1, j, 'isHidden'])) {
-    return true;
-  } else if (i - 1 >= 0 && j + 1 < cells.get(0).size && !cells.getIn([i - 1, j + 1, 'isHidden'])) {
-    return true;
-  } else if (j + 1 < cells.get(0).size && !cells.getIn([i, j + 1, 'isHidden'])) {
-    return true;
-  } else if (i + 1 < cells.size && j + 1 < cells.get(0).size && !cells.getIn([i + 1, j + 1, 'isHidden'])) {
-    return true;
-  } else if (i + 1 < cells.size && !cells.getIn([i + 1, j, 'isHidden'])) {
-    return true;
-  } else if (i + 1 < cells.size && j - 1 >= 0 && !cells.getIn([i + 1, j - 1, 'isHidden'])) {
-    return true;
-  } else if (j - 1 >= 0 && !cells.getIn([i, j - 1, 'isHidden'])) {
-    return true;
-  }
-  return false;
-};
+import { isOnFringe } from '../cellUtils';
 
 /**
  * Formulates valid solution based on arrangement and position.

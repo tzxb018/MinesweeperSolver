@@ -5,7 +5,8 @@ import { step } from 'actions/boardActions';
 import { changeSmile } from 'actions/smileActions';
 
 const mapStateToProps = state => ({
-  isGameRunning: state.board.present.get('isGameRunning'),
+  canStep: state.board.present.get('isGameRunning') && state.board.present.getIn(['csp', 'isConsistent'])
+    && state.board.present.getIn(['csp', 'solvable']).size > 0,
 });
 
 const mapDispatchToProps = dispatch => ({

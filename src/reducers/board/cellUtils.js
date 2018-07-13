@@ -1,3 +1,28 @@
+// coordinate matrix of all adjacent cells
+const coords = [
+  [-1, -1],   // top-left
+  [-1, 0],    // top-mid
+  [-1, 1],    // top-right
+  [0, 1],     // mid-right
+  [1, 1],     // bottom-right
+  [1, 0],     // bottom-mid
+  [1, -1],    // bottom-left
+  [0, -1],    // mid-left
+];
+
+/**
+ * Determines whether a cell is on the fringe.
+ * @param {Immutable.List<Immutable.List<{}>>} cells matrix of cell objects
+ * @param {number} i row of cell
+ * @param {number } j col of cell
+ * @returns {boolean} true if the cell is on the fringe, else otherwise
+ */
+export const isOnFringe = (cells, i, j) => coords.some(element => {
+  const x = i + element[0];
+  const y = j + element[1];
+  return x >= 0 && x < cells.size && y >= 0 && y < cells.get(0).size && !cells.getIn([x, y, 'isHidden']);
+});
+
 /**
  * Updates the number of nearby mines of the cells around mines.
  * @param {Immutable.List<Immutable.List<Immutable.Map>>>} cells matrix of cell objects
@@ -5,16 +30,6 @@
  * @return {Immutable.List<Immutable.List<Immutable.Map>>>} new cells
  */
 const placeNumbers = (cells, mines) => {
-  const coords = [
-    [-1, -1],   // top-left
-    [-1, 0],    // top-mid
-    [-1, 1],    // top-right
-    [0, 1],     // mid-right
-    [1, 1],     // bottom-right
-    [1, 0],     // bottom-mid
-    [1, -1],    // bottom-left
-    [0, -1],    // mid-left
-  ];
   const numRows = cells.size;
   const numCols = cells.get(0).size;
 
@@ -80,16 +95,6 @@ export const revealNeighbors = (minefield, row, col) => {
   });
   const numRows = minefield.get('cells').size;
   const numCols = minefield.getIn(['cells', 0]).size;
-  const coords = [
-    [-1, -1],   // top-left
-    [-1, 0],    // top-mid
-    [-1, 1],    // top-right
-    [0, 1],     // mid-right
-    [1, 1],     // bottom-right
-    [1, 0],     // bottom-mid
-    [1, -1],    // bottom-left
-    [0, -1],    // mid-left
-  ];
 
   // reveal all neighboring cells
   return minefield.withMutations(m => {

@@ -1,5 +1,8 @@
 import { revealNeighbors } from '../cellUtils';
-import { loseGame } from '../reducerFunctions';
+import {
+  algorithms,
+  loseGame,
+} from '../reducerFunctions';
 
 /**
  * Solves all cells found to be solvable, losing the game if a cell that had a mine was incorrectly revealed.
@@ -14,7 +17,9 @@ export default (state, doLog = true) => state.withMutations(s => {
   const oldNumFlagged = s.getIn(['minefield', 'numFlagged']);
   const oldNumRevealed = s.getIn(['minefield', 'numRevealed']);
   let lostGame = false;
-  s.getIn(['csp', 'solvable']).forEach((solvableSet, setKey) => {
+  const solveOrder = new Map([...s.getIn(['csp', 'solvable']).entries()].sort((a, b) =>
+    algorithms.get(a) - algorithms.get(b)));
+  solveOrder.forEach((solvableSet, setKey) => {
     const numRevealed = s.getIn(['minefield', 'numRevealed']);
     let numFlagged = 0;
     solvableSet.forEach(cell => {
@@ -69,6 +74,7 @@ export default (state, doLog = true) => state.withMutations(s => {
     s.update('historyLog', h => h.push({
       cells: changedCells,
       message: logString,
+      undoable: true,
     }));
   } else {
     solvedCellCounter.forEach((counter, setKey) => {

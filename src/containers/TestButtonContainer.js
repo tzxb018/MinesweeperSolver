@@ -4,12 +4,12 @@ import TestButton from 'components/TestButton';
 import { test } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
-  isGameRunning: state.board.present.get('isGameRunning'),
+  canTest: !state.board.present.get('isGameRunning') && state.board.present.getIn(['minefield', 'numRevealed']) === 0,
 });
 
 const mapDispatchToProps = dispatch => ({
-  test: numIterations => {
-    dispatch(test(numIterations));
+  test: (numIterations, allowCheats, stopOnError) => {
+    dispatch(test(numIterations, allowCheats, stopOnError));
   },
 });
 
