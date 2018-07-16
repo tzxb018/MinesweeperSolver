@@ -13,12 +13,31 @@
   }
 
   .log {
+    border-top: 2px solid #c0c0c0;
     position: relative;
     z-index: 1;
   }
 
+  .green {
+    @extend .log;
+    background-color: rgb(0, 160, 0);
+  }
+
+  .red {
+    @extend .log;
+    background-color: red;
+  }
+
   .log:hover {
     background-color: #808080;
+  }
+
+  .green:hover {
+    background-color: rgb(0, 112, 0);
+  }
+
+  .red:hover {
+    background-color: rgb(207, 0, 0);
   }
 
   .log .cellHighlight {

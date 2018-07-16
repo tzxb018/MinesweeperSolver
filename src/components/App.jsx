@@ -8,6 +8,7 @@ import HistoryLog from 'containers/HistoryLogContainer';
 import PeekToggle from 'containers/PeekToggleContainer';
 import SizeSelector from 'containers/SizeSelectorContainer';
 import StepButton from 'containers/StepButtonContainer';
+import TestButton from 'containers/TestButtonContainer';
 import UndoRedo from 'containers/UndoRedoContainer';
 
 import styles from './style';
@@ -18,6 +19,7 @@ export default class App extends Component {
       <div className={styles['container']}>
         <SizeSelector />
         <CheatButton />
+        <TestButton />
         <Board />
         <ColorCodedKey />
         <PeekToggle />

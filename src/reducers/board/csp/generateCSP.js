@@ -1,39 +1,12 @@
-/**
- * Determines whether a cell is on the fringe.
- * @param cells matrix of cells
- * @param i row of cell
- * @param j col of cell
- * @returns boolean
- */
-const isOnFringe = (cells, i, j) => {
-  // if the cell has any revealed cells adjacent to it, return true, else, return false
-  if (i - 1 >= 0 && j - 1 >= 0 && !cells.getIn([i - 1, j - 1, 'isHidden'])) {
-    return true;
-  } else if (i - 1 >= 0 && !cells.getIn([i - 1, j, 'isHidden'])) {
-    return true;
-  } else if (i - 1 >= 0 && j + 1 < cells.get(0).size && !cells.getIn([i - 1, j + 1, 'isHidden'])) {
-    return true;
-  } else if (j + 1 < cells.get(0).size && !cells.getIn([i, j + 1, 'isHidden'])) {
-    return true;
-  } else if (i + 1 < cells.size && j + 1 < cells.get(0).size && !cells.getIn([i + 1, j + 1, 'isHidden'])) {
-    return true;
-  } else if (i + 1 < cells.size && !cells.getIn([i + 1, j, 'isHidden'])) {
-    return true;
-  } else if (i + 1 < cells.size && j - 1 >= 0 && !cells.getIn([i + 1, j - 1, 'isHidden'])) {
-    return true;
-  } else if (j - 1 >= 0 && !cells.getIn([i, j - 1, 'isHidden'])) {
-    return true;
-  }
-  return false;
-};
+import { isOnFringe } from '../cellUtils';
 
 /**
  * Formulates valid solution based on arrangement and position.
- * @param value value to be placed
- * @param length number of variables in the solution
- * @param position index to start arrangement
- * @param arrangement pattern of values to be placed
- * @returns arrangement with necessary padding on either end to make a valid solution
+ * @param {boolean} value true if placing mines, false if placing open cells
+ * @param {number} length number of variables in the solution
+ * @param {number} position index to start arrangement
+ * @param {Array<boolean>} arrangement pattern of values to be placed
+ * @returns {Array<boolean>} a valid solution according to spec
  */
 const makeSolution = (value, length, position, arrangement) => {
   let solution = [];
@@ -54,9 +27,9 @@ const makeSolution = (value, length, position, arrangement) => {
 
 /**
  * Generates all the possible configurations of mines.
- * @param minesLeft number of mines still to be placed
- * @param numVariables number of variable cells
- * @returns matrix of configurations with one solution in each row
+ * @param {number} minesLeft number of mines still to be placed
+ * @param {number} numVariables number of unknown cells
+ * @returns {Array<Array<boolean>>} matrix of configurations with one solution in each row
  */
 const generatePossibilities = (minesLeft, numVariables) => {
   let value = true;
@@ -133,11 +106,12 @@ const generatePossibilities = (minesLeft, numVariables) => {
 
 /**
  * Creates the constraint object representing the given cell.
- * @param variables array of variable objects
- * @param row cell row
- * @param col cell col
- * @param numMines number of mines this constraint allows for
- * @returns matrix with variable keys in first row, and all possible solutions in subsequent rows
+ * @param {Array<{}>} variables array of variable objects
+ * @param {number} row cell row
+ * @param {number} col cell col
+ * @param {number} numMines number of mines this constraint allows for
+ * @returns {Array<Array<[number, boolean]>>}
+ * matrix with variable keys in first row, and all possible solutions in subsequent rows
  */
 const buildConstraint = (variables, row, col, numMines) => {
   const constraint = [];
@@ -184,7 +158,7 @@ const buildConstraint = (variables, row, col, numMines) => {
 
 /**
  * Creates a variable for each fringe cell
- * @param cells matrix of cells
+ * @param {Array<Array<{}>>} cells matrix of cells
  * @returns array of variable objects
  */
 const getVariables = cells => {
@@ -212,9 +186,9 @@ const getVariables = cells => {
 
 /**
  * Generates the variables and constraints that form the csp model of the minesweeper game.
- * @param csp the old csp model
- * @param cells state of the board cell matrix
- * @returns csp model with list of constraints and variables
+ * @param {Immutable.Map} csp the old csp model
+ * @param {Immutable.List<Immutable.List<{}>>} cells state of the board cell matrix
+ * @returns {Immutable.Map} csp model with list of constraints and variables
  */
 export default (csp, cells) => {
   // get the variables

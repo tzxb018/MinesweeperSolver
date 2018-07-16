@@ -1,8 +1,18 @@
 :local {
-  .button {
+  .container {
     grid-column: 1 / 2;
     grid-row: 2 / 3;
     height: 70px;
     width: 115px;
+  }
+
+  .button {
+    width: 115px;
+    height: 31px;
+  }
+
+  .radio {
+    left: -5px;
+    position: relative;
   }
 }

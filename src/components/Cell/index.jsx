@@ -47,7 +47,7 @@ export default class Cell extends Component {
     />,
     <polygon key="shine" points="6,6 8,6 8,8 6,8" style={{ fill: 'white' }} />,
   ];
-  numbers = [
+  numbers = number => ([
     null,
     <polygon key="1" points="8,3 10,3 10,11 12,11 12,13 5,13 5,11 7,11 7,7 5,7 5,6" style={{ fill: 'blue' }} />,
     <polygon key="2"
@@ -76,7 +76,7 @@ export default class Cell extends Component {
       10,7 10,5 6,5 3,4"
       style={{ fill: 'rgb(128, 128, 128)' }}
     />,
-  ];
+  ][number]);
 
   clickHandler = () => {
     if (this.props.content === -1) {
@@ -87,8 +87,10 @@ export default class Cell extends Component {
     }
   }
 
-  mouseDownHandler = () => {
-    this.props.changeSmile('SCARED');
+  mouseDownHandler = e => {
+    if (e.nativeEvent.which === 1) {
+      this.props.changeSmile('SCARED');
+    }
   }
 
   rightClickHandler = e => {
@@ -109,7 +111,7 @@ export default class Cell extends Component {
         );
       }
     } else {
-      graphic.push(this.numbers[this.props.content]);
+      graphic.push(this.numbers(this.props.content));
     }
     return graphic;
   }

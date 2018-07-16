@@ -1,8 +1,9 @@
 /**
  * Finds whether the given map contains the given pair as a key using deep equality, returning the key if it is found or
  * undefined if it does not exist in the map.
- * @param map
- * @param pair variable pair
+ * @param {Map<Array<number>, Array<Array<boolean>>>} map
+ * @param {Array<number>} pair variable pair
+ * @returns {Array<number>} matching map key or else undefined
  */
 const findKey = (map, pair) => {
   let key;
@@ -17,16 +18,14 @@ const findKey = (map, pair) => {
 };
 
 /**
- * Finds all possible pairings of variables that appear in at least two constraints and stores the possible domains that
- * those variables could take on as a pair.
- * @param components constraint model of the minesweeper board
- * @returns map of variable pairs and their domains
+ * Finds all possible pairings of variables and store the possible domains that those variables could take on as a pair.
+ * @param {Immutable.Map} components constraint model of the minesweeper board
+ * @returns {Map<Array<number>, Array<Array<boolean>>>} map of variable pairs and their domains
  */
 const getDomains = components => {
-  const pairs = new Map();
   const domains = new Map();
 
-  // get all the possible variables pairings and the domains of their pairs
+  // get all the possible variable pairings and the domains of their pairs
   components.forEach(component => {
     component.constraints.forEach(constraint => {
       for (let i = 0; i < constraint[0].length - 1; i++) {
@@ -43,13 +42,10 @@ const getDomains = components => {
             j = temp;
           }
           const pair = [var1, var2];
-          let key = findKey(pairs, pair);
+          let key = findKey(domains, pair);
           if (key === undefined) {
-            pairs.set(pair, false);
             key = pair;
             domains.set(key, []);
-          } else {
-            pairs.set(key, true);
           }
           // add all the possible pair solutions to the map
           for (let k = 1; k < constraint.length; k++) {
@@ -72,20 +68,15 @@ const getDomains = components => {
     });
   });
 
-  // remove any variable pairs that only appear in one constraint
-  pairs.forEach((value, key) => {
-    if (!value) {
-      domains.delete(key);
-    }
-  });
   return domains;
 };
 
 /**
- * Revises a constraint with the given domains. Returning a mpa of the new domain sets that the constraint agrees with.
- * @param constraint a table constraint to be revised
- * @param domains the map of variable pair domains
- * @returns map of the new domains sets that the revised constraint allows for
+ * Revises a constraint with the given domains. Returning a map of the new domain sets that the constraint agrees with.
+ * @param {Array<Array<boolean>>} constraint a table constraint to be revised
+ * @param {Map<Array<number>, Array<Array<boolean>>>} domains the map of variable pair domains
+ * @returns {Map<Array<number>, Array<Array<boolean>>>}
+ * map of the new domains sets that the revised constraint allows for
  */
 const revise = (constraint, domains) => {
   // set up the domain map
@@ -102,9 +93,7 @@ const revise = (constraint, domains) => {
       }
       const pair = [var1, var2];
       const key = findKey(domains, pair);
-      if (key !== undefined) {
-        newDomains.set(key, []);
-      }
+      newDomains.set(key, []);
     }
   }
 
@@ -143,8 +132,8 @@ const revise = (constraint, domains) => {
  * Implementation of pair-wise consistency (PWC) using a similar method to simple tabular reduction. Revises constraint
  * tuples and variable pair domain sets, enforcing PWC across all constraint tables. Any pairs with a domain of only one
  * combination are added to the list of solvable cells.
- * @param csp model of the minefield
- * @returns csp with PWC and any solvable cells identified
+ * @param {Immutable.Map} csp model of the minefield
+ * @returns {Immutable.Map} csp with PWC and any solvable cells identified
  */
 export default csp => csp.withMutations(c => {
   const PWC = [];
@@ -169,7 +158,7 @@ export default csp => csp.withMutations(c => {
             // add any constraints affected by this pair back to the queue
             component.constraints.forEach(element => {
               if (element !== constraint
-              && element[0].includes(varPair[0]) && element[0].includes(varPair[1])
+              && (element[0].includes(varPair[0]) && element[0].includes(varPair[1]))
               && !queue.includes(element)) {
                 queue.push(element);
               }
@@ -208,6 +197,8 @@ export default csp => csp.withMutations(c => {
           row: var1.row,
           value: pairDomain[0][0],
         });
+        c.get('domains').set(varPair[0],
+          new Set([...c.get('domains').get(varPair[0])].filter(x => x === pairDomain[0][0])));
       }
       if (var2 !== undefined) {
         PWC.push({
@@ -216,6 +207,8 @@ export default csp => csp.withMutations(c => {
           row: var2.row,
           value: pairDomain[0][1],
         });
+        c.get('domains').set(varPair[1],
+          new Set([...c.get('domains').get(varPair[1])].filter(x => x === pairDomain[0][1])));
       }
     });
   });

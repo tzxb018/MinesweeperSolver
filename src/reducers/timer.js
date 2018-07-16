@@ -5,6 +5,11 @@ const initialState = Immutable.Map({
   timer: null,
 });
 
+/**
+ * Resets the counter and stops the timer
+ * @param {Immutable.Map<string, any>} state state of the timer
+ * @returns {Immutable.Map<string, any>} new state
+ */
 const resetTimer = state => state.set('counter', 0).update('timer', t => clearInterval(t));
 
 /**

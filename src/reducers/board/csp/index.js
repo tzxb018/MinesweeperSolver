@@ -1,15 +1,16 @@
+import BTS from 'algorithms/backtrackSearch';
+import PWC from 'algorithms/pairwise';
+import STR from 'algorithms/STR';
+import Unary from 'algorithms/unary';
+
 import generateCSP from './generateCSP';
-import normalize from './normalize';
-import PWC from './pairwise';
-import separateComponents from './separateComponents';
-import STR from './STR.js';
-import unaryConsistency from './unary';
+import reduceComponents from './reduceComponents';
 
 /**
  * Checks csp model for any inconsistencies. Any unsatisfied constraints are highlighted red on the board and solving is
  * disabled to avoid errors.
- * @param state state of the board
- * @returns updated state with any inconsistencies highlighted red and solving disabled if inconsistent
+ * @param {Immutable.Map} state state of the board
+ * @returns {Immutable.Map} updated state with any inconsistencies highlighted red and solving disabled if inconsistent
  */
 const checkConsistency = state => state.withMutations(s => {
   // remove previous inconsistency
@@ -33,8 +34,10 @@ const checkConsistency = state => state.withMutations(s => {
 
   // log the processing message
   let logString;
+  let logColor;
   if (inconsistentCount > 0) {
     logString = `Processing stopped, ${inconsistentCount} inconsistencies found`;
+    logColor = 'red';
   } else {
     const solvableCount = new Map();
     const solvableCells = [];
@@ -57,15 +60,17 @@ const checkConsistency = state => state.withMutations(s => {
   }
   s.update('historyLog', h => h.push({
     cells: [],
+    color: logColor,
     message: logString,
+    undoable: true,
   }));
 });
 
 /**
  * Color codes all cells that are solvable.
- * @param cells matrix of cell objects
- * @param csp state of the csp model
- * @returns updated version of cells
+ * @param {Immutable.List<Immutable.List<Immutable.Map>>} cells matrix of cell objects
+ * @param {Immutable.Map} csp state of the csp model
+ * @returns {Immutable.List<Immutable.List<Immutable.Map>>} updated version of cells
  */
 const colorSolvable = (cells, csp) => cells.withMutations(c => {
   // clear previous coloring
@@ -91,8 +96,8 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     });
   }
 
-  // STR are colored darkGreen (2)
-  set = solvableSets.get('STR');
+  // BTS are colored darkGreen (2)
+  set = solvableSets.get('BTS');
   if (set !== undefined) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
@@ -102,8 +107,8 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     });
   }
 
-  // PWC are colored darkBlue (4)
-  set = solvableSets.get('PWC');
+  // STR are colored darkBlue (4)
+  set = solvableSets.get('STR');
   if (set !== undefined) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
@@ -113,15 +118,60 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     });
   }
 
+  // PWC are colored darkRed (5)
+  set = solvableSets.get('PWC');
+  if (set !== undefined) {
+    set.forEach(solvableCell => {
+      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
+        c.setIn([solvableCell.row, solvableCell.col, 'color'], 5);
+        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
+      }
+    });
+  }
+
   return c;
 });
+
+/**
+ * Gets the basic viable domains of each variable.
+ * @param {Array<Array<boolean>>} constraints the constraint model of the minefield
+ * @returns {Map<number, Set<boolean>>} map containing the allowed domain set for each variable
+ */
+const getDomains = constraints => {
+  const domains = new Map();
+
+  constraints.forEach(constraint => {
+    const newDomains = new Map();
+    // for each alive tuple, add the solution values to the domain set
+    constraint.forEach(tuple => {
+      if (tuple.alive) {
+        tuple.forEach((value, index) => {
+          const key = constraint[0][index];
+          if (!newDomains.has(key)) {
+            newDomains.set(key, new Set());
+          }
+          newDomains.get(key).add(value);
+        });
+      }
+    });
+    newDomains.forEach((values, key) => {
+      if (!domains.has(key)) {
+        domains.set(key, new Set([...values]));
+      } else {
+        domains.set(key, new Set([...domains.get(key)].filter(x => values.has(x))));
+      }
+    });
+  });
+
+  return domains;
+};
 
 /**
  * Generates the csp model of the minefield. Enforces unary consistency and normalizes the constraints. Separates the
  * model into its distinct component problems. Enforces any further consistency algorithms specified by the state.
  * Checks that the proposed solution is consistent with all constraints.
- * @param state state of the board
- * @returns state with csp model, solvable cells colored, and any inconsistencies colored
+ * @param {Immutable.Map} state state of the board
+ * @returns {Immutable.Map} state with csp model, solvable cells colored, and any inconsistencies colored
  */
 export default state => state.withMutations(s => {
   // generate the csp model of the minefield
@@ -129,16 +179,25 @@ export default state => state.withMutations(s => {
 
   // enforce unary consistency
   if (s.getIn(['csp', 'isActive', 'Unary'])) {
-    s.update('csp', c => unaryConsistency(c));
+    s.update('csp', c => Unary(c));
   } else {
     s.deleteIn(['csp', 'solvable', 'Unary']);
   }
 
-  // normalize the constraints
-  s.update('csp', c => normalize(c));
+  // normalize and separate variables and constraints into individual components
+  s.update('csp', c => reduceComponents(c));
 
-  // separate variables and constraints into individual components
-  s.update('csp', c => separateComponents(c));
+  // get the variable domains
+  const constraints = [];
+  s.getIn(['csp', 'components']).forEach(component => constraints.push(...component.constraints));
+  s.setIn(['csp', 'domains'], getDomains(constraints));
+
+  // reduce the domains with BTS
+  if (s.getIn(['csp', 'isActive', 'BTS'])) {
+    s.update('csp', c => BTS(c));
+  } else {
+    s.deleteIn(['csp', 'solvable', 'BTS']);
+  }
 
   // reduce the constraints with STR
   if (s.getIn(['csp', 'isActive', 'STR'])) {

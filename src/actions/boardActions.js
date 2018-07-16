@@ -3,8 +3,9 @@ export const changeSize = newSize => ({
   newSize,
 });
 
-export const cheat = () => ({
+export const cheat = isRandom => ({
   type: 'CHEAT',
+  isRandom,
 });
 
 export const loop = () => ({
@@ -29,6 +30,13 @@ export const revealCell = (row, col) => ({
 
 export const step = () => ({
   type: 'STEP',
+});
+
+export const test = (numIterations, allowCheats, stopOnError) => ({
+  type: 'TEST',
+  allowCheats,
+  numIterations,
+  stopOnError,
 });
 
 export const toggleActive = algorithm => ({
