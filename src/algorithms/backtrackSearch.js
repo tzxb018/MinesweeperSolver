@@ -96,19 +96,18 @@ const unlabel = (stack, currentLevel, key, domains, globalDomains) => {
 /**
  * Searches the subspace until a solution is found or the entire subspace is traversed.
  * @param {Array<{key: number, value: boolean}>} stack variable assignments
- * @param {number} startingLevel level to begin the search from
  * @param {Map<number, Set<boolean>} currentDomains variables mapped to the allowed values of the subspace
  * @param {Map<number, Set<boolean>} globalDomains variables mapped to the backup values of the subspace
  * @param {Map<number, Set<Array<Array<boolean>>>>} constraintMap variables mapped to the constraints that contain them
  * @param {Array<number>} assignmentOrder order of variable assignments
  * @returns {boolean} true if a solution was found, false if the search space was exhausted
  */
-const search = (stack, startingLevel, currentDomains, globalDomains, constraintMap, assignmentOrder) => {
+const search = (stack, currentDomains, globalDomains, constraintMap, assignmentOrder) => {
   let consistent = true;
   let currentLevel = stack.length;
 
   // search the tree
-  while (currentLevel >= startingLevel && currentLevel < assignmentOrder.length) {
+  while (currentLevel >= 0 && currentLevel < assignmentOrder.length) {
     const currentVariable = assignmentOrder[currentLevel];
     if (consistent) {
       const oldLevel = currentLevel;
@@ -127,32 +126,6 @@ const search = (stack, startingLevel, currentDomains, globalDomains, constraintM
 };
 
 /**
- * Unswipes variables in swiped order until a new possible swipe is found.
- * @param {Array<{key: number, value: boolean}>} swiped list of swiped variable domains
- * @param {Array<number>} assignmentOrder order of variable assignments
- * @param {Map<number, Set<boolean>} globalDomains variables mapped to the backup values of the subspace
- * @param {Map<number, Set<boolean>} startingDomains variables mapped to their default domain values
- * @returns {boolean} true if unswipe was successful, false if no more solutions can be found
- */
-const unswipe = (swiped, assignmentOrder, globalDomains, startingDomains) => {
-  let canSwipe = false;
-  let searchEnd = assignmentOrder.length;
-  while (!canSwipe && swiped.length > 0) {
-    const unswiped = swiped.pop();
-    const searchBegin = assignmentOrder.indexOf(unswiped.key) + 1;
-    globalDomains.set(unswiped.key, new Set([unswiped.value]));
-    assignmentOrder.slice(searchBegin, searchEnd).forEach(key => {
-      globalDomains.set(key, new Set([...startingDomains.get(key)]));
-      if (!canSwipe && globalDomains.get(key).size > 1) {
-        canSwipe = true;
-      }
-    });
-    searchEnd = searchBegin;
-  }
-  return canSwipe;
-};
-
-/**
  * Performs a backtracking search on the csp until a viable solution is found or the entire search tree is traversed,
  * indicating that the problem is impossible.
  * @param {Immutable.Map} csp constraint model of the minefield
@@ -161,81 +134,62 @@ const unswipe = (swiped, assignmentOrder, globalDomains, startingDomains) => {
 export default csp => csp.withMutations(c => {
   c.deleteIn(['solvable', 'BTS']);
   // create a separate copy of the domains
-  const globalDomains = new Map();
-  c.get('domains').forEach((values, key) => globalDomains.set(key, new Set([...values])));
+  const currentDomains = new Map();
+  c.get('domains').forEach((values, key) => currentDomains.set(key, new Set([...values])));
   // solve each component individually
   c.get('components').forEach(component => {
     // map the variables to the constraints that contain them
     const constraintMap = mapVariablesToConstraints(component.constraints);
     // set the variable assignment order
     const assignmentOrder = [...constraintMap.keys()];
-    assignmentOrder.sort((a, b) => a - b);
+    assignmentOrder.sort((a, b) => currentDomains.get(a).size - currentDomains.get(b).size);
 
+    // set up the stack for the search
     let fullySearched = false;
     const solutions = [];
-    const swiped = [];
-    while (!fullySearched) {
-      // set up the stack for the search
-      const currentDomains = new Map();
-      globalDomains.forEach((values, key) => currentDomains.set(key, new Set([...values])));
-      const stack = [];
-      assignmentOrder.every(key => {
-        if (currentDomains.get(key).size === 1) {
-          stack.push({
-            key,
-            value: [...currentDomains.get(key)][0],
-          });
-          return true;
-        }
-        return false;
-      });
-      const startingLevel = stack.length;
-      if (stack.length === 0 && assignmentOrder.length > 0) {
+    const stack = [];
+    assignmentOrder.every(key => {
+      if (currentDomains.get(key).size === 1) {
         stack.push({
-          key: assignmentOrder[0],
-          value: [...currentDomains.get(assignmentOrder[0])][0],
+          key,
+          value: [...currentDomains.get(key)][0],
         });
+        return true;
       }
+      return false;
+    });
+    if (stack.length === 0 && assignmentOrder.length > 0) {
+      stack.push({
+        key: assignmentOrder[0],
+        value: [...currentDomains.get(assignmentOrder[0])][0],
+      });
+    }
 
+    while (!fullySearched) {
       // search the tree
-      const success = search(stack, startingLevel, currentDomains, globalDomains, constraintMap, assignmentOrder);
+      const success = search(stack, currentDomains, c.get('domains'), constraintMap, assignmentOrder);
 
-      // if a solution was found, add it to the list and advance the starting position
+      // if a solution was found, add it to the list and set up the stack for the next solution
       if (success) {
-        solutions.push(stack);
+        solutions.push(stack.slice());
         // find the next variable with a domain > 1
-        let nextSwipe;
-        assignmentOrder.slice(startingLevel).every(key => {
-          if (currentDomains.get(key).size === 1) {
-            globalDomains.set(key, new Set([...currentDomains.get(key)]));
-            return true;
-          }
-          nextSwipe = key;
-          return false;
-        });
-        // if this was the last possible solution, attempt to unswipe
-        if (nextSwipe === undefined) {
-          if (swiped.length === 0) {
-            fullySearched = true;
+        let swipe;
+        while (!swipe && stack.length > 0) {
+          const top = stack.pop();
+          if (currentDomains.get(top.key).size > 1) {
+            swipe = top;
           } else {
-            if (!unswipe(swiped, assignmentOrder, globalDomains, c.get('domains'))) {
-              fullySearched = true;
-            }
+            currentDomains.set(top.key, new Set([...c.get('domains').get(top.key)]));
           }
-        // else, swipe the next available variable
-        } else {
-          const swipe = stack.find(x => x.key === nextSwipe);
-          swiped.push(swipe);
-          globalDomains.get(nextSwipe).delete(swipe.value);
         }
-      // if no solution was found and no cells can be unswiped, the tree is fully searched
-      } else if (swiped.length === 0) {
-        fullySearched = true;
-      // attempt to unswipe
-      } else {
-        if (!unswipe(swiped, assignmentOrder, globalDomains, c.get('domains'))) {
+        if (swipe) {
+          currentDomains.get(swipe.key).delete(swipe.value);
+        } else {
           fullySearched = true;
         }
+      // else the tree is fully searched
+      } else {
+        fullySearched = true;
       }
     }
 

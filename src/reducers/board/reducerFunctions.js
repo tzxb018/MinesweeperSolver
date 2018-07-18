@@ -253,9 +253,9 @@ export const initialize = () => {
     constraints: [],
     isActive: Immutable.Map({
       BTS: true,
-      PWC: true,
-      STR: true,
-      Unary: true,
+      PWC: false,
+      STR: false,
+      Unary: false,
     }),
     isConsistent: true,
     solvable: Immutable.Map(),
@@ -361,6 +361,7 @@ export const loseGame = (state, row = undefined, col = undefined) => state.withM
 export const test = (state, numIterations, allowCheats = true, stopOnError = false) => {
   let newState = state;
   const logMessages = [];
+  let numFails = 0;
   for (let i = 0; i < numIterations; i++) {
     try {
       // attempt to solve the puzzle
@@ -384,6 +385,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
 
       if (newState.get('isGameRunning')) {
         logColor = 'red';
+        numFails++;
         // stopped due to inconsistencies
         if (!newState.getIn(['csp', 'isConsistent'])) {
           logString = newState.get('historyLog').last().message;
@@ -403,6 +405,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
         } else {
           logString = 'Error made during solving';
           logColor = 'red';
+          numFails++;
           error = true;
         }
       }
@@ -423,6 +426,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
       let logString = 'Error thrown during solving';
       logString += `\n\t ${e.toString()}`;
       const logColor = 'red';
+      numFails++;
       logMessages.push([logString, logColor]);
       if (stopOnError) {
         break;
@@ -430,6 +434,11 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
     }
     newState = newState.deleteIn(['csp', 'count']);
     newState = reset(newState);
+  }
+  if (numIterations > 10) {
+    const accuracy = (numIterations - numFails) / numIterations * 100;
+    const logString = `Testing was ${accuracy}% successful`;
+    logMessages.push([logString]);
   }
   return newState.update('historyLog', h => h.push(...logMessages.map(log => ({
     cells: [],
