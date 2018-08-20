@@ -1,4 +1,4 @@
-import BTS from 'algorithms/backtrackSearch';
+import BTS from 'algorithms/BTS/index';
 import PWC from 'algorithms/pairwise';
 import STR from 'algorithms/STR';
 import Unary from 'algorithms/unary';
@@ -193,7 +193,8 @@ export default state => state.withMutations(s => {
   s.setIn(['csp', 'domains'], getDomains(constraints));
 
   // reduce the domains with BTS
-  if (s.getIn(['csp', 'isActive', 'BTS'])) {
+  if (s.getIn(['csp', 'isActive', 'BTS'])
+  && (s.getIn(['csp', 'isActive', 'BC']) || s.getIn(['csp', 'isActive', 'FC']))) {
     s.update('csp', c => BTS(c));
   } else {
     s.deleteIn(['csp', 'solvable', 'BTS']);

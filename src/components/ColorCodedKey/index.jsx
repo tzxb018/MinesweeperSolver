@@ -6,7 +6,9 @@ import styles from './style';
 export default class ColorCodedKey extends Component {
   static propTypes = {
     // state props
+    BC: PropTypes.bool.isRequired,
     BTS: PropTypes.bool.isRequired,
+    FC: PropTypes.bool.isRequired,
     PWC: PropTypes.bool.isRequired,
     STR: PropTypes.bool.isRequired,
     Unary: PropTypes.bool.isRequired,
@@ -50,7 +52,7 @@ export default class ColorCodedKey extends Component {
           />
           <label htmlFor="Unary">Unary</label>
         </div>
-        <div>
+        <div className={styles['dropdown']}>
           {this.colorCodedIcon('darkGreen')}
           <input type="checkbox"
             id="BTS"
@@ -59,6 +61,26 @@ export default class ColorCodedKey extends Component {
             onChange={this.changeHandler}
           />
           <label htmlFor="BTS">BTS</label>
+          <div className={styles['dropdown-content']}>
+            <div>
+              <input type="checkbox"
+                id="BC"
+                value="BC"
+                checked={this.props.BC}
+                onChange={this.changeHandler}
+              />
+              <label htmlFor="BC">BC</label>
+            </div>
+            <div>
+              <input type="checkbox"
+                id="FC"
+                value="FC"
+                checked={this.props.FC}
+                onChange={this.changeHandler}
+              />
+              <label htmlFor="FC">FC</label>
+            </div>
+          </div>
         </div>
         <div>
           {this.colorCodedIcon('darkBlue')}
