@@ -1,17 +1,18 @@
+import { checkAndRecordFuture, intersect } from '../utils';
+
 /**
  * Filters the constraints, finding those that contain any two current or future variables.
- * @param {Array<{key: number, value: boolean}} assignmentOrder variable assignment order
- * @param {Map<number, Set<Array<Array<boolean>>>} constraintMap variables mapped to the constraints that contain them
+ * @param {Map<number, Set<Array<Array<boolean>>>} constraints variables mapped to the constraints that contain them
+ * @param {Array<number>} assignmentOrder variable assignment order
  * @returns {Map<number, Array<Array<Array<boolean>>>} variables mapped to the constraints relevant to their forward
  * check
  */
-export const constraintFilter = (assignmentOrder, constraintMap) => {
+const constraintFilter = (constraints, assignmentOrder) => {
   const filteredMap = new Map();
   assignmentOrder.forEach((current, index) => {
     const future = assignmentOrder.slice(index + 1);
-    const constraints = [...constraintMap.get(current)];
-    const filtered = constraints.filter(constraint =>
-      future.some(variable => constraintMap.get(variable).has(constraint)));
+    const filtered = [...constraints.get(current)].filter(constraint =>
+      future.some(variable => constraints.get(variable).has(constraint)));
     filteredMap.set(current, filtered);
   });
   return filteredMap;
@@ -28,6 +29,7 @@ export const constraintFilter = (assignmentOrder, constraintMap) => {
  */
 const reduce = (reduced, newDomains, domains, queue) => {
   // reduce the domains
+  let consistent = true;
   newDomains.forEach((values, key) => {
     domains.set(key, new Set([...domains.get(key)].filter(x => {
       if (values.has(x)) {
@@ -39,12 +41,13 @@ const reduce = (reduced, newDomains, domains, queue) => {
       }
       return false;
     })));
+    newDomains.set(key, new Set([...domains.get(key)]));
+    // check for destroyed domains
+    if (domains.get(key).size === 0) {
+      consistent = false;
+    }
   });
-  // check for destroyed domains
-  if ([...domains.values()].some(set => set.size === 0)) {
-    return false;
-  }
-  return true;
+  return consistent;
 };
 
 /**
@@ -54,36 +57,25 @@ const reduce = (reduced, newDomains, domains, queue) => {
  * to their forward checks
  * @param {Map<number, Set<boolean>>} domains current variable domains
  * @param {Map<number, Array<Set<boolean>>>} reductions variables mapped to the domain reductions that have occured
- * @param {{timeChecking: 0}} diagnostics execution metrics object
  * @returns {boolean} true if consistent, false otherwise
  */
-const forwardCheck = (stack, constraintMap, domains, reductions, diagnostics) => {
-  const startTime = performance.now();
+const forwardCheck = (stack, constraintMap, domains, reductions) => {
   const current = stack.slice(-1)[0].key;
   const future = [...constraintMap.keys()].slice(stack.length);
   const newDomains = new Map();
   future.forEach(key => newDomains.set(key, new Set([...domains.get(key)])));
+  const mapStack = new Map();
+  stack.forEach(variable => mapStack.set(variable.key, new Set([variable.value])));
 
   // check that the current assignment is consistent with all constraints
   let consistent = constraintMap.get(current).every(constraint => {
-    const subFuture = constraint[0].filter(key => future.includes(key));
-    const subDomains = new Map();
-    subFuture.forEach(key => subDomains.set(key, new Set()));
-    const subSolution = stack.filter(variable => constraint[0].includes(variable.key));
-    let supported = false;
-    // populate subDomains from consistent tuples
-    constraint.slice(1).forEach(tuple => {
-      if (tuple.alive && subSolution.every(element => tuple[constraint[0].indexOf(element.key)] === element.value)) {
-        subFuture.forEach(key => subDomains.get(key).add(tuple[constraint[0].indexOf(key)]));
-        supported = true;
-      }
-    });
-    // update newDomains from subDomains if the assignment is supported
-    if (supported) {
-      subDomains.forEach((values, key) =>
-        newDomains.set(key, new Set([...newDomains.get(key)].filter(value => values.has(value)))));
+    const subFutureDomains = checkAndRecordFuture(mapStack, constraint, future, true);
+    // update newDomains from subFutureDomains if the assignment is supported
+    if (subFutureDomains) {
+      subFutureDomains.forEach((values, key) => newDomains.set(key, intersect(newDomains.get(key), values)));
+      return true;
     }
-    return supported;
+    return false;
   });
 
   // reduce the domains of the future variables
@@ -96,21 +88,13 @@ const forwardCheck = (stack, constraintMap, domains, reductions, diagnostics) =>
     while (consistent && queue.length > 0) {
       const next = queue.shift();
       consistent = constraintMap.get(next).every(constraint => {
-        const subFuture = constraint[0].filter(key => future.includes(key));
-        const subDomains = new Map();
-        subFuture.forEach(key => subDomains.set(key, new Set()));
-        let supported = false;
-        constraint.slice(1).forEach(tuple => {
-          if (tuple.alive && subFuture.every(key => domains.get(key).has(tuple[constraint[0].indexOf(key)]))) {
-            subFuture.forEach(key => subDomains.get(key).add(tuple[constraint[0].indexOf(key)]));
-            supported = true;
-          }
-        });
-        if (supported) {
-          subDomains.forEach((values, key) =>
-            newDomains.set(key, new Set([...newDomains.get(key)].filter(value => values.has(value)))));
+        const subFutureDomains = checkAndRecordFuture(newDomains, constraint, future);
+        // update newDomains from subFutureDomains if the assignment is supported
+        if (subFutureDomains) {
+          subFutureDomains.forEach((values, key) => newDomains.set(key, intersect(newDomains.get(key), values)));
+          return true;
         }
-        return supported;
+        return false;
       });
       // reduce the domains of the future variables
       if (consistent) {
@@ -120,14 +104,11 @@ const forwardCheck = (stack, constraintMap, domains, reductions, diagnostics) =>
 
     if (consistent) {
       reduced.forEach((values, key) => reductions.get(key).push(values));
-      diagnostics.timeChecking += performance.now() - startTime;
       return true;
     }
     reduced.forEach((values, key) => values.forEach(value => domains.get(key).add(value)));
-    diagnostics.timeChecking += performance.now() - startTime;
     return false;
   }
-  diagnostics.timeChecking += performance.now() - startTime;
   return false;
 };
 
@@ -140,23 +121,26 @@ const forwardCheck = (stack, constraintMap, domains, reductions, diagnostics) =>
  * @param {Map<number, Set<boolean>>} domains current variable domains
  * @param {Map<number, Array<Set<boolean>>>} reductions variables mapped to the domain reductions that have occured
  * @param {{timeChecking: number}} diagnostics execution metrics object
- * @returns {number} next level to try labeling
+ * @returns {boolean} true if labeling was successful, false if unlabeling needed
  */
 const label = (stack, key, constraintMap, domains, reductions, diagnostics) => {
-  while (domains.get(key).size > 0) {
+  let consistent = false;
+  while (domains.get(key).size > 0 && !consistent) {
     stack.push({
       key,
       value: [...domains.get(key)][0],
     });
-    if (forwardCheck(stack, constraintMap, domains, reductions, diagnostics)) {
-      break;
+    const startTime = performance.now();
+    if (forwardCheck(stack, constraintMap, domains, reductions)) {
+      consistent = true;
     } else {
       const value = stack.pop().value;
       domains.get(key).delete(value);
       reductions.get(key).slice(-1)[0].add(value);
     }
+    diagnostics.timeChecking += performance.now() - startTime;
   }
-  return stack.length;
+  return consistent;
 };
 
 /**
@@ -165,6 +149,7 @@ const label = (stack, key, constraintMap, domains, reductions, diagnostics) => {
  * @param {Array<number>} assignmentOrder order of variable assignments
  * @param {Map<number, Set<boolean>} domains current variable domains and reductions
  * @param {Map<number, Array<Set<boolean>>>} reductions variables mapped to the domain reductions that have occured
+ * @return {boolean} true if consistent, false if more unlabeling needed
  */
 const unlabel = (stack, assignmentOrder, domains, reductions) => {
   const variable = stack.pop();
@@ -176,7 +161,11 @@ const unlabel = (stack, assignmentOrder, domains, reductions) => {
     });
     domains.get(variable.key).delete(variable.value);
     reductions.get(variable.key).slice(-1)[0].add(variable.value);
+    if (domains.get(variable.key).size > 0) {
+      return true;
+    }
   }
+  return false;
 };
 
 /**
@@ -187,37 +176,100 @@ const unlabel = (stack, assignmentOrder, domains, reductions) => {
  * @param {Map<number, Array<Array<Array<boolean>>>>} constraintMap variables mapped to the constraints relevant to
  * their forward check
  * @param {Array<number>} assignmentOrder order of variable assignments
- * @returns {{*}} search diagnostics object
+ * @param {{nodesVisited: number, backtracks: number, timeChecking: number}} diagnostics search metrics object
+ * @returns {boolean} true if solution was found, false if no solution exists
  */
-export default (stack, domains, reductions, constraintMap, assignmentOrder) => {
+const search = (stack, domains, reductions, constraintMap, assignmentOrder, diagnostics) => {
   let consistent = true;
   let currentLevel = stack.length;
-  const diagnostics = {
-    solutionFound: false,
-    nodesVisited: 0,
-    backtracks: 0,
-    timeChecking: 0,
-  };
 
-  // search the tree
   while (currentLevel >= 0 && currentLevel < assignmentOrder.length) {
     const currentVariable = assignmentOrder[currentLevel];
     if (consistent) {
-      const oldLevel = currentLevel;
-      currentLevel = label(stack, currentVariable, constraintMap, domains, reductions, diagnostics);
+      consistent = label(stack, currentVariable, constraintMap, domains, reductions, diagnostics);
       diagnostics.nodesVisited++;
-      if (currentLevel === oldLevel) {
-        consistent = false;
+      if (consistent) {
+        currentLevel++;
       }
     } else {
-      unlabel(stack, assignmentOrder, domains, reductions);
+      consistent = unlabel(stack, assignmentOrder, domains, reductions);
       currentLevel--;
       diagnostics.backtracks++;
-      if (currentLevel >= 0 && domains.get(assignmentOrder[currentLevel]).size > 0) {
-        consistent = true;
-      }
     }
   }
-  diagnostics.solutionFound = stack.length === assignmentOrder.length;
-  return diagnostics;
+  return stack.length === assignmentOrder.length;
+};
+
+/**
+ * Finds all solutions to the given csp and reduces them to the backbone.
+ * @param {Map<number, Set<boolean>} domains variables mapped to their allowed values
+ * @param {Map<number, Array<Array<Array<boolean>>>>} constraints variables mapped to their constraints
+ * @param {Array<number>} assignmentOrder order of variable assignments
+ * @param {{*}} diagnostics search metrics object
+ * @returns {Array[{key: number, value: boolean}]} list of solvable variables
+ */
+export default (domains, constraints, assignmentOrder, diagnostics) => {
+  const currentDomains = new Map();
+  const reductions = new Map();
+  assignmentOrder.forEach(key => {
+    currentDomains.set(key, new Set([...domains.get(key)]));
+    reductions.set(key, []);
+  });
+  // pad the first variable's reductions so attempting to restore doesn't cause an error
+  if (assignmentOrder.length > 0) {
+    reductions.get(assignmentOrder[0]).push(new Set());
+  }
+  let fullySearched = false;
+  const stack = [];
+  const solutions = [];
+
+  // filter the constraints
+  const filterTime = performance.now();
+  const constraintMap = constraintFilter(constraints, assignmentOrder);
+  diagnostics.timeFiltering += performance.now() - filterTime;
+
+  while (!fullySearched) {
+    if (search(stack, currentDomains, reductions, constraintMap, assignmentOrder, diagnostics)) {
+      // save the solution
+      solutions.push(stack.slice());
+
+      // find the next variable that could be solved in a different way
+      let next;
+      while (!next && stack.length > 0) {
+        const top = stack.pop();
+        if (currentDomains.get(top.key).size > 1) {
+          next = top;
+        } else {  // restore the reductions to clean up for the next search
+          assignmentOrder.slice(assignmentOrder.indexOf(top.key) + 1).forEach(key =>
+            [...reductions.get(key).pop()].forEach(d => currentDomains.get(key).add(d)));
+        }
+      }
+
+      // remove the domain so the same solution isn't found again
+      if (next) {
+        assignmentOrder.slice(assignmentOrder.indexOf(next.key) + 1).forEach(key =>
+          [...reductions.get(key).pop()].forEach(d => currentDomains.get(key).add(d)));
+        reductions.get(next.key).slice(-1)[0].add(next.value);
+        currentDomains.get(next.key).delete(next.value);
+      } else {
+        fullySearched = true;
+      }
+    } else {
+      fullySearched = true;
+    }
+  }
+
+  // reduce the solutions to the backbone
+  const backbone = [];
+  [...currentDomains.keys()].forEach((key, index) => {
+    const solutionValues = new Set();
+    solutions.forEach(solution => solutionValues.add(solution[index].value));
+    if (solutionValues.size === 1) {
+      backbone.push({
+        key,
+        value: [...solutionValues][0],
+      });
+    }
+  });
+  return backbone;
 };

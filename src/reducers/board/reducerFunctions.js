@@ -254,7 +254,7 @@ export const initialize = () => {
     isActive: Immutable.Map({
       BC: true,
       BTS: true,
-      FC: false,
+      FC: true,
       PWC: false,
       STR: false,
       Unary: false,
@@ -439,7 +439,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
       numFails++;
       logMessages.push([logString, logColor]);
       if (stopOnError) {
-        break;
+        throw e;
       }
     }
     newState = newState.deleteIn(['csp', 'count']);
