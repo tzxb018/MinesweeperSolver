@@ -154,7 +154,7 @@ export default (domains, constraints, assignmentOrder, diagnostics) => {
 
   // reduce the solutions to the backbone
   const backbone = [];
-  [...currentDomains.keys()].forEach((key, index) => {
+  assignmentOrder.forEach((key, index) => {
     const solutionValues = new Set();
     solutions.forEach(solution => solutionValues.add(solution[index].value));
     if (solutionValues.size === 1) {

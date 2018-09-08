@@ -1,32 +1,37 @@
 /**
- * Revises a constraint with the given domains. Returning a map of the new domain sets that the constraint agrees with.
+ * Revises a constraint with the given domains. Supported domains are recorded and returned in a new map.
+ * If reduced is provided, any killed tuples are recorded there. Otherwise they are ignored.
  * @param {Array<Array<boolean>>} constraint a table constraint to be revised
- * @param {Map<number, Set<boolean>>} domains the set of variable domains
- * @returns {Map<number, Set<boolean>>} map of the new domain sets that the revised constraint allows for
+ * @param {Map<number, Set<boolean>>} domains the set of allowed variable domains
+ * @param {Map<{}, Set<number>>} [reduced] table constraints mapped to their killed tuples
+ * @returns {Map<number, Set<boolean>>} variables mapped to their new allowed domains
  */
-const revise = (constraint, domains) => {
+export const revise = (constraint, domains, reduced = undefined) => {
   // set up the new domain map
   const newDomains = new Map();
-  constraint[0].forEach(varKey => newDomains.set(varKey, new Set()));
+  constraint[0].forEach(key => newDomains.set(key, new Set()));
 
-  for (let i = 1; i < constraint.length; i++) {
-    // revise the alive tuples with the old domain sets
-    if (constraint[i].alive) {
-      for (let j = 0; j < constraint[0].length; j++) {
-        if (!domains.get(constraint[0][j]).has(constraint[i][j])) {
-          constraint[i].alive = false;
+  // revise the alive tuples with the old domain sets
+  constraint.slice(1).forEach((tuple, tupleNumber) => {
+    if (tuple.alive) {
+      const consistent = tuple.every((value, index) => {
+        if (!domains.get(constraint[0][index]).has(value)) {
+          tuple.alive = false;
           constraint.alive--;
-          break;
+          if (reduced) {
+            reduced.get(constraint).add(tupleNumber + 1);
+          }
+          return false;
         }
-      }
+        return true;
+      });
+
       // populate the new domain sets with the consistent tuples
-      if (constraint[i].alive) {
-        for (let j = 0; j < constraint[0].length; j++) {
-          newDomains.get(constraint[0][j]).add(constraint[i][j]);
-        }
+      if (consistent) {
+        tuple.forEach((value, index) => newDomains.get(constraint[0][index]).add(value));
       }
     }
-  }
+  });
 
   return newDomains;
 };

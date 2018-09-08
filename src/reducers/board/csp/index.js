@@ -194,7 +194,8 @@ export default state => state.withMutations(s => {
 
   // reduce the domains with BTS
   if (s.getIn(['csp', 'isActive', 'BTS'])
-  && (s.getIn(['csp', 'isActive', 'BC']) || s.getIn(['csp', 'isActive', 'FC']))) {
+  && (s.getIn(['csp', 'isActive', 'BC'])
+  || s.getIn(['csp', 'isActive', 'FC']) || s.getIn(['csp', 'isActive', 'FCSTR']))) {
     s.update('csp', c => BTS(c));
   } else {
     s.deleteIn(['csp', 'solvable', 'BTS']);

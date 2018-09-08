@@ -9,6 +9,7 @@ export default class ColorCodedKey extends Component {
     BC: PropTypes.bool.isRequired,
     BTS: PropTypes.bool.isRequired,
     FC: PropTypes.bool.isRequired,
+    FCSTR: PropTypes.bool.isRequired,
     PWC: PropTypes.bool.isRequired,
     STR: PropTypes.bool.isRequired,
     Unary: PropTypes.bool.isRequired,
@@ -79,6 +80,15 @@ export default class ColorCodedKey extends Component {
                 onChange={this.changeHandler}
               />
               <label htmlFor="FC">FC</label>
+            </div>
+            <div>
+              <input type="checkbox"
+                id="FCSTR"
+                value="FCSTR"
+                checked={this.props.FCSTR}
+                onChange={this.changeHandler}
+              />
+              <label htmlFor="FCSTR">FCSTR</label>
             </div>
           </div>
         </div>

@@ -255,6 +255,7 @@ export const initialize = () => {
       BC: true,
       BTS: true,
       FC: true,
+      FCSTR: true,
       PWC: false,
       STR: false,
       Unary: false,
@@ -457,7 +458,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
   }
 
   if (newState.getIn(['csp', 'isActive', 'BTS'])) {
-    ['BC', 'FC'].forEach(algorithm => {
+    ['BC', 'FC', 'FCSTR'].forEach(algorithm => {
       if (newState.getIn(['csp', 'isActive', algorithm])) {
         const diagnostics = newState.getIn(['csp', 'diagnostics', algorithm]);
         logString += `\n${algorithm} (averages per problem):`;

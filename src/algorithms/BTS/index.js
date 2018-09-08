@@ -1,5 +1,6 @@
 import backCheckSearch from './backCheck';
 import forwardCheckSearch from './forwardCheck';
+import forwardCheckSTRSearch from './forwardCheckSTR';
 
 /**
  * Groups all the constraints by the variables they contain.
@@ -35,7 +36,11 @@ export default csp => csp.withMutations(c => {
     backCheckSearch(domains, constraints, assignmentOrder, diagnostics));
   algorithms.set('FC', (domains, constraints, assignmentOrder, diagnostics) =>
     forwardCheckSearch(domains, constraints, assignmentOrder, diagnostics));
+  algorithms.set('FCSTR', (domains, constraints, assignmentOrder, diagnostics) =>
+    forwardCheckSTRSearch(domains, constraints, assignmentOrder, diagnostics));
+
   [...algorithms.keys()].forEach(key => solvable.set(key, []));
+
 
   c.get('components').forEach(component => {
     // sort the constraints and set the assignment order
