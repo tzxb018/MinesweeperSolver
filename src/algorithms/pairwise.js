@@ -1,71 +1,69 @@
 /**
  * Finds whether the given map contains the given pair as a key using deep equality, returning the key if it is found or
  * undefined if it does not exist in the map.
- * @param {Map<Array<number>, Array<Array<boolean>>>} map
- * @param {Array<number>} pair variable pair
- * @returns {Array<number>} matching map key or else undefined
+ * @param {Map<number[], boolean[][]>} map
+ * @param {number[]} pair variable pair to search for
+ * @returns {number[]} matching map key or else undefined
  */
-const findKey = (map, pair) => {
-  let key;
-  const keys = Array.from(map.keys());
-  keys.some(element => {
-    if (pair[0] === element[0] && pair[1] === element[1]) {
-      key = element;
+const findKey = (map, pair) =>
+  [...map.keys()].find(element => element.every((variable, index) => variable === pair[index]));
+
+/**
+ * Finds all valid pairings of variables and maps them to the constraints that have them in scope. A valid pair is a set
+ * of variables that appear together in more than one constraint.
+ * @param {Constraint[]} constraints list of Constraints
+ * @param {number} pairSize the size of the pairs to find (how many variables they should have)
+ * @returns {Map<number[], Constraint[]>} valid variable pairs mapped to their constraints
+ */
+const mapPairsToConstraints = (constraints, pairSize) => {
+  const pairMap = new Map();
+
+  // get all the possible pairings
+  constraints.filter(constraint => constraint.scope.length >= pairSize).forEach(constraint => {
+    // find all pairs of the required length
+    const pairs = [];
+    constraint.scope.slice(0, -pairSize + 1).forEach(variable => pairs.push([variable]));
+    for (let i = 1; i < pairSize; i++) {
+      pairs.forEach((pair, index) => pair.push(constraint.scope[index + i]));
     }
-    return key !== undefined;
+
+    // add each of the pairs to the map
+    pairs.forEach(pair => {
+      let key = findKey(pairMap, pair);
+      if (key === undefined) {
+        pairMap.set(pair, []);
+        key = pair;
+      }
+      pairMap.get(key).push(constraint);
+    });
   });
-  return key;
+
+  // filter the map so only valid pairs remains
+  [...pairMap.keys()].forEach(pair => {
+    if (pairMap.get(pair).length === 1) {
+      pairMap.delete(pair);
+    }
+  });
+  return pairMap;
 };
 
 /**
- * Finds all possible pairings of variables and store the possible domains that those variables could take on as a pair.
- * @param {Immutable.Map} components constraint model of the minesweeper board
- * @returns {Map<Array<number>, Array<Array<boolean>>>} map of variable pairs and their domains
+ * Finds the valid domains of each variable pair.
+ * @param {Map<number[], Constraint[]>} pairMap variable pairs mapped to their constraints
+ * @returns {Map<number[], boolean[][]} variable pairs mapped to the list of their valid domain combinations
  */
-const getDomains = components => {
+const getPairDomains = pairMap => {
   const domains = new Map();
 
-  // get all the possible variable pairings and the domains of their pairs
-  components.forEach(component => {
-    component.constraints.forEach(constraint => {
-      for (let i = 0; i < constraint[0].length - 1; i++) {
-        let var1 = constraint[0][i];
-        for (let j = i + 1; j < constraint[0].length; j++) {
-          let var2 = constraint[0][j];
-          // swap the variable keys if they are not in numerical order
-          if (var2 < var1) {
-            let temp = var1;
-            var1 = var2;
-            var2 = temp;
-            temp = i;
-            i = j;
-            j = temp;
-          }
-          const pair = [var1, var2];
-          let key = findKey(domains, pair);
-          if (key === undefined) {
-            key = pair;
-            domains.set(key, []);
-          }
-          // add all the possible pair solutions to the map
-          for (let k = 1; k < constraint.length; k++) {
-            if (constraint[k].alive) {
-              const solution = [constraint[k][i], constraint[k][j]];
-              // if the solution isn't already in the map, add it
-              if (!domains.get(key).some(element => element[0] === solution[0] && element[1] === solution[1])) {
-                domains.get(key).push(solution);
-              }
-            }
-          }
-          // if the keys were swapped, swap them back
-          if (j < i) {
-            const temp = j;
-            j = i;
-            i = temp;
-          }
-        }
-      }
+  // for each pair find the valid domains set by each constraint and intersect them
+  pairMap.forEach((constraints, pair) => {
+    let tuples = constraints[0].pairDomains(pair);
+    constraints.slice(1).forEach(constraint => {
+      const newTuples = constraint.pairDomains(pair);
+      tuples = tuples.filter(domain =>
+        newTuples.some(newDomain => newDomain.every((element, index) => element === domain[index])));
     });
+    domains.set(pair, tuples);
   });
 
   return domains;

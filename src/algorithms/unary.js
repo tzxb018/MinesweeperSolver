@@ -1,14 +1,18 @@
 /**
- * Finds unary (scope of only one variable) constraints.
- * @param {Array<{}>} constraints array of constraint objects
- * @returns {Map<number, boolean>} solvable map of variable keys with their solution
+ * Finds all unary constraints and returns any unary restrictions as specs. Unary constraints are those with a scope of
+ * only one variable
+ * @param {Constraint[]} constraints array of Constraints
+ * @returns {Object[]} domain specifications {key: number, value: boolean}
  */
 const findUnary = constraints => {
-  const unary = new Map();
+  const unary = [];
   // for each unary constraint
   constraints.forEach(constraint => {
-    if (constraint[0].length === 1 && constraint.alive === 1) {
-      unary.set(constraint[0][0], constraint[1][0]);
+    if (constraint.scope.length === 1 && constraint.numAlive === 1) {
+      unary.push({
+        key: constraint.scope[0],
+        value: constraint.tuples[0][0],
+      });
     }
   });
 
@@ -16,62 +20,33 @@ const findUnary = constraints => {
 };
 
 /**
- * Enforces unary variables on the constraints.
- * @param {Map<number, boolean>} unary map of unary variables
- * @param {Array<{}>} constraints list of constraint objects
- * @returns {Array<{}>} constraints with unary consistency
- */
-const enforceUnary = (unary, constraints) => {
-  unary.forEach((value, key) => {
-    constraints.forEach((constraint, i) => {
-      const index = constraint[0].indexOf(key);
-      if (index !== -1) {
-        for (let j = 1; j < constraint.length; j++) {
-          if (constraints[i][j].alive && constraint[j][index] !== value) {
-            // kill a solution if it does not match the unary constraint
-            constraints[i][j].alive = false;
-            constraints[i].alive--;
-          }
-        }
-      }
-    });
-  });
-
-  return constraints;
-};
-
-/**
- * Enforces unary consistency.
- * Constraints with a scope of only one variable are tested against all other constraints. Each unary constraint is then
- * enforced on the constraints and added to the list of solvable variables.
+ * Enforces unary consistency on all constraints. Constraints with a scope of only one variable are tested against all
+ * other constraints. Each unary constraint is then enforced on the constraints and added to the list of solvable
+ * variables.
  * @param {Immutable.Map} csp immutable state of the csp model
  * @returns {Immutable.Map} new csp model with unary consistency
  */
 export default csp => {
-  // create a mutable copy of the csp constraints
-  let constraints = csp.get('constraints').slice();
-
-  // find and enforce unary consistency
-  const unary = findUnary(constraints);
-  if (unary.length === 0) {
+  // find all unary variables
+  const specs = findUnary(csp.get('constraints'));
+  if (specs.length === 0) {
     return csp.deleteIn(['solvable', 'Unary']);
   }
-  constraints = enforceUnary(unary, constraints);
+
+  // enfore unary consistency
+  csp.get('constraints').forEach(constraint => constraint.killIf(specs));
 
   return csp.withMutations(c => {
-    c.set('constraints', constraints);
     const solvable = [];
-    unary.forEach((value, key) => {
-      const variable = c.get('variables').find(element => element.key === key);
+    specs.forEach(spec => {
+      const variable = c.get('variables').find(element => element.key === spec.key);
       solvable.push({
         col: variable.col,
-        key,
+        key: spec.key,
         row: variable.row,
-        value,
+        value: spec.value,
       });
     });
-    if (solvable.length > 0) {
-      c.setIn(['solvable', 'Unary'], solvable);
-    }
+    c.setIn(['solvable', 'Unary'], solvable);
   });
 };

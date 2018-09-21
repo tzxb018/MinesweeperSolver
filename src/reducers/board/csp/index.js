@@ -22,7 +22,7 @@ const checkConsistency = state => state.withMutations(s => {
   let inconsistentCount = 0;
   s.getIn(['csp', 'components']).forEach(component => {
     component.constraints.forEach(constraint => {
-      if (constraint.alive === 0) {
+      if (constraint.isAlive) {
         s.setIn(['minefield', 'cells', constraint.row, constraint.col, 'color'], -1);
         s.setIn(['csp', 'isConsistent'], false);
         inconsistentCount++;
@@ -134,26 +134,13 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
 
 /**
  * Gets the basic viable domains of each variable.
- * @param {Array<Array<boolean>>} constraints the constraint model of the minefield
+ * @param {Constraint[]} constraints array of Constraints
  * @returns {Map<number, Set<boolean>>} map containing the allowed domain set for each variable
  */
-const getDomains = constraints => {
+export const getDomains = constraints => {
   const domains = new Map();
-
   constraints.forEach(constraint => {
-    const newDomains = new Map();
-    // for each alive tuple, add the solution values to the domain set
-    constraint.forEach(tuple => {
-      if (tuple.alive) {
-        tuple.forEach((value, index) => {
-          const key = constraint[0][index];
-          if (!newDomains.has(key)) {
-            newDomains.set(key, new Set());
-          }
-          newDomains.get(key).add(value);
-        });
-      }
-    });
+    const newDomains = constraint.supportedDomains;
     newDomains.forEach((values, key) => {
       if (!domains.has(key)) {
         domains.set(key, new Set([...values]));
@@ -162,7 +149,6 @@ const getDomains = constraints => {
       }
     });
   });
-
   return domains;
 };
 

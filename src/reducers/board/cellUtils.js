@@ -15,7 +15,7 @@ const coords = [
  * @param {Immutable.List<Immutable.List<{}>>} cells matrix of cell objects
  * @param {number} i row of cell
  * @param {number } j col of cell
- * @returns {boolean} true if the cell is on the fringe, else otherwise
+ * @returns {boolean} true if the cell is on the fringe, false otherwise
  */
 export const isOnFringe = (cells, i, j) => coords.some(element => {
   const x = i + element[0];

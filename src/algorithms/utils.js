@@ -1,7 +1,7 @@
 /**
  * Checks if the solution is supported by the constraint.
  * @param {Array<{key: number, value: boolean}>} stack current solution stack
- * @param {Array<Array<boolean>>} constraint set of allowed solutions
+ * @param {Constraint} constraint set of allowed solutions
  * @returns {boolean} true if supported, false otherwise
  */
 export const check = (stack, constraint) => {

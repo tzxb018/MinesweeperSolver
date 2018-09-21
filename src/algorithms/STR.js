@@ -1,39 +1,46 @@
+import Constraint from 'reducers/board/csp/Constraint';
+import { intersect } from './utils';
+
+/**
+ * Maps all variables to the list of their constraints.
+ * @param {Constraint[]} constraints list of Constraints
+ * @returns {Map<number, Constraint[]} variables mapped to their constraints
+ */
+const mapVarsToConstraints = constraints => {
+  const map = new Map();
+  constraints.forEach(constraint => {
+    constraint.scope.forEach(variable => {
+      if (!map.has(variable)) {
+        map.set(variable, []);
+      }
+      map.get(variable).push(constraint);
+    });
+  });
+  return map;
+};
+
+
 /**
  * Revises a constraint with the given domains. Supported domains are recorded and returned in a new map.
  * If reduced is provided, any killed tuples are recorded there. Otherwise they are ignored.
- * @param {Array<Array<boolean>>} constraint a table constraint to be revised
+ * @param {Constraint} constraint a table constraint to be revised
  * @param {Map<number, Set<boolean>>} domains the set of allowed variable domains
- * @param {Map<{}, Set<number>>} [reduced] table constraints mapped to their killed tuples
+ * @param {Map<Constraint, Set<number>>} [reduced] table constraints mapped to their killed tuples
  * @returns {Map<number, Set<boolean>>} variables mapped to their new allowed domains
  */
 export const revise = (constraint, domains, reduced = undefined) => {
-  // set up the new domain map
-  const newDomains = new Map();
-  constraint[0].forEach(key => newDomains.set(key, new Set()));
+  // convert the domains to specs
+  const specs = Constraint.domainsToSpecs(domains);
 
   // revise the alive tuples with the old domain sets
-  constraint.slice(1).forEach((tuple, tupleNumber) => {
-    if (tuple.alive) {
-      const consistent = tuple.every((value, index) => {
-        if (!domains.get(constraint[0][index]).has(value)) {
-          tuple.alive = false;
-          constraint.alive--;
-          if (reduced) {
-            reduced.get(constraint).add(tupleNumber + 1);
-          }
-          return false;
-        }
-        return true;
-      });
+  const startTuples = constraint.tuples.map(tuple => tuple.id);
+  const endTuples = constraint.killIf(specs).map(tuple => tuple.id);
+  if (reduced) {
+    const killedTuples = startTuples.filter(id => !endTuples.includes(id));
+    killedTuples.forEach(id => reduced.get(constraint).add(id));
+  }
 
-      // populate the new domain sets with the consistent tuples
-      if (consistent) {
-        tuple.forEach((value, index) => newDomains.get(constraint[0][index]).add(value));
-      }
-    }
-  });
-
-  return newDomains;
+  return constraint.supportedDomains;
 };
 
 /**
@@ -47,6 +54,7 @@ export default csp => csp.withMutations(c => {
   const STR = [];
   const domains = c.get('domains');
   c.get('components').forEach(component => {
+    const constraintMap = mapVarsToConstraints(component.constraints);
     const queue = [];
     component.constraints.forEach(element => queue.push(element));
 
@@ -60,10 +68,10 @@ export default csp => csp.withMutations(c => {
         newDomains.forEach((values, key) => {
           // if the new domain set is different, intersect the new and old domain sets
           if (domains.get(key).size !== values.size) {
-            domains.set(key, new Set([...domains.get(key)].filter(x => values.has(x))));
+            domains.set(key, intersect(domains.get(key), values));
             // add any constraints affected by this variable back to the queue
-            component.constraints.forEach(element => {
-              if (element !== constraint && element[0].includes(key) && !queue.includes(element)) {
+            constraintMap.get(key).forEach(element => {
+              if (element !== constraint && !queue.includes(element)) {
                 queue.push(element);
               }
             });
@@ -75,11 +83,7 @@ export default csp => csp.withMutations(c => {
         });
       }
     } catch (error) {
-      component.constraints.forEach(element => {
-        if (element[0].includes(error)) {
-          element.alive = 0;
-        }
-      });
+      constraintMap.get(error).forEach(constraint => constraint.killAll());
     }
 
     // solve any variables with a domain of only one value
