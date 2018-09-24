@@ -1,5 +1,5 @@
 import BTS from 'algorithms/BTS/index';
-import PWC from 'algorithms/pairwise';
+import MWC from 'algorithms/mwise';
 import STR from 'algorithms/STR';
 import Unary from 'algorithms/unary';
 
@@ -119,7 +119,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   }
 
   // PWC are colored darkRed (5)
-  set = solvableSets.get('PWC');
+  set = solvableSets.get('MWC');
   if (set !== undefined) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
@@ -195,10 +195,10 @@ export default state => state.withMutations(s => {
   }
 
   // reduce the contstraints with PWC
-  if (s.getIn(['csp', 'isActive', 'PWC'])) {
-    s.update('csp', c => PWC(c));
+  if (s.getIn(['csp', 'isActive', 'MWC'])) {
+    s.update('csp', c => MWC(c));
   } else {
-    s.deleteIn(['csp', 'solvable', 'PWC']);
+    s.deleteIn(['csp', 'solvable', 'MWC']);
   }
 
   // color the solvable cells

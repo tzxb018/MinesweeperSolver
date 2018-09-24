@@ -269,26 +269,21 @@ export default class Constraint {
   }
 
   /**
-   * Ensures any tuples that don't fulfill the given domain specifications and pass the required checks are dead.
+   * Ensures any tuples that don't fulfill at least one of the given pair options for each specification are dead.
    * Updates numAlive if necessary.
-   * @param {Object[]} specs domain specifications to enforce on the tuples
-   * @param {number} specs[].key variable key
-   * @param {boolean} specs[].value variable domain restriction
-   * @param {{key: number, value: boolean}[]} specs[].check domain specifications to check before enforcing
+   * @param {Object[]} specs pair specifications to enforce on the tuples
+   * @param {number[]} specs[].pair variable key pair
+   * @param {boolean[]} specs[].options variable pair domain options
    * @returns {boolean[][]} new set of alive tuples
    */
-  killIfCheck(specs) {
+  killIfPairs(specs) {
     specs.forEach(restriction => {
-      const index = this.scope.indexOf(restriction.key);
-      const check = restriction.check.map(object => ({
-        index: this.scope.indexOf(object.key),
-        value: object.value,
-      }));
-      if (index >= 0) {
+      const indices = [];
+      restriction.pair.forEach(key => indices.push(this.scope.indexOf(key)));
+      if (indices.every(element => element >= 0)) {
         this.tuples.forEach(tuple => {
           if (tuple.alive
-          && check.every(object => tuple[object.index] === object.value)
-          && tuple[index] !== restriction.value) {
+          && !restriction.options.some(option => indices.every((index, i) => tuple[index] === option[i]))) {
             this.numAlive--;
             tuple.alive = false;
           }
@@ -299,20 +294,22 @@ export default class Constraint {
   }
 
   /**
-   * Finds the list of supported domain combinations of the given variable pair.
-   * @param {number[]} pair list of variable keys
-   * @returns {boolean[][]} list of supported domain combinations
+   * Finds the list of supported domain combinations of the given variable pairs.
+   * @param {number[][]} pairs list of variable key pairs
+   * @returns {Map<number[], boolean[][]>} list of supported domain combinations
    */
-  pairDomains(pair) {
+  pairDomains(pairs) {
     const domains = [];
-    const columns = pair.map(key => this.scope.indexOf(key));
-    this.tuples.filter(tuple => tuple.alive).forEach(tuple => domains.push(columns.map(index => tuple[index])));
-    // filter out any duplicates
-    domains.forEach((domain, index) => {
-      domains.slice(index + 1).forEach(other => {
-        if (domain.every((element, i) => element === other[i])) {
-          domains.splice(domains.indexOf(other), 1);
-        }
+    pairs.forEach(pair => {
+      const columns = pair.map(key => this.scope.indexOf(key));
+      this.tuples.filter(tuple => tuple.alive).forEach(tuple => domains.push(columns.map(index => tuple[index])));
+      // filter out any duplicates
+      domains.forEach((domain, index) => {
+        domains.slice(index + 1).forEach(other => {
+          if (domain.every((element, i) => element === other[i])) {
+            domains.splice(domains.indexOf(other), 1);
+          }
+        });
       });
     });
     return domains;
@@ -345,9 +342,27 @@ export default class Constraint {
   }
 
   /**
+   * Converts a set of pair domains into an array of specs. The specs contain only the restrictive pair domains.
+   * @param {Map<number[], boolean[][]>} pairDomains variable pairs mapped to their allowed pair domains
+   * @returns {{pair: number[], options: boolean[][]}[]} restrictive constraint specifications
+   */
+  static pairDomainsToOptions(pairDomains) {
+    const specs = [];
+    pairDomains.forEach((options, pair) => {
+      if (options.length < (2 ** pair.length)) {
+        specs.push({
+          pair,
+          options,
+        });
+      }
+    });
+    return specs;
+  }
+
+  /**
    * Converts a set of domains into an array of specs. The specs contain only the restrictive domains.
    * @param {Map<number, Set<boolean>>} domains variables mapped to their allowed domains
-   * @returns {Object[]} restrictive constraint specifications {key: number, value: boolean}
+   * @returns {{key: number, value: boolean}[]} restrictive constraint specifications
    */
   static domainsToSpecs(domains) {
     const specs = [];
