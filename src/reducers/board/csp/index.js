@@ -1,7 +1,6 @@
 import BTS from 'algorithms/BTS/index';
 import MWC from 'algorithms/mwise';
 import STR from 'algorithms/STR';
-import Unary from 'algorithms/unary';
 import { intersect } from 'algorithms/utils';
 
 import generateCSP from './generateCSP';
@@ -84,13 +83,13 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
 
   // get the sets of solvable cells
   const solvableSets = csp.get('solvable');
-  if (solvableSets === undefined) {
+  if (!solvableSets) {
     return cells;
   }
 
   // unary are colored blue (1)
   let set = solvableSets.get('Unary');
-  if (set !== undefined) {
+  if (set) {
     set.forEach(solvableCell => {
       c.setIn([solvableCell.row, solvableCell.col, 'color'], 1);
       c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
@@ -99,7 +98,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
 
   // BTS are colored darkGreen (2)
   set = solvableSets.get('BTS');
-  if (set !== undefined) {
+  if (set) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
         c.setIn([solvableCell.row, solvableCell.col, 'color'], 2);
@@ -110,7 +109,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
 
   // STR are colored darkBlue (4)
   set = solvableSets.get('STR');
-  if (set !== undefined) {
+  if (set) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
         c.setIn([solvableCell.row, solvableCell.col, 'color'], 4);
@@ -120,8 +119,8 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   }
 
   // PWC are colored darkRed (5)
-  set = solvableSets.get('MWC');
-  if (set !== undefined) {
+  set = solvableSets.get('MWC-2');
+  if (set) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
         c.setIn([solvableCell.row, solvableCell.col, 'color'], 5);
@@ -164,14 +163,7 @@ export default state => state.withMutations(s => {
   // generate the csp model of the minefield
   s.update('csp', c => generateCSP(c, s.getIn(['minefield', 'cells'])));
 
-  // enforce unary consistency
-  if (s.getIn(['csp', 'isActive', 'Unary'])) {
-    s.update('csp', c => Unary(c));
-  } else {
-    s.deleteIn(['csp', 'solvable', 'Unary']);
-  }
-
-  // normalize and separate variables and constraints into individual components
+  // enfore unary consistency, normalize, and separate variables and constraints into individual components
   s.update('csp', c => reduceComponents(c));
 
   // get the variable domains

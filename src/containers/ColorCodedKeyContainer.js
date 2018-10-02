@@ -8,9 +8,8 @@ const mapStateToProps = state => ({
   BTS: state.board.present.getIn(['csp', 'isActive', 'BTS']),
   FC: state.board.present.getIn(['csp', 'isActive', 'FC']),
   FCSTR: state.board.present.getIn(['csp', 'isActive', 'FCSTR']),
-  PWC: state.board.present.getIn(['csp', 'isActive', 'PWC']),
+  MWC: state.board.present.getIn(['csp', 'isActive', 'MWC']),
   STR: state.board.present.getIn(['csp', 'isActive', 'STR']),
-  Unary: state.board.present.getIn(['csp', 'isActive', 'Unary']),
 });
 
 const mapDispatchToProps = dispatch => ({

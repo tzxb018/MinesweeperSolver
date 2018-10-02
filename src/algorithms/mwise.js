@@ -59,9 +59,9 @@ const getPairDomains = pairMap => {
 
   // for each pair find the valid domains set by each constraint and intersect them
   pairMap.forEach((constraints, pair) => {
-    let tuples = constraints[0].pairDomains([pair]);
+    let tuples = constraints[0].pairDomains([pair]).get(pair);
     constraints.slice(1).forEach(constraint => {
-      const newTuples = constraint.pairDomains([pair]);
+      const newTuples = constraint.pairDomains([pair]).get(pair);
       tuples = tuples.filter(domain =>
         newTuples.some(newDomain => newDomain.every((element, index) => element === domain[index])));
     });
@@ -75,7 +75,8 @@ const getPairDomains = pairMap => {
  * Revises a constraint with the given domains. Returning a map of the new domain sets that the constraint agrees with.
  * @param {Constraint} constraint the Constraint to be revised
  * @param {Map<number[], boolean[][]>} domains variable pairs mapped to their vaid domains
- * @returns {Map<number[], boolean[][]>} map of the new domains that the revised constraint allows for
+ * @returns {Map<number[], boolean[][]>} map of the new domains that the revised constraint allows for, undefined if no
+ * alive tuples
  */
 const revise = (constraint, domains) => {
   // convert the domains to options
@@ -111,6 +112,9 @@ export default (csp, pairSize = 2) => csp.withMutations(c => {
         // revise the next constraint in the queue
         const constraint = queue.shift();
         const newDomains = revise(constraint, domains);
+        if (!newDomains) {
+          throw [...domains.keys()].filter(pair => pair.every(key => constraint.isInScope(key)));
+        }
 
         newDomains.forEach((values, pair) => {
           // if the new domain set is different, intersect the new and old domain sets
@@ -126,12 +130,14 @@ export default (csp, pairSize = 2) => csp.withMutations(c => {
           }
           // if the domain is inconsistent, break
           if (domains.get(pair).length === 0) {
-            throw pair;
+            throw new Array(pair);
           }
         });
       }
     } catch (error) {
-      constraintMap.get(error).forEach(constraint => constraint.killAll());
+      error.forEach(pair => {
+        constraintMap.get(pair).forEach(constraint => constraint.killAll());
+      });
     }
 
     // solve any pairs with a domain of only one value
@@ -156,9 +162,10 @@ export default (csp, pairSize = 2) => csp.withMutations(c => {
   });
 
   // add all MWC cells to the list of solvable cells
+  const key = `MWC-${pairSize}`;
   if (MWC.length > 0) {
-    c.setIn(['solvable', 'MWC', pairSize], MWC);
+    c.setIn(['solvable', key], MWC);
   } else {
-    c.deleteIn(['solvable', 'MWC', pairSize]);
+    c.deleteIn(['solvable', key]);
   }
 });

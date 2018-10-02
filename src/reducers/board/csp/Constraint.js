@@ -323,19 +323,24 @@ export default class Constraint {
    * @returns {Map<number[], boolean[][]>} list of supported domain combinations
    */
   pairDomains(pairs) {
-    const domains = [];
+    const domains = new Map();
     pairs.forEach(pair => {
+      const values = [];
       const columns = pair.map(key => this._scope.indexOf(key));
-      this.tuples.forEach(tuple => domains.push(columns.map(index => tuple[index])));
+      this.tuples.forEach(tuple => values.push(columns.map(index => tuple[index])));
       // filter out any duplicates
-      domains.forEach((domain, index) => {
-        domains.slice(index + 1).forEach(other => {
-          if (domain.every((element, i) => element === other[i])) {
-            domains.splice(domains.indexOf(other), 1);
+      values.forEach((value, index) => {
+        values.slice(index + 1).forEach(other => {
+          if (value.every((element, i) => element === other[i])) {
+            values.splice(values.indexOf(other), 1);
           }
         });
       });
+      domains.set(pair, values);
     });
+    if (domains.size === 0) {
+      return undefined;
+    }
     return domains;
   }
 

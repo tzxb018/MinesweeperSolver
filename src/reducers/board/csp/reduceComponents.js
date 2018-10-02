@@ -1,4 +1,42 @@
 /**
+ * Finds all unary constraints and returns any unary restrictions as specs. Unary constraints are those with a scope of
+ * only one variable.
+ * @param {Constraint[]} constraints array of Constraints
+ * @returns {{key: number, value: boolean}[]} unary domain specifications
+ */
+const findUnary = constraints => {
+  const unary = [];
+  // for each unary constraint
+  constraints.forEach(constraint => {
+    if (constraint.scope.length === 1 && constraint.numAlive === 1) {
+      unary.push({
+        key: constraint.scope[0],
+        value: constraint.tuples[0][0],
+      });
+    }
+  });
+
+  return unary;
+};
+
+/**
+ * Enforces unary consistency on all constraints. Constraints with a scope of only one variable are tested against all
+ * other constraints. Each unary constraint is then enforced on the constraints. The unary specs are then returned.
+ * @param {Constraint[]} constraints list of Constraints
+ * @returns {{key: number, value: boolean}[]} unary specs that can be solved
+ */
+const enforceUnary = constraints => {
+  // find all unary variables
+  const specs = findUnary(constraints);
+
+  // enfore unary consistency
+  constraints.forEach(constraint => constraint.killIf(specs));
+
+  return specs;
+};
+
+
+/**
  * Normalizes the constraints such that any constraint that is a subset of another constraint is removed, reducing the
  * total number of constraints. A constraint is a subset of another constraint if all of the variables within its scope
  * are also within the scope of the other constraint. Any constraint that completely envelopes that subset has its
@@ -37,6 +75,20 @@ const normalize = constraints => {
  * @returns {Immutable.Map} csp with normalized constraints and variables consolidated into components
  */
 export default csp => {
+  // enforce unary consistency on the constraints
+  let unarySolvable = enforceUnary(csp.get('constraints'));
+
+  // solve the unary specs
+  unarySolvable = unarySolvable.map(spec => {
+    const variable = csp.get('variables').find(element => element.key === spec.key);
+    return ({
+      col: variable.col,
+      key: spec.key,
+      row: variable.row,
+      value: spec.value,
+    });
+  });
+
   // normalize constraints and add the visited property to the variables
   const components = [];
   const normalized = normalize(csp.get('constraints'));
@@ -81,5 +133,10 @@ export default csp => {
   return csp.withMutations(c => {
     c.set('constraints', normalized);
     c.set('components', components);
+    if (unarySolvable.length > 0) {
+      c.setIn(['solvable', 'Unary'], unarySolvable);
+    } else {
+      c.deleteIn(['solvable', 'Unary']);
+    }
   });
 };

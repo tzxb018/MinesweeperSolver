@@ -10,9 +10,8 @@ export default class ColorCodedKey extends Component {
     BTS: PropTypes.bool.isRequired,
     FC: PropTypes.bool.isRequired,
     FCSTR: PropTypes.bool.isRequired,
-    PWC: PropTypes.bool.isRequired,
+    MWC: PropTypes.bool.isRequired,
     STR: PropTypes.bool.isRequired,
-    Unary: PropTypes.bool.isRequired,
     // dispatch props
     toggleActive: PropTypes.func.isRequired,
   }
@@ -24,7 +23,6 @@ export default class ColorCodedKey extends Component {
   colorCodedIcon = color => {
     let fill;
     switch (color) {
-    case 'blue': fill = { fill: 'blue' }; break;
     case 'darkGreen': fill = { fill: 'rgb(0, 128, 0)' }; break;
     case 'darkBlue': fill = { fill: 'rgb(0, 0, 128)' }; break;
     case 'darkRed': fill = { fill: 'rgb(128, 0, 0)' }; break;
@@ -43,16 +41,6 @@ export default class ColorCodedKey extends Component {
   render() {
     return (
       <div className={styles['container']}>
-        <div>
-          {this.colorCodedIcon('blue')}
-          <input type="checkbox"
-            id="Unary"
-            value="Unary"
-            checked={this.props.Unary}
-            onChange={this.changeHandler}
-          />
-          <label htmlFor="Unary">Unary</label>
-        </div>
         <div className={styles['dropdown']}>
           {this.colorCodedIcon('darkGreen')}
           <input type="checkbox"
@@ -105,12 +93,12 @@ export default class ColorCodedKey extends Component {
         <div>
           {this.colorCodedIcon('darkRed')}
           <input type="checkbox"
-            id="PWC"
-            value="PWC"
-            checked={this.props.PWC}
+            id="MWC"
+            value="MWC"
+            checked={this.props.MWC}
             onChange={this.changeHandler}
           />
-          <label htmlFor="PWC">PWC</label>
+          <label htmlFor="MWC">MWC</label>
         </div>
       </div>
     );
