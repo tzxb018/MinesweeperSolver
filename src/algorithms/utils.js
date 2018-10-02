@@ -1,8 +1,7 @@
 /**
- * Checks if the solution is supported by the constraint.
- * @param {Array<{key: number, value: boolean}>} solution current solution
- * @param {Array<Array<boolean>>} constraint set of allowed solutions
- * @returns {boolean} true if supported, false otherwise
+ * Intersects the domains of two sets. Outputing a new set of the intersection.
+ * @param {Set<*>} set1
+ * @param {Set<*>} set2
+ * @returns {Set<*>} new set of the intersect of set1 and set2
  */
-export const check = (solution, constraint) => constraint.some(tuple =>
-  tuple.alive && solution.every(variable => tuple[constraint[0].indexOf(variable.key)] === variable.value));
+export const intersect = (set1, set2) => new Set([...set1].filter(value => set2.has(value)));

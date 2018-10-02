@@ -252,11 +252,15 @@ export const initialize = () => {
   const csp = Immutable.Map({
     constraints: [],
     isActive: Immutable.Map({
+      BC: true,
       BTS: true,
+      FC: true,
+      FCSTR: true,
       PWC: true,
       STR: true,
       Unary: true,
     }),
+    diagnostics: Immutable.Map(),
     isConsistent: true,
     solvable: Immutable.Map(),
     variables: [],
@@ -361,7 +365,12 @@ export const loseGame = (state, row = undefined, col = undefined) => state.withM
 export const test = (state, numIterations, allowCheats = true, stopOnError = false) => {
   let newState = state;
   const logMessages = [];
+  const startTime = performance.now();
+  let numRuns = 0;
+  let numFails = 0;
+  let totalCheats = 0;
   for (let i = 0; i < numIterations; i++) {
+    numRuns++;
     try {
       // attempt to solve the puzzle
       newState = cheat(newState);
@@ -373,9 +382,10 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
           numCheats++;
           newState = loop(newState, false);
         }
+        totalCheats += numCheats;
       }
 
-      // log the results
+      // determine the results
       let logString = '';
       let logColor;
       let error = false;
@@ -384,6 +394,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
 
       if (newState.get('isGameRunning')) {
         logColor = 'red';
+        numFails++;
         // stopped due to inconsistencies
         if (!newState.getIn(['csp', 'isConsistent'])) {
           logString = newState.get('historyLog').last().message;
@@ -403,34 +414,70 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
         } else {
           logString = 'Error made during solving';
           logColor = 'red';
+          numFails++;
           error = true;
         }
       }
 
-      solveOrder.forEach((counter, setKey) => {
-        logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} `;
-        logString += 'cell(s)';
-      });
-      if (numCheats > 0) {
-        logString += `\n\t Cheat used ${numCheats} time(s)`;
-      }
       newState = newState.update('historyLog', h => h.pop());
-      logMessages.push([logString, logColor]);
-      if (error && stopOnError) {
-        break;
+      if (logColor === 'red' || numIterations <= 100) {
+        solveOrder.forEach((counter, setKey) => {
+          logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} `;
+          logString += 'cell(s)';
+        });
+        if (numCheats > 0) {
+          logString += `\n\t Cheat used ${numCheats} time(s)`;
+        }
+        logMessages.push([logString, logColor]);
+        if (error && stopOnError) {
+          break;
+        }
       }
     } catch (e) {
       let logString = 'Error thrown during solving';
       logString += `\n\t ${e.toString()}`;
       const logColor = 'red';
+      numFails++;
       logMessages.push([logString, logColor]);
       if (stopOnError) {
-        break;
+        throw e;
       }
     }
     newState = newState.deleteIn(['csp', 'count']);
     newState = reset(newState);
   }
+
+  // log the results
+  const accuracy = (numRuns - numFails) / numRuns * 100;
+  let logString = `Testing was ${accuracy}% successful`;
+  const executionTime = Math.round(performance.now() - startTime) / 1000;
+  logString += `\nExecution Time: ${executionTime} seconds`;
+  if (allowCheats) {
+    const averageCheats = Math.round(totalCheats / numRuns * 100) / 100;
+    logString += `\nAverage cheats used: ${averageCheats}`;
+  }
+
+  if (newState.getIn(['csp', 'isActive', 'BTS'])) {
+    ['BC', 'FC', 'FCSTR'].forEach(algorithm => {
+      if (newState.getIn(['csp', 'isActive', algorithm])) {
+        const diagnostics = newState.getIn(['csp', 'diagnostics', algorithm]);
+        logString += `\n${algorithm} (averages per problem):`;
+        Object.keys(diagnostics).forEach(key => {
+          let average = diagnostics[key] / numRuns;
+          logString += `\n\t${key} `;
+          if (key === 'nodesVisited' || key === 'backtracks') {
+            average = Math.round(average);
+            logString += `${average}`;
+          } else {
+            average = Math.round(average * 1000) / 1000;
+            logString += `${average} ms`;
+          }
+        });
+      }
+    });
+  }
+  newState = newState.updateIn(['csp', 'diagnostics'], d => d.clear());
+  logMessages.push([logString]);
   return newState.update('historyLog', h => h.push(...logMessages.map(log => ({
     cells: [],
     color: log[1],

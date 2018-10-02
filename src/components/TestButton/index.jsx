@@ -14,7 +14,7 @@ export default class TestButton extends Component {
 
   state = {
     allowCheats: true,
-    stopOnError: false,
+    stopOnError: true,
   }
 
   clickHandler = () => {
@@ -28,7 +28,14 @@ export default class TestButton extends Component {
         <button className={styles['button']} onClick={() => this.clickHandler()} disabled={!this.props.canTest}>
           Test
         </button>
-        <NumericInput id="numIterations" className={styles['selector']} min={1} max={10} value={3} strict />
+        <NumericInput id="numIterations"
+          className={styles['selector']}
+          min={10}
+          max={1000}
+          value={50}
+          step={10}
+          strict
+        />
         <div>
           <input type="checkbox"
             id="allowCheats"

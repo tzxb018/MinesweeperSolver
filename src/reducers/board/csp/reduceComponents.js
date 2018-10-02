@@ -1,11 +1,10 @@
-import { check } from 'algorithms/utils';
-
 /**
  * Normalizes the constraints such that any constraint that is a subset of another constraint is removed, reducing the
- * total number of constraints. Any constraint that completely envelopes that subset has its solutions reduced to only
- * those that also satisfy the subset.
- * @param {Array<Array<Array<boolean>>>} constraints constraint model of the minesweeper board
- * @returns {Array<Array<Array<boolean>>>} normalized constraints
+ * total number of constraints. A constraint is a subset of another constraint if all of the variables within its scope
+ * are also within the scope of the other constraint. Any constraint that completely envelopes that subset has its
+ * solutions reduced to only those that also satisfy the subset.
+ * @param {Constraint[]} constraints constraint model of the minesweeper board
+ * @returns {Constraint[]} normalized constraints
  */
 const normalize = constraints => {
   // for all constraints check if all their variables are contained in another constraint
@@ -14,25 +13,10 @@ const normalize = constraints => {
 
     constraints.forEach(constraint => {
       // if constraint envelopes subConstraint, it is a subset
-      if (subConstraint !== constraint
-      && subConstraint[0].length <= constraint[0].length
-      && subConstraint[0].every(key => constraint[0].includes(key))) {
-        const keyIndex = new Map();
-        subConstraint[0].forEach(key => keyIndex.set(key, constraint[0].indexOf(key)));
+      if (subConstraint !== constraint && subConstraint.scope.every(key => constraint.isInScope(key))) {
+        const specs = subConstraint.supportedSpecs();
         // filter out any tuples that are not supported by the subConstraint
-        constraint.forEach(tuple => {
-          if (tuple.alive) {
-            const solution = [];
-            keyIndex.forEach((index, key) => solution.push({
-              key,
-              value: tuple[index],
-            }));
-            if (!check(solution, subConstraint)) {
-              tuple.alive = false;
-              constraint.alive--;
-            }
-          }
-        });
+        constraint.killIf(specs);
         wasSubset = true;
       }
     });
@@ -46,83 +30,56 @@ const normalize = constraints => {
 };
 
 /**
- * Reduces the constraint pool through normalization before separating variables and constraints into individual
- * component problems.
+ * Normalizes the constraint pool, reducing it to only unique constraints. Then separates variables and constraints into
+ * individual component problems. A component is a set of all the constraints that have overlapping scopes and all the
+ * variables that are a part of those scopes.
  * @param {Immutable.Map} csp csp model of the minefield
- * @returns {Immutable.Map} csp with constraints and variables deleted and consolidated into components
+ * @returns {Immutable.Map} csp with normalized constraints and variables consolidated into components
  */
 export default csp => {
   // normalize constraints and add the visited property to the variables
   const components = [];
-  const constraints = normalize(csp.get('constraints'));
-  const variables = new Map();
+  const normalized = normalize(csp.get('constraints'));
+  const constraints = normalized.slice();
+  const variables = csp.get('variables');
   const isVisited = new Map();
-  csp.get('variables').forEach(variable => {
-    variables.set(variable.key, {
-      col: variable.col,
-      row: variable.row,
-    });
-    isVisited.set(variable.key, false);
-  });
+  variables.forEach(variable => isVisited.set(variable.key, false));
 
-  [...variables.keys()].forEach(key => {
-    if (!isVisited.get(key)) {
+  variables.forEach(variable => {
+    if (!isVisited.get(variable.key)) {
       const stack = [];
-      stack.push(key);
+      stack.push(variable.key);
       // new component object
       const component = {
-        constraints: [],  // list of relevant constraint matrices
+        constraints: [],  // list of relevant Constraints
         variables: [],    // list of relevant variable objects
       };
       // grab all relevant variables and constraints until the component is completed
       while (stack.length > 0) {
-        const currentKey = stack.shift();
-        const currentVariable = variables.get(currentKey);
+        const currentKey = stack.pop();
+        const currentVariable = variables.find(element => element.key === currentKey);
         // check all relevant constraints for unvisited variables
         constraints.slice().forEach(constraint => {
-          // if the constraint includes the variable or the variable is one of its neighbors
-          if (constraint[0].includes(currentKey)
-          || ((currentVariable.row >= constraint.row - 1 && currentVariable.row <= constraint.row + 1)
-          && (currentVariable.col >= constraint.col - 1 && currentVariable.col <= constraint.col + 1))) {
-            constraint[0].forEach(varKey => {
-              if (varKey !== currentKey && !isVisited.get(varKey) && !stack.includes(varKey)) {
-                stack.push(varKey);
+          // if the constraint includes the variable
+          if (constraint.isInScope(currentKey)) {
+            constraint.scope.forEach(key => {
+              if (key !== currentKey && !isVisited.get(key) && !stack.includes(key)) {
+                stack.push(key);
               }
             });
-            variables.forEach((variable, varKey) => {
-              if (varKey !== currentKey && !isVisited.get(varKey) && !stack.includes(varKey)
-              && (variable.row >= constraint.row - 1 && variable.row <= constraint.row + 1)
-              && (variable.col >= constraint.col - 1 && variable.col <= constraint.col + 1)) {
-                stack.push(varKey);
-              }
-            });
-            // cut visited constraint from the list to the component
+            // cut the constraint from the list to the component
             component.constraints.push(constraints.splice(constraints.indexOf(constraint), 1)[0]);
           }
         });
-        variables.forEach((variable, varKey) => {
-          if (varKey !== currentKey && !isVisited.get(varKey) && !stack.includes(varKey)
-          && (variable.row >= currentVariable.row - 1 && variable.row <= currentVariable.row + 1)
-          && (variable.col >= currentVariable.col - 1 && variable.col <= currentVariable.col + 1)) {
-            stack.push(varKey);
-          }
-        });
         isVisited.set(currentKey, true);
-        component.variables.push({
-          col: currentVariable.col,
-          key: currentKey,
-          row: currentVariable.row,
-        });
+        component.variables.push(currentVariable);
       }
-      if (component.constraints.length > 0) {
-        components.push(component);
-      }
+      components.push(component);
     }
   });
 
   return csp.withMutations(c => {
-    c.delete('variables');
-    c.delete('constraints');
+    c.set('constraints', normalized);
     c.set('components', components);
   });
 };
