@@ -26,7 +26,8 @@ const mapVarsToConstraints = constraints => {
  * @param {Constraint} constraint a table constraint to be revised
  * @param {Map<number, Set<boolean>>} domains the set of allowed variable domains
  * @param {Map<Constraint, Set<number>>} [reduced] table constraints mapped to their killed tuples
- * @returns {Map<number, Set<boolean>>} variables mapped to their new allowed domains
+ * @returns {Map<number, Set<boolean>>} variables mapped to their new allowed domains, undefined if the constraint is
+ * dead
  */
 export const revise = (constraint, domains, reduced = undefined) => {
   // convert the domains to specs
@@ -40,7 +41,7 @@ export const revise = (constraint, domains, reduced = undefined) => {
     killedTuples.forEach(id => reduced.get(constraint).add(id));
   }
 
-  return constraint.supportedDomains;
+  return constraint.supportedDomains();
 };
 
 /**
@@ -64,6 +65,9 @@ export default csp => csp.withMutations(c => {
         // revise the next constraint in the queue
         const constraint = queue.shift();
         const newDomains = revise(constraint, domains);
+        if (!newDomains) {
+          throw constraint.scope;
+        }
 
         newDomains.forEach((values, key) => {
           // if the new domain set is different, intersect the new and old domain sets
@@ -78,12 +82,14 @@ export default csp => csp.withMutations(c => {
           }
           // if the domain is inconsistent, break
           if (domains.get(key).size === 0) {
-            throw key;
+            throw new Array(key);
           }
         });
       }
     } catch (error) {
-      constraintMap.get(error).forEach(constraint => constraint.killAll());
+      error.forEach(key => {
+        constraintMap.get(key).forEach(constraint => constraint.killAll());
+      });
     }
 
     // solve any variables with a domain of only one value

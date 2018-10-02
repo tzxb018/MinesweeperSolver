@@ -4,14 +4,14 @@ import forwardCheckSTRSearch from './forwardCheckSTR';
 
 /**
  * Groups all the constraints by the variables they contain.
- * @param {Array<Array<Array<number>>>} constraints csp model of the minefield
- * @returns {Map<number, Set<Array<Array<boolean>>>} variables mapped to the constraints that contain them
+ * @param {Constraint[]} constraints csp model of the minefield
+ * @returns {Map<number, Set<Constraint>>} variables mapped to the constraints that contain them
  */
 const mapVariablesToConstraints = constraints => {
   const map = new Map();
 
   constraints.forEach(constraint => {
-    constraint[0].forEach(variable => {
+    constraint.scope.forEach(variable => {
       if (!map.has(variable)) {
         map.set(variable, new Set());
       }

@@ -2,6 +2,7 @@ import BTS from 'algorithms/BTS/index';
 import MWC from 'algorithms/mwise';
 import STR from 'algorithms/STR';
 import Unary from 'algorithms/unary';
+import { intersect } from 'algorithms/utils';
 
 import generateCSP from './generateCSP';
 import reduceComponents from './reduceComponents';
@@ -140,12 +141,12 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
 export const getDomains = constraints => {
   const domains = new Map();
   constraints.forEach(constraint => {
-    const newDomains = constraint.supportedDomains;
+    const newDomains = constraint.supportedDomains();
     newDomains.forEach((values, key) => {
       if (!domains.has(key)) {
         domains.set(key, new Set([...values]));
       } else {
-        domains.set(key, new Set([...domains.get(key)].filter(x => values.has(x))));
+        domains.set(key, intersect(domains.get(key), values));
       }
     });
   });

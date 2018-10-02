@@ -1,5 +1,3 @@
-import { check } from '../utils';
-
 /**
  * Filters the constraints, finding those that contain the current and at least one past variable.
  * @param {Map<number, Set<Array<Array<boolean>>>} constraints variables mapped to the constraints that contain them
@@ -23,7 +21,7 @@ const constraintFilter = (constraints, assignmentOrder) => {
  * @param {Array<Array<Array<boolean>>>} constraints constraints relevant to the back check
  * @returns {boolean} true if consistent, false otherwise
  */
-const backCheck = (stack, constraints) => constraints.every(constraint => check(stack, constraint));
+const backCheck = (stack, constraints) => constraints.every(constraint => constraint.isSupported(stack));
 
 /**
  * Attempts to assign the current variable a consistent value.

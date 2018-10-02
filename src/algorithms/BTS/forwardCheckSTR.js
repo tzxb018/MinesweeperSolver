@@ -7,10 +7,9 @@ import { revise } from '../STR';
  * @param {Map<number, Set<boolean>>} reduced map of reduced domains
  * @param {Map<number, Set<boolean>>} newDomains current valid variable domains
  * @param {Map<number, Set<boolean>>} domains old valid variable domains
- * @param {Array<{}>} queue list of unvisited constraints
- * @param {Map<number, Array<Array<Array<boolean>>>>} constraintMap variables mapped to the constraints relevant to
- * their forward check
- * @param {Array<Array<boolean>>} constraint current constraint being reduced
+ * @param {Constraint[]} queue list of unvisited constraints
+ * @param {Map<number, Constraint[]>} constraintMap variables mapped to the constraints relevant to their forward check
+ * @param {Constraint} constraint current constraint being reduced
  * @returns {boolean} true if reductions are consistent, false if a domain was destroyed
  */
 const reduce = (reduced, newDomains, domains, queue, constraintMap, constraint) => {
@@ -42,11 +41,10 @@ const reduce = (reduced, newDomains, domains, queue, constraintMap, constraint) 
 /**
  * Restores the reductions of the given key.
  * @param {number} restoreKey variable key to restore reductions from
- * @param {Array<number>} assignmentOrder order of variable assignments
- * @param {Map<number, Array<Array<Array<boolean>>>>} constraintMap variables mapped to the constraints relevant to
- * their forward check
- * @param {Map<*, Array<Set<*>>>} reductions variables and constraints mapped to their domain and tuple reductions
- * respectively
+ * @param {number[]} assignmentOrder order of variable assignments
+ * @param {Map<number, Constraint[]>} constraintMap variables mapped to the constraints relevant to their forward check
+ * @param {Map<(number|Constraint), Set<(boolean|number)>[]>} reductions variables and constraints mapped to their
+ * domain and tuple reductions respectively
  * @param {Map<number, Set<boolean>>} domains variables mapped to their valid domain
  */
 const restore = (restoreKey, assignmentOrder, constraintMap, reductions, domains) => {
@@ -58,21 +56,20 @@ const restore = (restoreKey, assignmentOrder, constraintMap, reductions, domains
   constraintMap.get(restoreKey).forEach(constraint => futureConstraints.add(constraint));
 
   futureConstraints.forEach(constraint => {
-    [...reductions.get(constraint).pop()].forEach(value => {
-      constraint[value].alive = true;
-      constraint.alive++;
-    });
+    const tuplesToRestore = [...reductions.get(constraint).pop()];
+    tuplesToRestore.forEach(id => constraint.revive(id));
   });
 };
 
 /**
  * Maintains GAC on all future variables and constraints using STR based on the current variable assignment.
- * @param {Array<{key: number, value: boolean}>} stack current variable assignments
- * @param {Map<number, Array<Array<Array<boolean>>>>} constraintMap future variables mapped to the constraints relevant
- * to their forward checks
+ * @param {Object[]} stack current variable assignments
+ * @param {number} stack[].key variable key
+ * @param {boolean} stack[].value variable assignment
+ * @param {Map<number, Constraint[]>} constraintMap variables mapped to the constraints relevant to their forward check
  * @param {Map<number, Set<boolean>>} domains current variable domains
- * @param {Map<*, Array<Set<*>>>} reductions variables and constraints mapped to their domain and tuple reductions
- * respectively
+ * @param {Map<(number|Constraint), Set<(boolean|number)>[]>} reductions variables and constraints mapped to their
+ * domain and tuple reductions respectively
  * @returns {boolean} true if consistent, false otherwise
  */
 const forwardCheckSTR = (stack, constraintMap, domains, reductions) => {
@@ -93,7 +90,6 @@ const forwardCheckSTR = (stack, constraintMap, domains, reductions) => {
     return false;
   })));
 
-
   const queue = [];
   constraintMap.get(current.key).forEach(constraint => {
     queue.push(constraint);
@@ -102,18 +98,22 @@ const forwardCheckSTR = (stack, constraintMap, domains, reductions) => {
   futureConstraints.forEach(constraint => reduced.set(constraint, new Set()));
   let consistent = true;
 
-  while (queue.length > 0 && consistent) {
+  while (consistent && queue.length > 0) {
     // revise the next constraint in the queue
     const constraint = queue.shift();
     const newDomains = revise(constraint, domains, reduced);
-    [...newDomains.keys()].forEach(key => {
-      if (!future.includes(key)) {
-        newDomains.delete(key);
-      }
-    });
+    if (newDomains) {
+      [...newDomains.keys()].forEach(key => {
+        if (!future.includes(key)) {
+          newDomains.delete(key);
+        }
+      });
 
-    // update the future domains and add any affected constraints back to the queue
-    consistent = reduce(reduced, newDomains, domains, queue, constraintMap, constraint);
+      // update the future domains and add any affected constraints back to the queue
+      consistent = reduce(reduced, newDomains, domains, queue, constraintMap, constraint);
+    } else {
+      consistent = false;
+    }
   }
 
   if (consistent) {
@@ -125,10 +125,7 @@ const forwardCheckSTR = (stack, constraintMap, domains, reductions) => {
       if (typeof key === 'number') {
         values.forEach(value => domains.get(key).add(value));
       } else {
-        values.forEach(value => {
-          key[value].alive = true;
-          key.alive++;
-        });
+        values.forEach(value => key.revive(value));
       }
     });
   }
@@ -138,14 +135,16 @@ const forwardCheckSTR = (stack, constraintMap, domains, reductions) => {
 
 /**
  * Attempts to assign the current variable a consistent value.
- * @param {Array<{key: number, value: boolean}>} stack past variable assignments
+ * @param {Object[]} stack past variable assignments
+ * @param {number} stack[].key variable key
+ * @param {boolean} stack[].value variable assignment
  * @param {number} key variable to be assigned
- * @param {Map<number, Array<Array<Array<boolean>>>>} constraintMap future variables mapped to the constraints relevant
- * to their forward checks
+ * @param {Map<number, Constraint[]>} constraintMap variables mapped to the constraints relevant to their forward checks
  * @param {Map<number, Set<boolean>>} domains current variable domains
- * @param {Map<number, Array<Set<boolean>>>} reductions variables and constraints mapped to their domain and tuple
- * reductions respectively
- * @param {{timeChecking: number}} diagnostics execution metrics object
+ * @param {Map<(number|Constraint), Set<(boolean|number)>[]>} reductions variables and constraints mapped to their
+ * domain and tuple reductions respectively
+ * @param {Object} diagnostics execution metrics object
+ * @param {number} diagnostics.timeChecking number of ms spent forward checking
  * @returns {boolean} true if labeling was successful, false if unlabeling needed
  */
 const label = (stack, key, constraintMap, domains, reductions, diagnostics) => {
@@ -170,13 +169,14 @@ const label = (stack, key, constraintMap, domains, reductions, diagnostics) => {
 
 /**
  * Restores the domain of the current variable and removes the previous variable assignment from the stack.
- * @param {Array<{key: number, value: boolean}>} stack variable assignments
- * @param {Array<number>} assignmentOrder order of variable assignments
- * @param {Map<number, Array<Array<Array<boolean>>>>} constraintMap variables mapped to the constraints relevant to
- * their forward check
- * @param {Map<number, Set<boolean>} domains current variable domains and reductions
- * @param {Map<*, Array<Set<*>>>} reductions variables and constraints mapped to their domain and tuple reductions
- * respectively
+ * @param {Object[]} stack past variable assignments
+ * @param {number} stack[].key variable key
+ * @param {boolean} stack[].value variable assignment
+ * @param {number[]} assignmentOrder order of variable assignments
+ * @param {Map<number, Constraint[]>} constraintMap variables mapped to the constraints relevant to their forward check
+ * @param {Map<number, Set<boolean>>} domains current variable domains
+ * @param {Map<(number|Constraint), Set<(boolean|number)>[]>} reductions variables and constraints mapped to their
+ * domain and tuple reductions respectively
  * @return {boolean} true if consistent, false if more unlabeling needed
  */
 const unlabel = (stack, assignmentOrder, constraintMap, domains, reductions) => {
@@ -194,13 +194,18 @@ const unlabel = (stack, assignmentOrder, constraintMap, domains, reductions) => 
 
 /**
  * Searches the subspace until a solution is found or the entire subspace is traversed.
- * @param {Array<{key: number, value: boolean}>} stack variable assignments
- * @param {Map<number, Set<boolean>} domains variables mapped to the allowed values of the subspace
- * @param {Map<number, Array<Set<boolean>>>} reductions variables mapped to the domain reductions that have occured
- * @param {Map<number, Array<Array<Array<boolean>>>>} constraintMap variables mapped to the constraints relevant to
- * their forward check
- * @param {Array<number>} assignmentOrder order of variable assignments
- * @param {{nodesVisited: number, backtracks: number, timeChecking: number}} diagnostics search metrics object
+ * @param {Object[]} stack variable assignments
+ * @param {number} stack[].key variable key
+ * @param {boolean} stack[].boolean variable assignment
+ * @param {Map<number, Set<boolean>>} domains variables mapped to the allowed values of the subspace
+ * @param {Map<(number|Constraint), Set<(boolean|number)>[]>} reductions variables and constraints mapped to their
+ * domain and tuple reductions respectively
+ * @param {Map<number, Constraint[]>} constraintMap variables mapped to the constraints relevant to their forward check
+ * @param {number[]} assignmentOrder order of variable assignments
+ * @param {Object} diagnostics search metrics object
+ * @param {number} diagnostics.nodesVisited number of nodes the search visited
+ * @param {number} diagnostics.backtracks number of backtracks the search required
+ * @param {number} diagnostics.timeChecking number of ms the search required
  * @returns {boolean} true if solution was found, false if no solution exists
  */
 const search = (stack, domains, reductions, constraintMap, assignmentOrder, diagnostics) => {
@@ -227,10 +232,14 @@ const search = (stack, domains, reductions, constraintMap, assignmentOrder, diag
 /**
  * Finds all solutions to the given csp and reduces them to the backbone.
  * @param {Map<number, Set<boolean>>} domains variables mapped to their allowed values
- * @param {Map<number, Array<Array<Array<boolean>>>>} constraints variables mapped to their constraints
- * @param {Array<number>} assignmentOrder order of variable assignments
- * @param {{*}} diagnostics search metrics object
- * @returns {Array<{key: number, value: boolean}>} list of solvable variables
+ * @param {Map<number, Constraint[]>} constraints variables mapped to their constraints
+ * @param {number[]} assignmentOrder order of variable assignments
+ * @param {Object} diagnostics search metrics object
+ * @param {number} diagnostics.timeFiltering number of ms spent filtering the constraints
+ * @param {number} diagnostics.nodesVisited number of nodes the search visited
+ * @param {number} diagnostics.backtracks number of backtracks the search required
+ * @param {number} diagnostics.timeChecking number of ms the search required
+ * @returns {{key: number, value: boolean}[]} list of solvable variables
  */
 export default (domains, constraints, assignmentOrder, diagnostics) => {
   // filter the constraints
@@ -285,10 +294,7 @@ export default (domains, constraints, assignmentOrder, diagnostics) => {
   // return the constraints to their previous state
   reductions.forEach((values, key) => {
     if (typeof key !== 'number') {
-      values.forEach(value => {
-        key[value.alive] = true;
-        key.alive++;
-      });
+      values.forEach(value => key.revive(value));
     }
   });
 

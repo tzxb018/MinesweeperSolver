@@ -45,12 +45,22 @@ export default (csp, cells) => {
   for (let row = 0; row < cells.size; row++) {
     for (let col = 0; col < cells.get(0).size; col++) {
       if (!cells.getIn([row, col, 'isHidden']) && cells.getIn([row, col, 'content']) > 0) {
+        let numMines = cells.getIn([row, col, 'content']);
         const variablesInScope = variables.filter(variable => {
           const rowDiff = Math.abs(variable.row - row);
           const colDiff = Math.abs(variable.col - col);
-          return rowDiff <= 1 && colDiff <= 1;
+          if (rowDiff <= 1 && colDiff <= 1) {
+            if (variable.isFlagged) {
+              numMines--;
+              return false;
+            }
+            return true;
+          }
+          return false;
         });
-        constraints.push(new Constraint(variablesInScope, row, col, cells.getIn([row, col, 'content'])));
+        if (variablesInScope.length > 0 || numMines < 0) {
+          constraints.push(new Constraint(variablesInScope, row, col, numMines));
+        }
       }
     }
   }

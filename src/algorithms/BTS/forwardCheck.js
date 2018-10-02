@@ -1,4 +1,6 @@
-import { checkAndRecordFuture, intersect } from '../utils';
+import Constraint from 'reducers/board/csp/Constraint';
+
+import { intersect } from '../utils';
 
 /**
  * Filters the constraints, finding those that contain any two current or future variables.
@@ -64,15 +66,17 @@ const forwardCheck = (stack, constraintMap, domains, reductions) => {
   const future = [...constraintMap.keys()].slice(stack.length);
   const newDomains = new Map();
   future.forEach(key => newDomains.set(key, new Set([...domains.get(key)])));
-  const mapStack = new Map();
-  stack.forEach(variable => mapStack.set(variable.key, new Set([variable.value])));
 
   // check that the current assignment is consistent with all constraints
   let consistent = constraintMap.get(current).every(constraint => {
-    const subFutureDomains = checkAndRecordFuture(mapStack, constraint, future, true);
+    const subFutureDomains = constraint.supportedDomains(stack);
     // update newDomains from subFutureDomains if the assignment is supported
     if (subFutureDomains) {
-      subFutureDomains.forEach((values, key) => newDomains.set(key, intersect(newDomains.get(key), values)));
+      subFutureDomains.forEach((values, key) => {
+        if (future.includes(key)) {
+          newDomains.set(key, intersect(newDomains.get(key), values));
+        }
+      });
       return true;
     }
     return false;
@@ -88,10 +92,14 @@ const forwardCheck = (stack, constraintMap, domains, reductions) => {
     while (consistent && queue.length > 0) {
       const next = queue.shift();
       consistent = constraintMap.get(next).every(constraint => {
-        const subFutureDomains = checkAndRecordFuture(newDomains, constraint, future);
+        const subFutureDomains = constraint.supportedDomains(Constraint.domainsToSpecs(newDomains));
         // update newDomains from subFutureDomains if the assignment is supported
         if (subFutureDomains) {
-          subFutureDomains.forEach((values, key) => newDomains.set(key, intersect(newDomains.get(key), values)));
+          subFutureDomains.forEach((values, key) => {
+            if (future.includes(key)) {
+              newDomains.set(key, intersect(newDomains.get(key), values));
+            }
+          });
           return true;
         }
         return false;

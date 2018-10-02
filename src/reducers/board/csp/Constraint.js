@@ -42,13 +42,16 @@ const generatePossibilities = (numMines, numVariables) => {
   }
   const possibilities = [];
 
-  // if there is only one possibility, just stop now
+  // if there is only one possibility or no possibilities, just stop now
   if (numValues === 0) {
     const solution = [];
     for (let i = 0; i < numVariables; i++) {
       solution.push(!value);
     }
     possibilities.push(solution);
+    return possibilities;
+  }
+  if (numMines < 0) {
     return possibilities;
   }
 
@@ -121,89 +124,112 @@ export default class Constraint {
    * @param {number} numMines number of mines the constraint allows for
    */
   constructor(variables, row, col, numMines) {
-    this.row = row;
-    this.col = col;
-    this.numMines = numMines;
-    this.variables = variables;
-    this.scope = [];
-    let minesLeftToPlace = numMines;
-    variables.forEach(variable => {
-      if (variable.isFlagged) {
-        minesLeftToPlace--;
-      } else {
-        this.scope.push(variable.key);
-      }
-    });
-    this.scope.sort((a, b) => a - b);
+    this._row = row;
+    this._col = col;
+    this._numMines = numMines;
+    this._variables = variables;
+    this._scope = variables.map(variable => variable.key);
+    this._scope.sort((a, b) => a - b);
 
     // calculate all possible configurations of mines and store them as tuples
-    this.tuples = generatePossibilities(minesLeftToPlace, this.scope.length);
-    this.tuples.forEach((tuple, index) => {
+    this._tuples = generatePossibilities(numMines, this._scope.length);
+    this._tuples.forEach((tuple, index) => {
       tuple.alive = true;
       tuple.id = index;
     });
-    this.numAlive = this.tuples.length;
+    this._numAlive = this._tuples.length;
   }
 
   /* Plain Getters */
-  get col() { return this.col; }
-  get numAlive() { return this.numAlive; }
-  get numMines() { return this.numMines; }
-  get row() { return this.row; }
-  get scope() { return this.scope; }
-  get variables() { return this.variables; }
+  get col() { return this._col; }
+  get numAlive() { return this._numAlive; }
+  get numMines() { return this._numMines; }
+  get row() { return this._row; }
+  get scope() { return this._scope; }
+  get variables() { return this._variables; }
   /**
    * Gets whether the constraint is consistent or not.
    * @returns {boolean} true if consistent, false otherwise
    */
-  get isConsistent() { return this.numAlive > 0; }
+  get isConsistent() { return this._numAlive > 0; }
   /**
-   * Gets the domains of the variables in scope that are supported by at least one alive tuple.
-   * @returns {Map<number, Set<boolean>>} variable keys mapped to their supported domains
+   * Gets an array of all currently alive tuples. Empty array if no currently alive tuples.
    */
-  get supportedDomains() {
-    const aliveTuples = this.tuples.filter(tuple => tuple.alive);
+  get tuples() { return this._tuples.filter(tuple => tuple.alive); }
+
+  /**
+   * Gets the domains of the variables in scope that are supported by at least one alive tuple. Can also take in specs
+   * to enforce on the tuples, without killing them, before the supported domains are determined.
+   * @param {Object[]} [specs] domain specifications to check against the tuples
+   * @param {number} specs[].key variable key
+   * @param {boolean} specs[].value variable domain restriction
+   * @returns {Map<number, Set<boolean>>} variable keys mapped to their supported domains, undefined if no domains up to
+   * spec or if no tuples alive
+   */
+  supportedDomains(specs) {
+    // map and filter the specs if there are any
+    let specIndex = [];
+    if (specs) {
+      specIndex = specs.map(variable => ({
+        index: this._scope.indexOf(variable.key),
+        value: variable.value,
+      }));
+      specIndex = specIndex.filter(variable => variable.index !== -1);
+    }
+
+    // find the supported domains
     const domains = new Map();
-    aliveTuples.forEach(tuple => {
-      tuple.forEach((value, index) => {
-        const key = this.scope[index];
-        if (!domains.has(key)) {
-          domains.set(key, new Set());
-        }
-        domains.get(key).add(value);
-      });
+    this.tuples.forEach(tuple => {
+      if (specIndex.every(variable => tuple[variable.index] === variable.value)) {
+        tuple.forEach((value, index) => {
+          const key = this._scope[index];
+          if (!domains.has(key)) {
+            domains.set(key, new Set());
+          }
+          domains.get(key).add(value);
+        });
+      }
     });
+
+    if (domains.size === 0) {
+      return undefined;
+    }
     return domains;
   }
+
   /**
    * Gets only the restrictive domains, those with a size of one, of the variables in scope that are supported by at
-   * least one alive tuple. Formats them as specifications.
-   * @returns {Object[]} list of domain specifications {key: number, value: boolean}, empty array if no restrictions
+   * least one alive tuple. Can also take in specs to enforce on the tuples, without killing them, before the supported
+   * domains are determined. Formats them as specifications.
+   * @param {Object[]} [specs] domain specifications to check against the tuples
+   * @param {number} specs[].key variable key
+   * @param {boolean} specs[].value variable domain restriction
+   * @returns {{key: number, value: boolean}[]} list of domain specifications, empty array if no restrictions, undefined
+   * if no domains up to spec or if no tuples alive
    */
-  get supportedSpecs() {
-    const domains = this.supportedDomains;
-    const specs = [];
+  supportedSpecs(specs) {
+    const domains = this.supportedDomains(specs);
+    if (!domains) {
+      return undefined;
+    }
+    const newSpecs = [];
     domains.forEach((values, key) => {
       if (values.size === 1) {
-        specs.push({
+        newSpecs.push({
           key,
           value: [...values][0],
         });
       }
     });
-    return specs;
+    return newSpecs;
   }
-  /**
-   * Gets an array of all currently alive tuples. Empty array if no currently alive tuples.
-   */
-  get tuples() { return this.tuples.filter(tuple => tuple.alive); }
 
   /**
    * Returns whether or not the given variable is in the scope of the constraint.
    * @param {number} key unique variable key
    * @returns {boolean} true if in scope, false otherwise
    */
-  isInScope(key) { return this.scope.includes(key); }
+  isInScope(key) { return this._scope.includes(key); }
 
   /**
    * Returns whether or not the constraint supports the given specifications.
@@ -213,13 +239,12 @@ export default class Constraint {
    * @returns {boolean} true if at least one constraint supports the specs, false otherwise
    */
   isSupported(specs) {
-    const aliveTuples = this.tuples.filter(tuple => tuple.alive);
     let specIndex = specs.map(variable => ({
-      index: this.scope.indexOf(variable.key),
+      index: this._scope.indexOf(variable.key),
       value: variable.value,
     }));
     specIndex = specIndex.filter(variable => variable.index !== -1);
-    return aliveTuples.some(tuple => specIndex.every(variable => tuple[variable.index] === variable.value));
+    return this.tuples.some(tuple => specIndex.every(variable => tuple[variable.index] === variable.value));
   }
 
   /**
@@ -228,22 +253,22 @@ export default class Constraint {
    * @returns {boolean[][]} new set of alive tuples
    */
   kill(id) {
-    const tupleToKill = this.tuples[id];
+    const tupleToKill = this._tuples[id];
     if (tupleToKill) {
       if (tupleToKill.alive) {
-        this.numAlive--;
+        this._numAlive--;
         tupleToKill.alive = false;
       }
     }
-    return this.tuples.filter(tuple => tuple.alive);
+    return this.tuples;
   }
 
   /**
    * Ensures all tuples are dead, making the constraint inconsistent such that this.isConsistent is false.
    */
   killAll() {
-    this.tuples.forEach(tuple => { tuple.alive = false; });
-    this.numAlive = 0;
+    this._tuples.forEach(tuple => { tuple.alive = false; });
+    this._numAlive = 0;
   }
 
   /**
@@ -255,17 +280,17 @@ export default class Constraint {
    */
   killIf(specs) {
     specs.forEach(restriction => {
-      const index = this.scope.indexOf(restriction.key);
+      const index = this._scope.indexOf(restriction.key);
       if (index >= 0) {
         this.tuples.forEach(tuple => {
-          if (tuple.alive && tuple[index] !== restriction.value) {
-            this.numAlive--;
+          if (tuple[index] !== restriction.value) {
+            this._numAlive--;
             tuple.alive = false;
           }
         });
       }
     });
-    return this.tuples.filter(tuple => tuple.alive);
+    return this.tuples;
   }
 
   /**
@@ -279,18 +304,17 @@ export default class Constraint {
   killIfPairs(specs) {
     specs.forEach(restriction => {
       const indices = [];
-      restriction.pair.forEach(key => indices.push(this.scope.indexOf(key)));
+      restriction.pair.forEach(key => indices.push(this._scope.indexOf(key)));
       if (indices.every(element => element >= 0)) {
         this.tuples.forEach(tuple => {
-          if (tuple.alive
-          && !restriction.options.some(option => indices.every((index, i) => tuple[index] === option[i]))) {
-            this.numAlive--;
+          if (!restriction.options.some(option => indices.every((index, i) => tuple[index] === option[i]))) {
+            this._numAlive--;
             tuple.alive = false;
           }
         });
       }
     });
-    return this.tuples.filter(tuple => tuple.alive);
+    return this.tuples;
   }
 
   /**
@@ -301,8 +325,8 @@ export default class Constraint {
   pairDomains(pairs) {
     const domains = [];
     pairs.forEach(pair => {
-      const columns = pair.map(key => this.scope.indexOf(key));
-      this.tuples.filter(tuple => tuple.alive).forEach(tuple => domains.push(columns.map(index => tuple[index])));
+      const columns = pair.map(key => this._scope.indexOf(key));
+      this.tuples.forEach(tuple => domains.push(columns.map(index => tuple[index])));
       // filter out any duplicates
       domains.forEach((domain, index) => {
         domains.slice(index + 1).forEach(other => {
@@ -320,9 +344,9 @@ export default class Constraint {
    * @returns {boolean[][]} new set of alive tuples
    */
   reset() {
-    this.tuples.forEach(tuple => { tuple.alive = true; });
-    this.numAlive = this.tuples.length;
-    return this.tuples;
+    this._tuples.forEach(tuple => { tuple.alive = true; });
+    this._numAlive = this._tuples.length;
+    return this._tuples;
   }
 
   /**
@@ -331,14 +355,14 @@ export default class Constraint {
    * @returns {boolean[][]} new set of alive tuples
    */
   revive(id) {
-    const tupleToRevive = this.tuples[id];
+    const tupleToRevive = this._tuples[id];
     if (tupleToRevive) {
       if (!tupleToRevive.alive) {
-        this.numAlive++;
+        this._numAlive++;
         tupleToRevive.alive = true;
       }
     }
-    return this.tuples.filter(tuple => tuple.alive);
+    return this.tuples;
   }
 
   /**

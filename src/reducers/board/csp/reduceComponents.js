@@ -14,7 +14,7 @@ const normalize = constraints => {
     constraints.forEach(constraint => {
       // if constraint envelopes subConstraint, it is a subset
       if (subConstraint !== constraint && subConstraint.scope.every(key => constraint.isInScope(key))) {
-        const specs = subConstraint.supportedSpecs;
+        const specs = subConstraint.supportedSpecs();
         // filter out any tuples that are not supported by the subConstraint
         constraint.killIf(specs);
         wasSubset = true;
