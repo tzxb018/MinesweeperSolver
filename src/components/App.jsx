@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 
 import Board from 'containers/BoardContainer';
-import LoopButton from 'containers/LoopButtonContainer';
 import CheatButton from 'containers/CheatButtonContainer';
 import ColorCodedKey from 'containers/ColorCodedKeyContainer';
 import HistoryLog from 'containers/HistoryLogContainer';
 import PeekToggle from 'containers/PeekToggleContainer';
 import SizeSelector from 'containers/SizeSelectorContainer';
-import StepButton from 'containers/StepButtonContainer';
+import StepLoop from 'containers/StepLoop';
 import TestButton from 'containers/TestButtonContainer';
 import UndoRedo from 'containers/UndoRedoContainer';
 
@@ -17,16 +16,25 @@ export default class App extends Component {
   render() {
     return (
       <div className={styles['container']}>
-        <SizeSelector />
-        <CheatButton />
-        <TestButton />
+        <div className={styles['v_container']}>
+          <SizeSelector />
+          <div className={styles['gap']} />
+          <CheatButton />
+          <div className={styles['gap']} />
+          <TestButton />
+        </div>
         <Board />
-        <ColorCodedKey />
-        <PeekToggle />
-        <StepButton />
-        <LoopButton />
-        <UndoRedo />
-        <HistoryLog />
+        <div className={styles['v_container']}>
+          <ColorCodedKey />
+          <div className={styles['gap']} />
+          <PeekToggle />
+          <div className={styles['gap']} />
+          <StepLoop />
+        </div>
+        <div className={styles['log_container']}>
+          <UndoRedo />
+          <HistoryLog />
+        </div>
       </div>
     );
   }

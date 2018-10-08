@@ -1,9 +1,28 @@
+@import 'colors';
+
 :local {
   .container {
-    display: grid;
-    grid-column-gap: 10px;
-    grid-row-gap: 10px;
-    grid-template-columns: 115px 500px 115px 500px;
-    grid-template-rows: 70px 70px 70px 70px 70px;
+    display: flex;
+    justify-content: space-evenly;
+  }
+
+  .v_container {
+    min-width: 150px;
+    height: 318px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gap {
+    min-height: 10px;
+    flex-grow: 1;
+  }
+
+  .log_container {
+    padding: 10px;
+    background-color: $unl_red;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
   }
 }

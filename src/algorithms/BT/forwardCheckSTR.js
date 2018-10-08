@@ -1,5 +1,5 @@
 import { constraintFilter } from './forwardCheck';
-import { revise } from '../STR';
+import { revise } from '../STR2';
 
 /**
  * Reduces the domains based on the newDomains, adding necessary elements to the queue, and storing reductions in

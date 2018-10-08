@@ -162,7 +162,7 @@ export default (csp, pairSize = 2) => csp.withMutations(c => {
   });
 
   // add all MWC cells to the list of solvable cells
-  const key = `MWC-${pairSize}`;
+  const key = `mWC-${pairSize}`;
   if (MWC.length > 0) {
     c.setIn(['solvable', key], MWC);
   } else {

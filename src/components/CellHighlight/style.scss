@@ -1,8 +1,10 @@
+@import 'colors';
+
 :local {
   .cell {
-    background-color: blue;
+    background-color: $blue;
     height: 16px;
-    opacity: 0.20;
+    opacity: 0.16;
     visibility: hidden;
     width: 16px;
   }

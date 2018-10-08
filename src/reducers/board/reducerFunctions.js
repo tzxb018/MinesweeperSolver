@@ -13,8 +13,8 @@ import {
 
 export const algorithms = new Map([
   ['Unary', 0],
-  ['BTS', 1],
-  ['STR', 2],
+  ['BT', 1],
+  ['STR2', 2],
   ['PWC', 3],
 ]);
 
@@ -38,9 +38,7 @@ export const reset = state => state.withMutations(s => {
 
   // clear out the csp model
   s.deleteIn(['csp', 'components']);
-  s.setIn(['csp', 'constraints'], []);
   s.setIn(['csp', 'isConsistent'], true);
-  s.setIn(['csp', 'variables'], []);
   s.updateIn(['csp', 'solvable'], o => o.clear());
 
   // reset the other settings
@@ -250,19 +248,26 @@ export const initialize = () => {
 
   // create the csp model
   const csp = Immutable.Map({
-    constraints: [],
-    isActive: Immutable.Map({
-      BC: true,
-      BTS: true,
-      FC: true,
-      FCSTR: true,
-      MWC: true,
-      STR: true,
+    algorithms: Immutable.Map({
+      BT: Immutable.Map({
+        subSets: Immutable.Map({
+          BC: true,
+          FC: true,
+          'FC-STR': true,
+        }),
+        isActive: true,
+      }),
+      STR2: Immutable.Map({
+        isActive: true,
+      }),
+      mWC: Immutable.Map({
+        isActive: true,
+        m: 2,
+      }),
     }),
     diagnostics: Immutable.Map(),
     isConsistent: true,
     solvable: Immutable.Map(),
-    variables: [],
   });
 
   // return the initial state map
@@ -290,7 +295,7 @@ export const loop = (state, isLogged = true) => {
       newState = oldState.setIn(['csp', 'count'], new Map());
     } else {
       newState = oldState;
-      oldState = "You're a wizard Harry!";
+      oldState = undefined;
     }
   } else {
     return oldState;
@@ -456,9 +461,9 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
     logString += `\nAverage cheats used: ${averageCheats}`;
   }
 
-  if (newState.getIn(['csp', 'isActive', 'BTS'])) {
-    ['BC', 'FC', 'FCSTR'].forEach(algorithm => {
-      if (newState.getIn(['csp', 'isActive', algorithm])) {
+  if (newState.getIn(['csp', 'algorithms', 'BT'])) {
+    newState.getIn(['csp', 'algorithms', 'BT', 'subSets']).forEach((isActive, algorithm) => {
+      if (isActive) {
         const diagnostics = newState.getIn(['csp', 'diagnostics', algorithm]);
         logString += `\n${algorithm} (averages per problem):`;
         Object.keys(diagnostics).forEach(key => {
@@ -489,10 +494,19 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
  * Handles the toggle active action by changed the active status of the specified algorithm.
  * @param state state of the board
  * @param {string} algorithm name of the algorithm to toggle
+ * @param {string|number} [modifier] modifier to apply to the algorithm change
  * @returns newState
  */
-export const toggleActive = (state, algorithm) => state.withMutations(s => {
-  s.updateIn(['csp', 'isActive', algorithm], a => !a);
+export const toggleActive = (state, algorithm, modifier) => state.withMutations(s => {
+  if (modifier) {
+    switch (algorithm) {
+    case 'BT': s.updateIn(['csp', 'algorithms', 'BT', 'subSets', modifier], a => !a); break;
+    case 'mWC': s.setIn(['csp', 'algorithms', 'mWC', 'm'], modifier); break;
+    default:
+    }
+  } else {
+    s.updateIn(['csp', 'algorithms', algorithm, 'isActive'], a => !a);
+  }
   if (s.get('isGameRunning')) {
     s.update('historyLog', h => h.pop());
     return processCSP(s);

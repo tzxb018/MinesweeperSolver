@@ -1,52 +1,47 @@
+@import 'colors';
+
 :local {
   .container {
-    background-color: #c0c0c0;
-    grid-column: 4 / 5;
-    grid-row: 2;
-    height: 335px;
-    top: -25px;
+    border-radius: 5px;
+    flex-grow: 1;
+    min-width: 400px;
+    background-color: $unl_light_cream;
     overflow: auto;
-    padding: 6px;
-    position: relative;
+    padding: 10px;
     white-space: pre-wrap;
-    width: 500px;
+    height: 512px;
   }
 
   .log {
-    border-top: 2px solid #c0c0c0;
+    background-color: $unl_gray;
     position: relative;
     z-index: 1;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 5px;
   }
 
   .green {
     @extend .log;
-    background-color: rgb(0, 160, 0);
+    background-color: $unl_dark_accent_green;
+    color: $unl_light_cream;
   }
 
   .red {
     @extend .log;
-    background-color: red;
+    background-color: $unl_desaturated_red;
+    color: $unl_light_cream;
   }
 
   .log:hover {
-    background-color: #808080;
+    background-color: $unl_dark_gray;
   }
 
   .green:hover {
-    background-color: rgb(0, 112, 0);
+    background-color: #5a580c;
   }
 
   .red:hover {
-    background-color: rgb(207, 0, 0);
-  }
-
-  .log .cellHighlight {
-    background-color: rgb(0, 0, 255);
-    opacity: 0.5;
-    visibility: hidden;
-  }
-
-  .log:hover .cellHighlight {
-    visibility: visible;
+    background-color: #b21f1f;
   }
 }

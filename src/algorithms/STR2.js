@@ -110,8 +110,8 @@ export default csp => csp.withMutations(c => {
 
   // add all STR cells to the list of solvable cells
   if (STR.length > 0) {
-    c.setIn(['solvable', 'STR'], STR);
+    c.setIn(['solvable', 'STR2'], STR);
   } else {
-    c.deleteIn(['solvable', 'STR']);
+    c.deleteIn(['solvable', 'STR2']);
   }
 });

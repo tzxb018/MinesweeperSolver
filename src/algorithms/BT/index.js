@@ -29,14 +29,14 @@ const mapVariablesToConstraints = constraints => {
  * @returns {Immutable.Map} updated constraint model
  */
 export default csp => csp.withMutations(c => {
-  c.setIn(['solvable', 'BTS'], []);
+  c.setIn(['solvable', 'BT'], []);
   const solvable = new Map();
   const algorithms = new Map();
   algorithms.set('BC', (domains, constraints, assignmentOrder, diagnostics) =>
     backCheckSearch(domains, constraints, assignmentOrder, diagnostics));
   algorithms.set('FC', (domains, constraints, assignmentOrder, diagnostics) =>
     forwardCheckSearch(domains, constraints, assignmentOrder, diagnostics));
-  algorithms.set('FCSTR', (domains, constraints, assignmentOrder, diagnostics) =>
+  algorithms.set('FC-STR', (domains, constraints, assignmentOrder, diagnostics) =>
     forwardCheckSTRSearch(domains, constraints, assignmentOrder, diagnostics));
 
   [...algorithms.keys()].forEach(key => solvable.set(key, []));
@@ -50,7 +50,7 @@ export default csp => csp.withMutations(c => {
 
     // search the tree with each active algorithm
     algorithms.forEach((search, algorithmKey) => {
-      if (c.getIn(['isActive', algorithmKey])) {
+      if (c.getIn(['algorithms', 'BT', 'subSets', algorithmKey])) {
         if (!c.getIn(['diagnostics', algorithmKey])) {
           const diagnostics = {
             nodesVisited: 0,
@@ -81,10 +81,10 @@ export default csp => csp.withMutations(c => {
   });
 
   [...solvable.values()].forEach(value => {
-    c.updateIn(['solvable', 'BTS'], x => x.concat(value));
+    c.updateIn(['solvable', 'BT'], x => x.concat(value));
     value.forEach(cell => c.get('domains').set(cell.key, new Set([cell.value])));
   });
-  if (c.getIn(['solvable', 'BTS']).length === 0) {
-    c.deleteIn(['solvable', 'BTS']);
+  if (c.getIn(['solvable', 'BT']).length === 0) {
+    c.deleteIn(['solvable', 'BT']);
   }
 });

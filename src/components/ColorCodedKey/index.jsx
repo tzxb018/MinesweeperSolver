@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import NumericInput from 'react-numeric-input';
 import React, { Component } from 'react';
 
 import styles from './style';
@@ -7,17 +8,18 @@ export default class ColorCodedKey extends Component {
   static propTypes = {
     // state props
     BC: PropTypes.bool.isRequired,
-    BTS: PropTypes.bool.isRequired,
+    BT: PropTypes.bool.isRequired,
     FC: PropTypes.bool.isRequired,
-    FCSTR: PropTypes.bool.isRequired,
-    MWC: PropTypes.bool.isRequired,
-    STR: PropTypes.bool.isRequired,
+    'FC-STR': PropTypes.bool.isRequired,
+    m: PropTypes.number.isRequired,
+    mWC: PropTypes.bool.isRequired,
+    STR2: PropTypes.bool.isRequired,
     // dispatch props
     toggleActive: PropTypes.func.isRequired,
   }
 
-  changeHandler = e => {
-    this.props.toggleActive(e.target.value);
+  changeHandler = (id, modifier) => {
+    this.props.toggleActive(id, modifier);
   }
 
   colorCodedIcon = color => {
@@ -40,65 +42,70 @@ export default class ColorCodedKey extends Component {
 
   render() {
     return (
-      <div className={styles['container']}>
-        <div className={styles['dropdown']}>
-          {this.colorCodedIcon('darkGreen')}
-          <input type="checkbox"
-            id="BTS"
-            value="BTS"
-            checked={this.props.BTS}
-            onChange={this.changeHandler}
-          />
-          <label htmlFor="BTS">BTS</label>
-          <div className={styles['dropdown-content']}>
+      <div>
+        <div className={styles['backbone']}>
+          <div className={styles['left']}>
+            <div>
+              {this.colorCodedIcon('darkGreen')}
+              <input type="checkbox"
+                id="BT"
+                checked={this.props.BT}
+                onChange={() => this.changeHandler('BT')}
+              />BT
+            </div>
+          </div>
+          <text className={styles['bracket']}>{'{'}</text>
+          <div className={styles['right']}>
             <div>
               <input type="checkbox"
                 id="BC"
-                value="BC"
                 checked={this.props.BC}
-                onChange={this.changeHandler}
-              />
-              <label htmlFor="BC">BC</label>
+                onChange={() => this.changeHandler('BT', 'BC')}
+              />BC
             </div>
             <div>
               <input type="checkbox"
                 id="FC"
-                value="FC"
                 checked={this.props.FC}
-                onChange={this.changeHandler}
-              />
-              <label htmlFor="FC">FC</label>
+                onChange={() => this.changeHandler('BT', 'FC')}
+              />FC
             </div>
             <div>
               <input type="checkbox"
-                id="FCSTR"
-                value="FCSTR"
-                checked={this.props.FCSTR}
-                onChange={this.changeHandler}
-              />
-              <label htmlFor="FCSTR">FCSTR</label>
+                id="FC-STR"
+                checked={this.props['FC-STR']}
+                onChange={() => this.changeHandler('BT', 'FC-STR')}
+              />FC-STR
             </div>
           </div>
         </div>
-        <div>
-          {this.colorCodedIcon('darkBlue')}
-          <input type="checkbox"
-            id="STR"
-            value="STR"
-            checked={this.props.STR}
-            onChange={this.changeHandler}
-          />
-          <label htmlFor="STR">STR</label>
-        </div>
-        <div>
-          {this.colorCodedIcon('darkRed')}
-          <input type="checkbox"
-            id="MWC"
-            value="MWC"
-            checked={this.props.MWC}
-            onChange={this.changeHandler}
-          />
-          <label htmlFor="MWC">MWC</label>
+        <div className={styles['gap']} />
+        <div className={styles['container']}>
+          <div>
+            {this.colorCodedIcon('darkBlue')}
+            <input type="checkbox"
+              id="STR2"
+              checked={this.props.STR2}
+              onChange={() => this.changeHandler('STR2')}
+            />STR2
+          </div>
+          <div>
+            {this.colorCodedIcon('darkRed')}
+            <input type="checkbox"
+              id="mWC"
+              checked={this.props.mWC}
+              onChange={() => this.changeHandler('mWC')}
+            />mWC
+            <NumericInput id="m"
+              className={styles['selector']}
+              min={2}
+              max={4}
+              value={this.props.m}
+              step={1}
+              strict
+              onChange={valueAsNumber => this.changeHandler('mWC', valueAsNumber)}
+            />
+          </div>
         </div>
       </div>
     );

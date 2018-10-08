@@ -30,7 +30,7 @@ export default (state = initialState, action) => {
   case 'REVEAL_CELL': return revealCell(state, action.row, action.col);
   case 'STEP': return step(state);
   case 'TEST': return test(state, action.numIterations, action.allowCheats, action.stopOnError);
-  case 'TOGGLE_ACTIVE': return toggleActive(state, action.algorithm);
+  case 'TOGGLE_ACTIVE': return toggleActive(state, action.algorithm, action.modifier);
   case 'TOGGLE_FLAG': return toggleFlag(state, action.row, action.col);
   default: return state;
   }

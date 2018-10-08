@@ -4,17 +4,18 @@ import ColorCodedKey from 'components/ColorCodedKey';
 import { toggleActive } from 'actions/boardActions';
 
 const mapStateToProps = state => ({
-  BC: state.board.present.getIn(['csp', 'isActive', 'BC']),
-  BTS: state.board.present.getIn(['csp', 'isActive', 'BTS']),
-  FC: state.board.present.getIn(['csp', 'isActive', 'FC']),
-  FCSTR: state.board.present.getIn(['csp', 'isActive', 'FCSTR']),
-  MWC: state.board.present.getIn(['csp', 'isActive', 'MWC']),
-  STR: state.board.present.getIn(['csp', 'isActive', 'STR']),
+  BC: state.board.present.getIn(['csp', 'algorithms', 'BT', 'subSets', 'BC']),
+  BT: state.board.present.getIn(['csp', 'algorithms', 'BT', 'isActive']),
+  FC: state.board.present.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC']),
+  'FC-STR': state.board.present.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC-STR']),
+  m: state.board.present.getIn(['csp', 'algorithms', 'mWC', 'm']),
+  mWC: state.board.present.getIn(['csp', 'algorithms', 'mWC', 'isActive']),
+  STR2: state.board.present.getIn(['csp', 'algorithms', 'STR2', 'isActive']),
 });
 
 const mapDispatchToProps = dispatch => ({
-  toggleActive: name => {
-    dispatch(toggleActive(name));
+  toggleActive: (name, modifier) => {
+    dispatch(toggleActive(name, modifier));
   },
 });
 

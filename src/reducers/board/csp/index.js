@@ -1,6 +1,6 @@
-import BTS from 'algorithms/BTS/index';
-import MWC from 'algorithms/mwise';
-import STR from 'algorithms/STR';
+import BT from 'algorithms/BT/index';
+import mWC from 'algorithms/mWC';
+import STR2 from 'algorithms/STR2';
 import { intersect } from 'algorithms/utils';
 
 import generateCSP from './generateCSP';
@@ -97,7 +97,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   }
 
   // BTS are colored darkGreen (2)
-  set = solvableSets.get('BTS');
+  set = solvableSets.get('BT');
   if (set) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
@@ -108,7 +108,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   }
 
   // STR are colored darkBlue (4)
-  set = solvableSets.get('STR');
+  set = solvableSets.get('STR2');
   if (set) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
@@ -119,7 +119,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
   }
 
   // PWC are colored darkRed (5)
-  set = solvableSets.get('MWC-2');
+  set = solvableSets.get('mWC-2');
   if (set) {
     set.forEach(solvableCell => {
       if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
@@ -172,26 +172,26 @@ export default state => state.withMutations(s => {
   s.setIn(['csp', 'domains'], getDomains(constraints));
 
   // reduce the domains with BTS
-  if (s.getIn(['csp', 'isActive', 'BTS'])
-  && (s.getIn(['csp', 'isActive', 'BC'])
-  || s.getIn(['csp', 'isActive', 'FC']) || s.getIn(['csp', 'isActive', 'FCSTR']))) {
-    s.update('csp', c => BTS(c));
+  if (s.getIn(['csp', 'algorithms', 'BT', 'isActive'])
+  && (s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'BC']) || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC'])
+  || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC-STR']))) {
+    s.update('csp', c => BT(c));
   } else {
-    s.deleteIn(['csp', 'solvable', 'BTS']);
+    s.deleteIn(['csp', 'solvable', 'BT']);
   }
 
   // reduce the constraints with STR
-  if (s.getIn(['csp', 'isActive', 'STR'])) {
-    s.update('csp', c => STR(c));
+  if (s.getIn(['csp', 'algorithms', 'STR2', 'isActive'])) {
+    s.update('csp', c => STR2(c));
   } else {
-    s.deleteIn(['csp', 'solvable', 'STR']);
+    s.deleteIn(['csp', 'solvable', 'STR2']);
   }
 
   // reduce the contstraints with PWC
-  if (s.getIn(['csp', 'isActive', 'MWC'])) {
-    s.update('csp', c => MWC(c));
+  if (s.getIn(['csp', 'algorithms', 'mWC', 'isActive'])) {
+    s.update('csp', c => mWC(c));
   } else {
-    s.deleteIn(['csp', 'solvable', 'MWC']);
+    s.deleteIn(['csp', 'solvable', 'mWC']);
   }
 
   // color the solvable cells
