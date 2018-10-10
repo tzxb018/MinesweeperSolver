@@ -1,5 +1,5 @@
+import Constraint from 'Constraint';
 import { isOnFringe } from '../cellUtils';
-import Constraint from './Constraint';
 
 /**
  * Creates a variable for each fringe cell.

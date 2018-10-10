@@ -1,4 +1,4 @@
-import Constraint from 'reducers/board/csp/Constraint';
+import Constraint from 'Constraint';
 
 import { intersect } from '../utils';
 

@@ -1,4 +1,4 @@
-import Constraint from 'reducers/board/csp/Constraint';
+import Constraint from 'Constraint';
 
 /**
  * Finds whether the given map contains the given pair as a key using deep equality, returning the key if it is found or

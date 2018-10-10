@@ -1,4 +1,5 @@
 import Immutable from 'immutable';
+import HistoryLog from 'HistoryLog';
 
 import processCSP from './csp/index';
 import solveCSP from './csp/solve';
@@ -92,15 +93,16 @@ export const revealCell = (state, row, col) => {
       const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
 
       // post the action to the history log
-      const logString = `Revealed ${numCellsRevealed} cell(s) at [${row}, ${col}]`;
+      let cellOrCells = 'cells';
+      if (numCellsRevealed === 1) {
+        cellOrCells = 'cell';
+      }
+      const message = `[${row},${col}] revealed ${numCellsRevealed} ${cellOrCells}`;
       if (popFromHistory) {
         s.update('historyLog', h => h.pop());
       }
-      s.update('historyLog', h => h.push({
-        cells: getChangedCells(oldCells, s.getIn(['minefield', 'cells'])),
-        message: logString,
-        undoable: true,
-      }));
+      const log = new HistoryLog(message, 'log', true, getChangedCells(oldCells, s.getIn(['minefield', 'cells'])));
+      s.update('historyLog', h => h.push(log));
 
       // check if the game has been won, and reprocess the csp
       if (checkWinCondition(s.get('minefield'))) {
@@ -309,30 +311,32 @@ export const loop = (state, isLogged = true) => {
   if (isLogged) {
     const numFlagged = newState.getIn(['minefield', 'numFlagged']) - state.getIn(['minefield', 'numFlagged']);
     const numRevealed = newState.getIn(['minefield', 'numRevealed']) - state.getIn(['minefield', 'numRevealed']);
-    let logString = `Flagged ${numFlagged} mine(s) and revealed ${numRevealed} cell(s)`;
+    let cellOrCells = 'cells';
+    if (numFlagged + numRevealed === 1) {
+      cellOrCells = 'cell';
+    }
+    let message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[flag]`;
+    const log = new HistoryLog(
+      message,
+      'log',
+      true,
+      getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells']))
+    );
     const solveOrder = new Map([...newState.getIn(['csp', 'count']).entries()].sort((a, b) =>
       algorithms.get(a[0]) - algorithms.get(b[0])));
     solveOrder.forEach((counter, setKey) => {
-      logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
+      cellOrCells = 'cells';
+      if (counter.numFlagged + counter.numRevealed === 1) {
+        cellOrCells = 'cell';
+      }
+      log.addDetail(`${setKey} solved ${counter.numFlagged + counter.numRevealed}, ${numFlagged}[flag]`);
     });
     if (newState.get('isGameRunning')) {
-      newState = newState.update('historyLog', h => h.pop().push({
-        cells: getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells'])),
-        message: logString,
-        undoable: true,
-      }));
-      logString = 'Found 0 solvable cell(s)';
-      newState = newState.update('historyLog', h => h.push({
-        cells: [],
-        message: logString,
-        undoable: true,
-      }));
+      newState = newState.update('historyLog', h => h.pop().push(log));
+      message = 'Finds 0 solvable cells';
+      newState = newState.update('historyLog', h => h.push(new HistoryLog(message, 'log', false)));
     } else {
-      newState = newState.update('historyLog', h => h.push({
-        cells: getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells'])),
-        message: logString,
-        undoable: true,
-      }));
+      newState = newState.update('historyLog', h => h.push(log));
     }
     // clean up the results of the loop
     return newState.deleteIn(['csp', 'count']);
@@ -368,7 +372,7 @@ export const loseGame = (state, row = undefined, col = undefined) => state.withM
  */
 export const test = (state, numIterations, allowCheats = true, stopOnError = false) => {
   let newState = state;
-  const logMessages = [];
+  const logs = [];
   const startTime = performance.now();
   let numRuns = 0;
   let numFails = 0;
@@ -390,59 +394,76 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
       }
 
       // determine the results
-      let logString = '';
-      let logColor;
+      let log;
       let error = false;
+      let isRed = false;
       const solveOrder = new Map([...newState.getIn(['csp', 'count']).entries()].sort((a, b) =>
         algorithms.get(a[0]) - algorithms.get(b[0])));
 
       if (newState.get('isGameRunning')) {
-        logColor = 'red';
+        isRed = true;
         numFails++;
         // stopped due to inconsistencies
         if (!newState.getIn(['csp', 'isConsistent'])) {
-          logString = newState.get('historyLog').last().message;
+          const message = newState.get('historyLog').last().message;
+          log = new HistoryLog(message, 'red', false);
           error = true;
         // could not solve without cheats
         } else {
-          logString = `Flagged ${newState.getIn(['minefield', 'numFlagged'])} mine(s) and revealed`;
-          logString += ` ${newState.getIn(['minefield', 'numRevealed'])} cell(s)`;
-          logString += '\nCheats needed to advance further';
+          const numFlagged = newState.getIn(['minefield', 'numFlagged']);
+          const numRevealed = newState.getIn(['minefield', 'numRevealed']);
+          let cellOrCells = 'cells';
+          if (numFlagged + numRevealed === 1) {
+            cellOrCells = 'cell';
+          }
+          const message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[flag]`;
+          log = new HistoryLog(message, 'red', false);
+          log.addDetail('Cheats needed to advance further');
         }
       } else {
         // solved the puzzle
         if (checkWinCondition(newState.get('minefield'))) {
-          logString = 'Successfully solved the puzzle';
-          logColor = 'green';
+          const message = 'Successfully solved the puzzle';
+          log = new HistoryLog(message, 'green', false);
         // made an error while solving
         } else {
-          logString = 'Error made during solving';
-          logColor = 'red';
+          const message = 'Error made during solving';
+          log = new HistoryLog(message, 'red', false);
           numFails++;
           error = true;
+          isRed = true;
         }
       }
 
       newState = newState.update('historyLog', h => h.pop());
-      if (logColor === 'red' || numIterations <= 100) {
+      if (isRed || numIterations <= 100) {
         solveOrder.forEach((counter, setKey) => {
-          logString += `\n\t ${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} `;
-          logString += 'cell(s)';
+          let cellOrCells = 'cells';
+          if (counter.numFlagged + counter.numRevealed === 1) {
+            cellOrCells = 'cell';
+          }
+          log.addDetail(
+            `${setKey} solved ${counter.numFlagged + counter.numRevealed} ${cellOrCells}, ${counter.numFlagged}[flag]`
+          );
         });
         if (numCheats > 0) {
-          logString += `\n\t Cheat used ${numCheats} time(s)`;
+          let cellOrCells = 'times';
+          if (numCheats === 1) {
+            cellOrCells = 'time';
+          }
+          log.addDetail(`Cheat used ${numCheats} ${cellOrCells}`);
         }
-        logMessages.push([logString, logColor]);
+        logs.push(log);
         if (error && stopOnError) {
           break;
         }
       }
     } catch (e) {
-      let logString = 'Error thrown during solving';
-      logString += `\n\t ${e.toString()}`;
-      const logColor = 'red';
+      const message = 'Error thrown during solving';
+      const log = new HistoryLog(message, 'red', false);
+      log.addDetail(`${e.toString()}`);
       numFails++;
-      logMessages.push([logString, logColor]);
+      logs.push(log);
       if (stopOnError) {
         throw e;
       }
@@ -453,41 +474,38 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
 
   // log the results
   const accuracy = (numRuns - numFails) / numRuns * 100;
-  let logString = `Testing was ${accuracy}% successful`;
+  const message = `Testing was ${accuracy}% successful`;
+  const log = new HistoryLog(message, 'log', false);
   const executionTime = Math.round(performance.now() - startTime) / 1000;
-  logString += `\nExecution Time: ${executionTime} seconds`;
+  log.addDetail(`\nExecution Time: ${executionTime} seconds`, true);
   if (allowCheats) {
     const averageCheats = Math.round(totalCheats / numRuns * 100) / 100;
-    logString += `\nAverage cheats used: ${averageCheats}`;
+    log.addDetail(`\nAverage cheats used: ${averageCheats}`, true);
   }
 
   if (newState.getIn(['csp', 'algorithms', 'BT'])) {
     newState.getIn(['csp', 'algorithms', 'BT', 'subSets']).forEach((isActive, algorithm) => {
       if (isActive) {
         const diagnostics = newState.getIn(['csp', 'diagnostics', algorithm]);
-        logString += `\n${algorithm} (averages per problem):`;
+        log.addDetail(`\n${algorithm} (averages per problem):`, true);
         Object.keys(diagnostics).forEach(key => {
           let average = diagnostics[key] / numRuns;
-          logString += `\n\t${key} `;
+          let detail = `${key} `;
           if (key === 'nodesVisited' || key === 'backtracks') {
             average = Math.round(average);
-            logString += `${average}`;
+            detail += `${average}`;
           } else {
             average = Math.round(average * 1000) / 1000;
-            logString += `${average} ms`;
+            detail += `${average} ms`;
           }
+          log.addDetail(detail);
         });
       }
     });
   }
   newState = newState.updateIn(['csp', 'diagnostics'], d => d.clear());
-  logMessages.push([logString]);
-  return newState.update('historyLog', h => h.push(...logMessages.map(log => ({
-    cells: [],
-    color: log[1],
-    message: log[0],
-    undoable: false,
-  }))));
+  logs.push(log);
+  return newState.update('historyLog', h => h.push(...logs));
 };
 
 /**
@@ -524,28 +542,24 @@ export const toggleActive = (state, algorithm, modifier) => state.withMutations(
 export const toggleFlag = (state, row, col) => {
   if (state.get('isGameRunning')) {
     return state.withMutations(s => {
-      let logString;
+      let message;
 
       // if the cell is not already flagged and there are flags available to be placed, place the flag
       if (!s.getIn(['minefield', 'cells', row, col, 'isFlagged'])
       && s.getIn(['minefield', 'numFlagged']) < s.getIn(['minefield', 'numMines'])) {
         s.setIn(['minefield', 'cells', row, col, 'isFlagged'], true);
         s.updateIn(['minefield', 'numFlagged'], n => n + 1);
-        logString = `Flagged cell at [${row}, ${col}]`;
+        message = `[${row},${col}] flagged`;
 
       // else if the cell is already flagged, remove the flag
       } else if (s.getIn(['minefield', 'cells', row, col, 'isFlagged'])) {
         s.setIn(['minefield', 'cells', row, col, 'isFlagged'], false);
         s.updateIn(['minefield', 'numFlagged'], n => n - 1);
-        logString = `Unflagged cell at [${row}, ${col}]`;
+        message = `[${row},${col}] unflagged`;
       }
 
       // record the event in the history log and reprocess the csp
-      s.update('historyLog', h => h.pop().push({
-        cells: [{ col, row }],
-        message: logString,
-        undoable: true,
-      }));
+      s.update('historyLog', h => h.pop().push(new HistoryLog(message, 'log', true)));
       return processCSP(s);
     });
   }

@@ -2,6 +2,7 @@ import BT from 'algorithms/BT/index';
 import mWC from 'algorithms/mWC';
 import STR2 from 'algorithms/STR2';
 import { intersect } from 'algorithms/utils';
+import HistoryLog from 'HistoryLog';
 
 import generateCSP from './generateCSP';
 import reduceComponents from './reduceComponents';
@@ -33,11 +34,14 @@ const checkConsistency = state => state.withMutations(s => {
   });
 
   // log the processing message
-  let logString;
-  let logColor;
+  let log;
   if (inconsistentCount > 0) {
-    logString = `Processing stopped, ${inconsistentCount} inconsistencies found`;
-    logColor = 'red';
+    let cellOrCells = 'inconsistencies';
+    if (inconsistentCount === 1) {
+      cellOrCells = 'inconsistency';
+    }
+    const message = `Processing stopped due to ${inconsistentCount} ${cellOrCells}`;
+    log = new HistoryLog(message, 'red', true);
   } else {
     const solvableCount = new Map();
     const solvableCells = [];
@@ -51,19 +55,24 @@ const checkConsistency = state => state.withMutations(s => {
       });
       solvableCount.set(setKey, count);
     });
-    logString = `Found ${solvableCells.length} solvable cell(s)`;
+    let cellOrCells = 'cells';
+    if (solvableCells.length === 1) {
+      cellOrCells = 'cell';
+    }
+    const message = `Finds ${solvableCells.length} solvable ${cellOrCells}`;
+    log = new HistoryLog(message, 'log', false);
     solvableCount.forEach((count, setKey) => {
       if (count > 0) {
-        logString += `\n\t${setKey} found ${count} new solvable cell(s)`;
+        cellOrCells = 'cells';
+        if (count === 1) {
+          cellOrCells = 'cell';
+        }
+        const detail = `${setKey} finds ${count} solvable ${cellOrCells}`;
+        log.addDetail(detail);
       }
     });
   }
-  s.update('historyLog', h => h.push({
-    cells: [],
-    color: logColor,
-    message: logString,
-    undoable: true,
-  }));
+  s.update('historyLog', h => h.push(log));
 });
 
 /**
