@@ -476,7 +476,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
   const accuracy = (numRuns - numFails) / numRuns * 100;
   const message = `Testing was ${accuracy}% successful`;
   const log = new HistoryLog(message, 'log', false);
-  const executionTime = Math.round(performance.now() - startTime) / 1000;
+  const executionTime = Math.round((performance.now() - startTime) / 10) / 100;
   log.addDetail(`\nExecution Time: ${executionTime} seconds`, true);
   if (allowCheats) {
     const averageCheats = Math.round(totalCheats / numRuns * 100) / 100;
@@ -489,14 +489,14 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
         const diagnostics = newState.getIn(['csp', 'diagnostics', algorithm]);
         log.addDetail(`\n${algorithm} (averages per problem):`, true);
         Object.keys(diagnostics).forEach(key => {
-          let average = diagnostics[key] / numRuns;
-          let detail = `${key} `;
-          if (key === 'nodesVisited' || key === 'backtracks') {
-            average = Math.round(average);
-            detail += `${average}`;
-          } else {
-            average = Math.round(average * 1000) / 1000;
-            detail += `${average} ms`;
+          const average = diagnostics[key] / numRuns;
+          let detail;
+          switch (key) {
+          case 'nodesVisited': detail = `# nodes visited\t\t\t${Math.round(average)}`; break;
+          case 'backtracks': detail = `# backtracks\t\t\t\t${Math.round(average)}`; break;
+          case 'timeChecking': detail = `time spent checking\t\t${Math.round(average * 100) / 100} ms`; break;
+          case 'timeFiltering': detail = `time spent filtering\t\t\t${Math.round(average * 100) / 100} ms`; break;
+          default: detail = `${key}\t\t\t\t${Math.round(average)}`;
           }
           log.addDetail(detail);
         });

@@ -30,6 +30,7 @@ export default class HistoryLog {
   get canJump() { return this._canJump; }
   get hasHighlight() { return this._cellHighlight.length > 0; }
   get message() { return this._message; }
+  get numJumps() { return this._numJumps; }
 
   /**
    * Sets the cells to be highlighted upon hovering over this history log.
@@ -129,7 +130,7 @@ export default class HistoryLog {
    * @param {function} clickHandler the click handler for the history logs
    */
   static clickHandler(clickHandler) {
-    HistoryLog._clickHandler = key => clickHandler(key);
+    HistoryLog._clickHandler = numJumps => clickHandler(numJumps);
   }
 
   /**

@@ -37,9 +37,15 @@ export default class HistoryLog extends Component {
 
   // formats each history log for display
   formatter = () => {
+    let numJumps = 0;
+    this.props.historyLog.forEach(log => (log.canJump ? numJumps++ : null));
     const size = this.props.historyLog.size;
     return this.props.historyLog.map((log, index) => {
       const key = index - size + 1;
+      if (log.canJump) {
+        log.numJumps = numJumps;
+        numJumps--;
+      }
       return log.display(key);
     });
   }
