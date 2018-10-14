@@ -3,6 +3,7 @@ import {
   algorithms,
   loseGame,
 } from '../reducerFunctions';
+import HistoryLog from '../../../HistoryLog';
 
 /**
  * Solves all cells found to be solvable, losing the game if a cell that had a mine was incorrectly revealed.
@@ -65,17 +66,24 @@ export default (state, doLog = true) => state.withMutations(s => {
   if (doLog) {
     const numCellsFlagged = s.getIn(['minefield', 'numFlagged']) - oldNumFlagged;
     const numCellsRevealed = s.getIn(['minefield', 'numRevealed']) - oldNumRevealed;
-    let logString = `Flagged ${numCellsFlagged} mine(s) and revealed ${numCellsRevealed} cell(s)`;
+    let cellOrCells = 'cells';
+    if (numCellsFlagged + numCellsRevealed === 1) {
+      cellOrCells = 'cell';
+    }
+    const message = `Solved ${numCellsFlagged + numCellsRevealed} ${cellOrCells}, ${numCellsFlagged}[flag]`;
+    const log = new HistoryLog(message, 'log', true, changedCells);
     solvedCellCounter.forEach((counter, setKey) => {
       if (counter.numFlagged + counter.numRevealed > 0) {
-        logString += `\n\t${setKey} flagged ${counter.numFlagged} mine(s) and revealed ${counter.numRevealed} cell(s)`;
+        cellOrCells = 'cells';
+        if (counter.numFlagged + counter.numRevealed === 1) {
+          cellOrCells = 'cell';
+        }
+        const detail =
+          `${setKey} solved ${counter.numFlagged + counter.numRevealed} ${cellOrCells}, ${counter.numFlagged}[flag]`;
+        log.addDetail(detail);
       }
     });
-    s.update('historyLog', h => h.push({
-      cells: changedCells,
-      message: logString,
-      undoable: true,
-    }));
+    s.update('historyLog', h => h.push(log));
   } else {
     solvedCellCounter.forEach((counter, setKey) => {
       if (counter.numFlagged + counter.numRevealed > 0) {

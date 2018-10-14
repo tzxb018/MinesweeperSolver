@@ -329,7 +329,7 @@ export const loop = (state, isLogged = true) => {
       if (counter.numFlagged + counter.numRevealed === 1) {
         cellOrCells = 'cell';
       }
-      log.addDetail(`${setKey} solved ${counter.numFlagged + counter.numRevealed}, ${numFlagged}[flag]`);
+      log.addDetail(`${setKey} solved ${counter.numFlagged + counter.numRevealed}, ${counter.numFlagged}[flag]`);
     });
     if (newState.get('isGameRunning')) {
       newState = newState.update('historyLog', h => h.pop().push(log));

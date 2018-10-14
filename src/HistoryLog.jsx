@@ -1,5 +1,12 @@
 import React from 'react';
 
+const flag = key => (
+  <svg height="10" width="8" key={key}>
+    <polygon key="flag" points="5,0 4,0 0,2 0,3 4,5 5,5" style={{ fill: 'red' }} />
+    <polygon key="pole" points="5,5 4,5 4,7 0,8 0,10 8,10 8,8 5,7" style={{ fill: 'black' }} />
+  </svg>
+);
+
 export default class HistoryLog {
   /**
    * @constructor
@@ -77,6 +84,25 @@ export default class HistoryLog {
    * @returns {HTMLDivElement} history log jsx element
    */
   display(key) {
+    let message = this._message;
+    let i = 0;
+    if (message.includes('[flag]')) {
+      const newMessage = message.replace('flag]', '');
+      message = [newMessage, flag(i), ']'];
+      i++;
+    }
+
+    const details = this._details.slice();
+    let offset = 0;
+    details.slice().forEach((detail, index) => {
+      if (detail.includes('[flag]')) {
+        const newDetail = detail.replace('flag]', '');
+        details.splice(index + offset, 1, newDetail, flag(i), ']');
+        offset += 2;
+        i++;
+      }
+    });
+
     return (
       <div className={HistoryLog._styles[this._style]}
         key={key}
@@ -84,8 +110,8 @@ export default class HistoryLog {
         onMouseEnter={this.hasHighlight ? () => HistoryLog._highlighter(this._cellHighlight) : null}
         onMouseLeave={this.hasHighlight ? () => HistoryLog._clearer() : null}
       >
-        {this._message}
-        {this._details}
+        {message}
+        {details}
       </div>
     );
   }
