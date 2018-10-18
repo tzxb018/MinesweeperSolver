@@ -146,13 +146,9 @@ export default (csp, pairSize = 2) => csp.withMutations(c => {
         for (let i = 0; i < pair.length; i++) {
           const key = pair[i];
           const value = values[0][i];
-          if (values.every(tuple => tuple[i] === value)
-          && !MWC.find(element => element.key === key)) {
-            const variable = component.variables.find(element => element.key === key);
+          if (values.every(tuple => tuple[i] === value)) {
             MWC.push({
-              col: variable.col,
               key,
-              row: variable.row,
               value,
             });
           }

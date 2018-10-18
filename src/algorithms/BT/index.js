@@ -2,6 +2,15 @@ import backCheckSearch from './backCheck';
 import forwardCheckSearch from './forwardCheck';
 import forwardCheckSTRSearch from './forwardCheckSTR';
 
+const algorithms = new Map([
+  ['BC', (domains, constraints, assignmentOrder, diagnostics) =>
+  backCheckSearch(domains, constraints, assignmentOrder, diagnostics)],
+  ['FC', (domains, constraints, assignmentOrder, diagnostics) =>
+  forwardCheckSearch(domains, constraints, assignmentOrder, diagnostics)],
+  ['FC-STR', (domains, constraints, assignmentOrder, diagnostics) =>
+  forwardCheckSTRSearch(domains, constraints, assignmentOrder, diagnostics)],
+]);
+
 /**
  * Groups all the constraints by the variables they contain.
  * @param {Constraint[]} constraints csp model of the minefield
@@ -31,16 +40,7 @@ const mapVariablesToConstraints = constraints => {
 export default csp => csp.withMutations(c => {
   c.setIn(['solvable', 'BT'], []);
   const solvable = new Map();
-  const algorithms = new Map();
-  algorithms.set('BC', (domains, constraints, assignmentOrder, diagnostics) =>
-    backCheckSearch(domains, constraints, assignmentOrder, diagnostics));
-  algorithms.set('FC', (domains, constraints, assignmentOrder, diagnostics) =>
-    forwardCheckSearch(domains, constraints, assignmentOrder, diagnostics));
-  algorithms.set('FC-STR', (domains, constraints, assignmentOrder, diagnostics) =>
-    forwardCheckSTRSearch(domains, constraints, assignmentOrder, diagnostics));
-
   [...algorithms.keys()].forEach(key => solvable.set(key, []));
-
 
   c.get('components').forEach(component => {
     // sort the constraints and set the assignment order
@@ -62,28 +62,17 @@ export default csp => csp.withMutations(c => {
         }
 
         // search the tree
-        let solvableCells =
+        const solvableVars =
           search(c.get('domains'), constraints, assignmentOrder, c.getIn(['diagnostics', algorithmKey]));
 
-        // map the solvable cells to usable solvable cell objects
-        solvableCells = solvableCells.map(cell => {
-          const variable = component.variables.find(element => element.key === cell.key);
-          return {
-            col: variable.col,
-            key: cell.key,
-            row: variable.row,
-            value: cell.value,
-          };
-        });
-        solvable.set(algorithmKey, solvable.get(algorithmKey).concat(solvableCells));
+        solvable.set(algorithmKey, solvable.get(algorithmKey).concat(solvableVars));
       }
     });
   });
 
-  [...solvable.values()].forEach(value => {
-    c.updateIn(['solvable', 'BT'], x => x.concat(value));
-    value.forEach(cell => c.get('domains').set(cell.key, new Set([cell.value])));
-  });
+  const solvableSet = [...solvable.values()][0];
+  c.updateIn(['solvable', 'BT'], x => x.concat(solvableSet));
+  solvableSet.forEach(cell => c.get('domains').set(cell.key, new Set([cell.value])));
   if (c.getIn(['solvable', 'BT']).length === 0) {
     c.deleteIn(['solvable', 'BT']);
   }

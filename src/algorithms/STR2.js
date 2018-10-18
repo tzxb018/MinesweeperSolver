@@ -95,15 +95,10 @@ export default csp => csp.withMutations(c => {
     // solve any variables with a domain of only one value
     domains.forEach((values, key) => {
       if (values.size === 1) {
-        const variable = component.variables.find(element => element.key === key);
-        if (variable !== undefined) {
-          STR.push({
-            col: variable.col,
-            key,
-            row: variable.row,
-            value: [...values][0],
-          });
-        }
+        STR.push({
+          key,
+          value: [...values][0],
+        });
       }
     });
   });

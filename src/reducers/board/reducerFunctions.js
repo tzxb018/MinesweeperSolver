@@ -12,12 +12,7 @@ import {
   revealNeighbors,
 } from './cellUtils';
 
-export const algorithms = new Map([
-  ['Unary', 0],
-  ['BT', 1],
-  ['STR2', 2],
-  ['PWC', 3],
-]);
+export const algorithms = ['Unary', 'BT', 'STR2', 'PWC'];
 
 /**
  * Handles the reset action by reverting the cells, csp model, and undo history to their starting states.
@@ -118,7 +113,7 @@ export const revealCell = (state, row, col) => {
 /**
  * Handles the step action by solving and advancing the csp once if possible.
  * @param state state of the board
- * @param {boolean} isLogged default solveCSP will be logged, false if log isn't wanted (optional)
+ * @param {boolean} [isLogged] default solveCSP will be logged, false if log isn't wanted
  * @returns newState, or oldState if no changes could be made
  */
 export const step = (state, isLogged = true) => {
@@ -322,14 +317,17 @@ export const loop = (state, isLogged = true) => {
       true,
       getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells']))
     );
-    const solveOrder = new Map([...newState.getIn(['csp', 'count']).entries()].sort((a, b) =>
-      algorithms.get(a[0]) - algorithms.get(b[0])));
-    solveOrder.forEach((counter, setKey) => {
-      cellOrCells = 'cells';
-      if (counter.numFlagged + counter.numRevealed === 1) {
-        cellOrCells = 'cell';
+    algorithms.forEach((algorithm) => {
+      if (newState.getIn(['csp', 'count']).has(algorithm)) {
+        const count = newState.getIn(['csp', 'count']).get(algorithm);
+        cellOrCells = 'cells';
+        if (count.numFlagged + count.numRevealed === 1) {
+          cellOrCells = 'cell';
+        }
+        const detail =
+          `${algorithm} solved ${count.numFlagged + count.numRevealed} ${cellOrCells}, ${count.numFlagged}[flag]`;
+        log.addDetail(detail);
       }
-      log.addDetail(`${setKey} solved ${counter.numFlagged + counter.numRevealed}, ${counter.numFlagged}[flag]`);
     });
     if (newState.get('isGameRunning')) {
       newState = newState.update('historyLog', h => h.pop().push(log));
@@ -347,12 +345,12 @@ export const loop = (state, isLogged = true) => {
 /**
  * Loses the game.
  * @param state state of the board
- * @param {number} row row of the cell that caused the loss (optional)
- * @param {number} col col of the cell that caused the loss (optional)
+ * @param {number} [row] row of the cell that caused the loss
+ * @param {number} [col] col of the cell that caused the loss
  * @returns newState
  */
-export const loseGame = (state, row = undefined, col = undefined) => state.withMutations(s => {
-  if (row !== undefined && col !== undefined) {
+export const loseGame = (state, row, col) => state.withMutations(s => {
+  if (row && col) {
     s.setIn(['minefield', 'cells', row, col, 'isHidden'], false);
   }
   s.update('minefield', m => revealMines(m));
@@ -397,8 +395,6 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
       let log;
       let error = false;
       let isRed = false;
-      const solveOrder = new Map([...newState.getIn(['csp', 'count']).entries()].sort((a, b) =>
-        algorithms.get(a[0]) - algorithms.get(b[0])));
 
       if (newState.get('isGameRunning')) {
         isRed = true;
@@ -437,7 +433,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
 
       newState = newState.update('historyLog', h => h.pop());
       if (isRed || numIterations <= 100) {
-        solveOrder.forEach((counter, setKey) => {
+        newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
           let cellOrCells = 'cells';
           if (counter.numFlagged + counter.numRevealed === 1) {
             cellOrCells = 'cell';
@@ -483,7 +479,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
     log.addDetail(`\nAverage cheats used: ${averageCheats}`, true);
   }
 
-  if (newState.getIn(['csp', 'algorithms', 'BT'])) {
+  if (newState.getIn(['csp', 'algorithms', 'BT', 'isActive'])) {
     newState.getIn(['csp', 'algorithms', 'BT', 'subSets']).forEach((isActive, algorithm) => {
       if (isActive) {
         const diagnostics = newState.getIn(['csp', 'diagnostics', algorithm]);

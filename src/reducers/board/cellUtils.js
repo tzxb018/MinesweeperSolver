@@ -104,11 +104,9 @@ export const revealNeighbors = (minefield, row, col) => {
         const x = currentCell.x + element[0];
         const y = currentCell.y + element[1];
         // if the coordinate exists on the board and isn't already revealed, reveal it
-        if (x >= 0
-            && x < numRows
-            && y >= 0
-            && y < numCols
-            && m.getIn(['cells', x, y, 'isHidden'])) {
+        if (x >= 0 && x < numRows
+        && y >= 0 && y < numCols
+        && m.getIn(['cells', x, y, 'isHidden'])) {
           m.setIn(['cells', x, y, 'isHidden'], false);
           m.update('numRevealed', n => n + 1);
           // if this cell is also empty, add it to the queue so its neighbors can also be revealed
@@ -129,8 +127,8 @@ export const revealNeighbors = (minefield, row, col) => {
  * @param {Immutable.Map} minefield state of the minefield
  * @returns {boolean} true if game has been won, false otherwise
  */
-export const checkWinCondition = minefield => minefield.get('numRevealed') === (minefield.get('cells').size
-  * minefield.getIn(['cells', 0]).size) - minefield.get('numMines');
+export const checkWinCondition = minefield => minefield.get('numRevealed') === ((minefield.get('cells').size
+  * minefield.getIn(['cells', 0]).size) - minefield.get('numMines'));
 
 /**
  * Gets all the cells that changed from the previous state to the current one. Returning their [row, col] pairs in an

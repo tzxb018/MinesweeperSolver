@@ -6,6 +6,7 @@ import HistoryLog from 'HistoryLog';
 
 import generateCSP from './generateCSP';
 import reduceComponents from './reduceComponents';
+import { parseSolvable } from './solve';
 
 /**
  * Checks csp model for any inconsistencies. Any unsatisfied constraints are highlighted red on the board and solving is
@@ -43,45 +44,43 @@ const checkConsistency = state => state.withMutations(s => {
     const message = `Processing stopped due to ${inconsistentCount} ${cellOrCells}`;
     log = new HistoryLog(message, 'red', true);
   } else {
-    const solvableCount = new Map();
-    const solvableCells = [];
-    s.getIn(['csp', 'solvable']).forEach((solvableSet, setKey) => {
-      let count = 0;
-      solvableSet.forEach(cell => {
-        if (!solvableCells.includes(cell.key)) {
-          solvableCells.push(cell.key);
-          count++;
-        }
-      });
-      solvableCount.set(setKey, count);
-    });
+    let count = 0;
+    const details = [];
     let cellOrCells = 'cells';
-    if (solvableCells.length === 1) {
+    s.getIn(['csp', 'solvable']).forEach((solvable, algorithm) => {
+      count += solvable.length;
+      cellOrCells = 'cells';
+      if (solvable.length === 1) {
+        cellOrCells = 'cell';
+      }
+      details.push(`${algorithm} finds ${solvable.length} solvable ${cellOrCells}`);
+    });
+    cellOrCells = 'cells';
+    if (count === 1) {
       cellOrCells = 'cell';
     }
-    const message = `Finds ${solvableCells.length} solvable ${cellOrCells}`;
+    const message = `Finds ${count} solvable ${cellOrCells}`;
     log = new HistoryLog(message, 'log', false);
-    solvableCount.forEach((count, setKey) => {
-      if (count > 0) {
-        cellOrCells = 'cells';
-        if (count === 1) {
-          cellOrCells = 'cell';
-        }
-        const detail = `${setKey} finds ${count} solvable ${cellOrCells}`;
-        log.addDetail(detail);
-      }
-    });
+    details.forEach(detail => log.addDetail(detail));
   }
   s.update('historyLog', h => h.push(log));
 });
 
 /**
  * Color codes all cells that are solvable.
- * @param {Immutable.List<Immutable.List<Immutable.Map>>} cells matrix of cell objects
+ * @param {object[][]} cells matrix of cell objects
  * @param {Immutable.Map} csp state of the csp model
- * @returns {Immutable.List<Immutable.List<Immutable.Map>>} updated version of cells
+ * @returns {object[][]} updated version of cells
  */
 const colorSolvable = (cells, csp) => cells.withMutations(c => {
+  // defined colors
+  const colors = new Map([
+    ['Unary', 1],   // blue
+    ['BT', 2],      // darkGreen
+    ['STR2', 4],    // darkBlue
+    ['mWC-2', 5],   // darkRed
+  ]);
+
   // clear previous coloring
   csp.get('components').forEach(component => {
     component.variables.forEach(variable => {
@@ -90,54 +89,14 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     });
   });
 
-  // get the sets of solvable cells
-  const solvableSets = csp.get('solvable');
-  if (!solvableSets) {
-    return cells;
-  }
-
-  // unary are colored blue (1)
-  let set = solvableSets.get('Unary');
-  if (set) {
-    set.forEach(solvableCell => {
-      c.setIn([solvableCell.row, solvableCell.col, 'color'], 1);
-      c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
+  // color each solvable set
+  csp.get('solvable').forEach((solvable, algorithm) => {
+    const color = colors.get(algorithm);
+    solvable.forEach(cell => {
+      c.setIn([cell.row, cell.col, 'color'], color);
+      c.setIn([cell.row, cell.col, 'solution'], cell.value);
     });
-  }
-
-  // BTS are colored darkGreen (2)
-  set = solvableSets.get('BT');
-  if (set) {
-    set.forEach(solvableCell => {
-      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'color'], 2);
-        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
-      }
-    });
-  }
-
-  // STR are colored darkBlue (4)
-  set = solvableSets.get('STR2');
-  if (set) {
-    set.forEach(solvableCell => {
-      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'color'], 4);
-        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
-      }
-    });
-  }
-
-  // PWC are colored darkRed (5)
-  set = solvableSets.get('mWC-2');
-  if (set) {
-    set.forEach(solvableCell => {
-      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'color'], 5);
-        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
-      }
-    });
-  }
-
+  });
   return c;
 });
 
@@ -202,6 +161,9 @@ export default state => state.withMutations(s => {
   } else {
     s.deleteIn(['csp', 'solvable', 'mWC']);
   }
+
+  // parse the solvable cells
+  s.updateIn(['csp', 'solvable'], o => parseSolvable(o, s.getIn(['csp', 'variables'])));
 
   // color the solvable cells
   s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp')));
