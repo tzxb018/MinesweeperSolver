@@ -1,6 +1,69 @@
 import Constraint from 'Constraint';
 
 /**
+ * Revises the constraints of the given pair by enforcing pairwise consistency. Pairwise consistency means every tuple
+ * has a supporting tuple in the other constraints of the pair.
+ * @param {Constraint[]} pair list of Constraints that form the pair
+ * @param {number[]} pair.scope list of variables common to the pair
+ * @returns {Constraint[]} list of Constraints that were revised, empty array if no changes made
+ */
+const revise = pair => {
+  // regionalize each constraint and find the common regions
+  const regionMaps = pair.map(constraint => constraint.regionalize(pair.scope));
+  const commonRegions = [...regionMaps[0].keys()].filter(domain =>
+    regionMaps.every(regionMap => regionMap.has(domain)));
+
+  // revise each constraint's tuples based on the common regions
+  const revisedConstraints = [];
+  regionMaps.forEach((regionMap, index) => {
+    let revised = false;
+    regionMap.forEach((tuples, domain) => {
+      if (!commonRegions.includes(domain)) {
+        tuples.forEach(id => pair[index].kill(id));
+        revised = true;
+      }
+    });
+    if (revised) {
+      revisedConstraints.push(pair[index]);
+    }
+  });
+
+  return revisedConstraints;
+};
+
+/**
+ * Brute force finds all the pairs of constraints with intersecting scopes.
+ * @param {Constraint[]} constraints list of Constraints
+ * @param {number} size the maximum number of constraints to pair up
+ * @returns {Constraint[]} every pair of constraints and their intersecting scopes
+ */
+/* work in progress
+const findPairs = (constraints, size) => {
+  const pairs = [];
+  constraints.forEach((constraint1, index) => {
+    const intersect = [];
+    constraints.slice(index).filter(constraint2 => {
+      const scope = Constraint.intersectScopes(constraint1, constraint2);
+      if (scope.length > 1) {
+
+      }
+    })
+  })
+};
+
+const pwc = csp => csp.withMutations(c => {
+  c.get('components').forEach(component => {
+    const pairs = findPairs(component.constraints);
+    const queue = pairs.slice();
+    while (queue.length > 0) {
+      const pair = queue.shift();
+      const revised = revise(pair);
+    }
+  });
+});
+*/
+
+/**
  * Finds whether the given map contains the given pair as a key using deep equality, returning the key if it is found or
  * undefined if it does not exist in the map.
  * @param {Map<number[], boolean[][]>} map
@@ -69,25 +132,6 @@ const getPairDomains = pairMap => {
   });
 
   return domains;
-};
-
-/**
- * Revises a constraint with the given domains. Returning a map of the new domain sets that the constraint agrees with.
- * @param {Constraint} constraint the Constraint to be revised
- * @param {Map<number[], boolean[][]>} domains variable pairs mapped to their vaid domains
- * @returns {Map<number[], boolean[][]>} map of the new domains that the revised constraint allows for, undefined if no
- * alive tuples
- */
-const revise = (constraint, domains) => {
-  // convert the domains to options
-  const validPairs = [...domains.keys()].filter(pair => pair.every(key => constraint.isInScope(key)));
-  let options = Constraint.pairDomainsToOptions(domains);
-  options = options.filter(option => validPairs.includes(option.pair));
-
-  // revise the alive tuples with the old pair domain options
-  constraint.killIfPairs(options);
-
-  return constraint.pairDomains(validPairs);
 };
 
 /**
