@@ -78,7 +78,7 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     ['Unary', 1],   // blue
     ['BT', 2],      // darkGreen
     ['STR2', 4],    // darkBlue
-    ['mWC-2', 5],   // darkRed
+    ['PWC', 5],     // darkRed
   ]);
 
   // clear previous coloring

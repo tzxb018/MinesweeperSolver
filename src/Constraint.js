@@ -335,7 +335,7 @@ export default class Constraint {
       if (!regions.has(domainKey)) {
         regions.set(domainKey, []);
       }
-      regions.get(domainKey).push(tuple.key);
+      regions.get(domainKey).push(tuple.id);
     });
     return regions;
   }

@@ -252,10 +252,10 @@ export const initialize = () => {
           FC: true,
           'FC-STR': true,
         }),
-        isActive: true,
+        isActive: false,
       }),
       STR2: Immutable.Map({
-        isActive: true,
+        isActive: false,
       }),
       mWC: Immutable.Map({
         isActive: true,
