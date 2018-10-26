@@ -70,9 +70,11 @@ const restore = (restoreKey, assignmentOrder, constraintMap, reductions, domains
  * @param {Map<number, Set<boolean>>} domains current variable domains
  * @param {Map<(number|Constraint), Set<(boolean|number)>[]>} reductions variables and constraints mapped to their
  * domain and tuple reductions respectively
+ * @param {Object} diagnostics execution metrics object
+ * @param {number} diagnostics.tuplesKilled number of tuples killed
  * @returns {boolean} true if consistent, false otherwise
  */
-const forwardCheckSTR = (stack, constraintMap, domains, reductions) => {
+const forwardCheckSTR = (stack, constraintMap, domains, reductions, diagnostics) => {
   const current = stack.slice(-1)[0];
   const future = [...constraintMap.keys()].slice(stack.length);
   const reduced = new Map();
@@ -101,7 +103,7 @@ const forwardCheckSTR = (stack, constraintMap, domains, reductions) => {
   while (consistent && queue.length > 0) {
     // revise the next constraint in the queue
     const constraint = queue.shift();
-    const newDomains = revise(constraint, domains, reduced);
+    const newDomains = revise(constraint, domains, diagnostics, reduced);
     if (newDomains) {
       [...newDomains.keys()].forEach(key => {
         if (!future.includes(key)) {
@@ -155,7 +157,7 @@ const label = (stack, key, constraintMap, domains, reductions, diagnostics) => {
       value: [...domains.get(key)][0],
     });
     const startTime = performance.now();
-    if (forwardCheckSTR(stack, constraintMap, domains, reductions)) {
+    if (forwardCheckSTR(stack, constraintMap, domains, reductions, diagnostics)) {
       consistent = true;
     } else {
       const value = stack.pop().value;
@@ -242,6 +244,9 @@ const search = (stack, domains, reductions, constraintMap, assignmentOrder, diag
  * @returns {{key: number, value: boolean}[]} list of solvable variables
  */
 export default (domains, constraints, assignmentOrder, diagnostics) => {
+  if (!diagnostics.tuplesKilled) {
+    diagnostics.tuplesKilled = 0;
+  }
   // filter the constraints
   const filterTime = performance.now();
   const constraintMap = constraintFilter(constraints, assignmentOrder);

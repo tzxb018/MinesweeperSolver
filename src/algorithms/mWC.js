@@ -36,10 +36,12 @@ const findPairs = (constraints) => {
  * has a supporting tuple in the other constraints of the pair.
  * @param {Constraint[]} pair list of Constraints that form the pair
  * @param {number[]} pair.scope list of variables common to the pair
+ * @param {Object} diagnostics execution metrics object
+ * @param {number} diagnostics.tuplesKilled number of tuples killed
  * @returns {Constraint[]} list of Constraints that were revised, undefined if one of the constraints of the pair is
  * dead
  */
-const revise = pair => {
+const revise = (pair, diagnostics) => {
   let isConsistent = true;
   // regionalize each constraint and find the common regions
   const regionMaps = pair.map(constraint => constraint.regionalize(pair.scope));
@@ -53,6 +55,7 @@ const revise = pair => {
     regionMap.forEach((tuples, domain) => {
       if (!commonRegions.includes(domain)) {
         tuples.forEach(id => pair[index].kill(id));
+        diagnostics.tuplesKilled += tuples.length;
         revised = true;
       }
     });
@@ -74,9 +77,23 @@ const revise = pair => {
  * alive supporting tuple in all other constraints of the pair.
  */
 export default csp => csp.withMutations(c => {
+  if (!c.getIn(['diagnostics', 'PWC'])) {
+    const diagnostics = {
+      time: 0,
+      revisions: 0,
+      tuplesKilled: 0,
+      timePairing: 0,
+    };
+    c.setIn(['diagnostics', 'PWC'], diagnostics);
+  }
+  const diagnostics = c.getIn(['diagnostics', 'PWC']);
   const PWC = [];
+  const startTime = performance.now();
+
   c.get('components').forEach(component => {
+    const pairTime = performance.now();
     const pairs = findPairs(component.constraints);
+    diagnostics.timePairing += performance.now() - pairTime;
     const constraintMap = new Map();
     pairs.forEach(pair => pair.forEach(constraint => {
       if (!constraintMap.has(constraint)) {
@@ -89,8 +106,9 @@ export default csp => csp.withMutations(c => {
     // revise the pairs until they reach a steady state
     try {
       while (queue.length > 0) {
+        diagnostics.revisions++;
         const pair = queue.shift();
-        const revisedConstraints = revise(pair);
+        const revisedConstraints = revise(pair, diagnostics);
         if (!revisedConstraints) {
           throw pair;
         }
@@ -108,6 +126,7 @@ export default csp => csp.withMutations(c => {
       }
     });
   });
+  diagnostics.time += performance.now() - startTime;
 
   // add all PWC cells to the list of solvable cells
   if (PWC.length > 0) {

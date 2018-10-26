@@ -213,7 +213,11 @@ const search = (stack, domains, reductions, constraintMap, assignmentOrder, diag
  * @param {Map<number, Set<boolean>} domains variables mapped to their allowed values
  * @param {Map<number, Array<Array<Array<boolean>>>>} constraints variables mapped to their constraints
  * @param {Array<number>} assignmentOrder order of variable assignments
- * @param {{*}} diagnostics search metrics object
+ * @param {Object} diagnostics search metrics object
+ * @param {number} diagnostics.timeFiltering number of ms spent filtering the constraints
+ * @param {number} diagnostics.nodesVisited number of nodes the search visited
+ * @param {number} diagnostics.backtracks number of backtracks the search required
+ * @param {number} diagnostics.timeChecking number of ms the search required
  * @returns {Array<{key: number, value: boolean}>} list of solvable variables
  */
 export default (domains, constraints, assignmentOrder, diagnostics) => {

@@ -252,10 +252,10 @@ export const initialize = () => {
           FC: true,
           'FC-STR': true,
         }),
-        isActive: false,
+        isActive: true,
       }),
       STR2: Immutable.Map({
-        isActive: false,
+        isActive: true,
       }),
       mWC: Immutable.Map({
         isActive: true,
@@ -478,12 +478,15 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
     const averageCheats = Math.round(totalCheats / numRuns * 100) / 100;
     log.addDetail(`\nAverage cheats used: ${averageCheats}`, true);
   }
+  logs.push(log);
 
+  // search logging
   if (newState.getIn(['csp', 'algorithms', 'BT', 'isActive'])) {
+    const search = new HistoryLog('Search', 'log', false);
     newState.getIn(['csp', 'algorithms', 'BT', 'subSets']).forEach((isActive, algorithm) => {
       if (isActive) {
         const diagnostics = newState.getIn(['csp', 'diagnostics', algorithm]);
-        log.addDetail(`\n${algorithm} (averages per problem):`, true);
+        search.addDetail(`\n${algorithm}:`, true);
         Object.keys(diagnostics).forEach(key => {
           const average = diagnostics[key] / numRuns;
           let detail;
@@ -492,15 +495,54 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
           case 'backtracks': detail = `# backtracks\t\t\t\t${Math.round(average)}`; break;
           case 'timeChecking': detail = `time spent checking\t\t${Math.round(average * 100) / 100} ms`; break;
           case 'timeFiltering': detail = `time spent filtering\t\t\t${Math.round(average * 100) / 100} ms`; break;
+          case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${Math.round(average)}`; break;
           default: detail = `${key}\t\t\t\t${Math.round(average)}`;
           }
-          log.addDetail(detail);
+          search.addDetail(detail);
         });
       }
     });
+    logs.push(search);
   }
+
+  // STR2 logging
+  if (newState.getIn(['csp', 'algorithms', 'STR2', 'isActive'])) {
+    const str2 = new HistoryLog('STR2:', 'log', false);
+    const diagnostics = newState.getIn(['csp', 'diagnostics', 'STR2']);
+    Object.keys(diagnostics).forEach(key => {
+      const average = diagnostics[key] / numRuns;
+      let detail;
+      switch (key) {
+      case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
+      case 'revisions': detail = `# constraints checked\t\t${Math.round(average)}`; break;
+      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${Math.round(average)}`; break;
+      default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+      }
+      str2.addDetail(detail);
+    });
+    logs.push(str2);
+  }
+
+  // PWC logging
+  if (newState.getIn(['csp', 'algorithms', 'mWC', 'isActive'])) {
+    const pwc = new HistoryLog('PWC:', 'log', false);
+    const diagnostics = newState.getIn(['csp', 'diagnostics', 'PWC']);
+    Object.keys(diagnostics).forEach(key => {
+      const average = diagnostics[key] / numRuns;
+      let detail;
+      switch (key) {
+      case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
+      case 'revisions': detail = `# pairs checked\t\t\t${Math.round(average)}`; break;
+      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${Math.round(average)}`; break;
+      case 'timePairing': detail = `time spent pairing\t\t\t${Math.round(average * 100) / 100} ms`; break;
+      default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+      }
+      pwc.addDetail(detail);
+    });
+    logs.push(pwc);
+  }
+
   newState = newState.updateIn(['csp', 'diagnostics'], d => d.clear());
-  logs.push(log);
   return newState.update('historyLog', h => h.push(...logs));
 };
 
