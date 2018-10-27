@@ -12,7 +12,7 @@ export default class CheatButton extends Component {
   }
 
   state = {
-    random: true,
+    random: false,
   }
 
   clickHandler = () => {

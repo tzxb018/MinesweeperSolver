@@ -178,27 +178,27 @@ export const changeSize = (state, newSize) => state.withMutations(s => {
 /**
  * Converts the cheat action into a reveal cell action.
  * @param state state of the board
- * @param {boolean} isRandom true if pick cheat cell randomly, false if prioritize unsolvable cells on the fringe
+ * @param {boolean} [isRandom=true] true if pick cheat cell randomly, false if prioritize unsolvable cells on the fringe
  * @returns newState
  */
-export const cheat = (state, isRandom) => {
+export const cheat = (state, isRandom = true) => {
   let row = Math.floor(Math.random() * state.getIn(['minefield', 'cells']).size);
   let col = Math.floor(Math.random() * state.getIn(['minefield', 'cells', 0]).size);
 
   // if selection style is not random, prioritize the fringe
   let cellFound = false;
   if (!isRandom && state.get('isGameRunning')) {
-    const solvable = [];
-    state.getIn(['csp', 'solvable']).forEach(set => solvable.push(...set));
-    cellFound = state.getIn(['csp', 'components']).some(component => component.variables.some(variable => {
-      if (state.getIn(['minefield', 'cells', variable.row, variable.col, 'content']) !== -1
-      && !solvable.some(element => element.key === variable.key)) {
-        row = variable.row;
-        col = variable.col;
-        return true;
-      }
-      return false;
-    }));
+    const solvable = new Set();
+    state.getIn(['csp', 'solvable']).forEach(set => set.forEach(e => solvable.add(e.key)));
+    let variables = [];
+    state.getIn(['csp', 'components']).forEach(component => variables.push(...component.variables));
+    variables = variables.filter(variable =>
+      state.getIn(['minefield', 'cells', variable.row, variable.col, 'content']) !== -1 && !solvable.has(variable.key));
+    cellFound = variables[Math.floor(Math.random() * variables.length)];
+    if (cellFound) {
+      row = cellFound.row;
+      col = cellFound.col;
+    }
   }
   // else find a random safe cell
   if (!cellFound) {
@@ -384,7 +384,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
       let numCheats = 0;
       if (allowCheats) {
         while (newState.get('isGameRunning') && newState.getIn(['csp', 'isConsistent'])) {
-          newState = cheat(newState);
+          newState = cheat(newState, false);
           numCheats++;
           newState = loop(newState, false);
         }

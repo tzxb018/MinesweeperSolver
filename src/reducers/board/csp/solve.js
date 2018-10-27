@@ -59,6 +59,7 @@ export const parseSolvable = (solvableSpecs, variables) => {
     solvableCells = solvableCells.map(spec => {
       const variable = variables.find(element => element.key === spec.key);
       return {
+        key: spec.key,
         value: spec.value,
         row: variable.row,
         col: variable.col,
