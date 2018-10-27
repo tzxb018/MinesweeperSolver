@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 import HistoryLog from 'HistoryLog';
+import { numberWithCommas } from 'algorithms/utils';
 
 import processCSP from './csp/index';
 import solveCSP from './csp/solve';
@@ -470,7 +471,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
 
   // log the results
   const accuracy = (numRuns - numFails) / numRuns * 100;
-  const message = `Testing was ${accuracy}% successful`;
+  const message = `Testing was ${Math.round(accuracy)}% successful`;
   const log = new HistoryLog(message, 'log', false);
   const executionTime = Math.round((performance.now() - startTime) / 10) / 100;
   log.addDetail(`\nExecution Time: ${executionTime} seconds`, true);
@@ -491,11 +492,11 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
           const average = diagnostics[key] / numRuns;
           let detail;
           switch (key) {
-          case 'nodesVisited': detail = `# nodes visited\t\t\t${Math.round(average)}`; break;
-          case 'backtracks': detail = `# backtracks\t\t\t\t${Math.round(average)}`; break;
+          case 'nodesVisited': detail = `# nodes visited\t\t\t${numberWithCommas(Math.round(average))}`; break;
+          case 'backtracks': detail = `# backtracks\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
           case 'timeChecking': detail = `time spent checking\t\t${Math.round(average * 100) / 100} ms`; break;
           case 'timeFiltering': detail = `time spent filtering\t\t\t${Math.round(average * 100) / 100} ms`; break;
-          case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${Math.round(average)}`; break;
+          case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
           default: detail = `${key}\t\t\t\t${Math.round(average)}`;
           }
           search.addDetail(detail);
@@ -515,7 +516,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
       switch (key) {
       case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
       case 'revisions': detail = `# constraints checked\t\t${Math.round(average)}`; break;
-      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${Math.round(average)}`; break;
+      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
       default: detail = `${key}\t\t\t\t${Math.round(average)}`;
       }
       str2.addDetail(detail);
@@ -533,7 +534,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
       switch (key) {
       case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
       case 'revisions': detail = `# pairs checked\t\t\t${Math.round(average)}`; break;
-      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${Math.round(average)}`; break;
+      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
       case 'timePairing': detail = `time spent pairing\t\t\t${Math.round(average * 100) / 100} ms`; break;
       default: detail = `${key}\t\t\t\t${Math.round(average)}`;
       }
