@@ -1,20 +1,24 @@
+@import '../colors';
+
 :local {
   .container {
-    grid-column: 1 / 2;
-    grid-row: 3 / 4;
-    height: 70px;
-    width: 115px;
+    color: $unl_light_cream;
+    background-color: $unl_red;
+    border-radius: 5px;
+    padding: 10px;
   }
   
   .button {
-    height: 39px;
-    margin-bottom: 2px;
-    width: 44px;
+    height: 35px;
+    width: 70px;
+    border-radius: 5px;
+    background-color: $unl_gray;
+    margin-bottom: 10px;
   }
 
   .selector {
     align-self: center;
-    margin-left: 4px;
+    margin-left: 10px;
     width: 66px;
   }
 }

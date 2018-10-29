@@ -39,9 +39,10 @@ export const test = (numIterations, allowCheats, stopOnError) => ({
   stopOnError,
 });
 
-export const toggleActive = algorithm => ({
+export const toggleActive = (algorithm, modifier) => ({
   type: 'TOGGLE_ACTIVE',
   algorithm,
+  modifier,
 });
 
 export const toggleFlag = (row, col) => ({

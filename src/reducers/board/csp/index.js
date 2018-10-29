@@ -1,11 +1,12 @@
-import BTS from 'algorithms/BTS/index';
-import MWC from 'algorithms/mwise';
-import STR from 'algorithms/STR';
-import Unary from 'algorithms/unary';
+import BT from 'algorithms/BT/index';
+import mWC from 'algorithms/mWC';
+import STR2 from 'algorithms/STR2';
 import { intersect } from 'algorithms/utils';
+import HistoryLog from 'HistoryLog';
 
 import generateCSP from './generateCSP';
 import reduceComponents from './reduceComponents';
+import { parseSolvable } from './solve';
 
 /**
  * Checks csp model for any inconsistencies. Any unsatisfied constraints are highlighted red on the board and solving is
@@ -34,46 +35,52 @@ const checkConsistency = state => state.withMutations(s => {
   });
 
   // log the processing message
-  let logString;
-  let logColor;
+  let log;
   if (inconsistentCount > 0) {
-    logString = `Processing stopped, ${inconsistentCount} inconsistencies found`;
-    logColor = 'red';
+    let cellOrCells = 'inconsistencies';
+    if (inconsistentCount === 1) {
+      cellOrCells = 'inconsistency';
+    }
+    const message = `Processing stopped due to ${inconsistentCount} ${cellOrCells}`;
+    log = new HistoryLog(message, 'red', true);
   } else {
-    const solvableCount = new Map();
-    const solvableCells = [];
-    s.getIn(['csp', 'solvable']).forEach((solvableSet, setKey) => {
-      let count = 0;
-      solvableSet.forEach(cell => {
-        if (!solvableCells.includes(cell.key)) {
-          solvableCells.push(cell.key);
-          count++;
-        }
-      });
-      solvableCount.set(setKey, count);
-    });
-    logString = `Found ${solvableCells.length} solvable cell(s)`;
-    solvableCount.forEach((count, setKey) => {
-      if (count > 0) {
-        logString += `\n\t${setKey} found ${count} new solvable cell(s)`;
+    let count = 0;
+    const details = [];
+    let cellOrCells = 'cells';
+    s.getIn(['csp', 'solvable']).forEach((solvable, algorithm) => {
+      count += solvable.length;
+      cellOrCells = 'cells';
+      if (solvable.length === 1) {
+        cellOrCells = 'cell';
       }
+      details.push(`${algorithm} finds ${solvable.length} solvable ${cellOrCells}`);
     });
+    cellOrCells = 'cells';
+    if (count === 1) {
+      cellOrCells = 'cell';
+    }
+    const message = `Finds ${count} solvable ${cellOrCells}`;
+    log = new HistoryLog(message, 'log', false);
+    details.forEach(detail => log.addDetail(detail));
   }
-  s.update('historyLog', h => h.push({
-    cells: [],
-    color: logColor,
-    message: logString,
-    undoable: true,
-  }));
+  s.update('historyLog', h => h.push(log));
 });
 
 /**
  * Color codes all cells that are solvable.
- * @param {Immutable.List<Immutable.List<Immutable.Map>>} cells matrix of cell objects
+ * @param {object[][]} cells matrix of cell objects
  * @param {Immutable.Map} csp state of the csp model
- * @returns {Immutable.List<Immutable.List<Immutable.Map>>} updated version of cells
+ * @returns {object[][]} updated version of cells
  */
 const colorSolvable = (cells, csp) => cells.withMutations(c => {
+  // defined colors
+  const colors = new Map([
+    ['Unary', 1],   // blue
+    ['BT', 2],      // darkGreen
+    ['STR2', 4],    // darkBlue
+    ['PWC', 5],     // darkRed
+  ]);
+
   // clear previous coloring
   csp.get('components').forEach(component => {
     component.variables.forEach(variable => {
@@ -82,54 +89,14 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     });
   });
 
-  // get the sets of solvable cells
-  const solvableSets = csp.get('solvable');
-  if (solvableSets === undefined) {
-    return cells;
-  }
-
-  // unary are colored blue (1)
-  let set = solvableSets.get('Unary');
-  if (set !== undefined) {
-    set.forEach(solvableCell => {
-      c.setIn([solvableCell.row, solvableCell.col, 'color'], 1);
-      c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
+  // color each solvable set
+  csp.get('solvable').forEach((solvable, algorithm) => {
+    const color = colors.get(algorithm);
+    solvable.forEach(cell => {
+      c.setIn([cell.row, cell.col, 'color'], color);
+      c.setIn([cell.row, cell.col, 'solution'], cell.value);
     });
-  }
-
-  // BTS are colored darkGreen (2)
-  set = solvableSets.get('BTS');
-  if (set !== undefined) {
-    set.forEach(solvableCell => {
-      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'color'], 2);
-        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
-      }
-    });
-  }
-
-  // STR are colored darkBlue (4)
-  set = solvableSets.get('STR');
-  if (set !== undefined) {
-    set.forEach(solvableCell => {
-      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'color'], 4);
-        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
-      }
-    });
-  }
-
-  // PWC are colored darkRed (5)
-  set = solvableSets.get('MWC');
-  if (set !== undefined) {
-    set.forEach(solvableCell => {
-      if (c.getIn([solvableCell.row, solvableCell.col, 'color']) === 0) {
-        c.setIn([solvableCell.row, solvableCell.col, 'color'], 5);
-        c.setIn([solvableCell.row, solvableCell.col, 'solution'], solvableCell.value);
-      }
-    });
-  }
-
+  });
   return c;
 });
 
@@ -164,14 +131,7 @@ export default state => state.withMutations(s => {
   // generate the csp model of the minefield
   s.update('csp', c => generateCSP(c, s.getIn(['minefield', 'cells'])));
 
-  // enforce unary consistency
-  if (s.getIn(['csp', 'isActive', 'Unary'])) {
-    s.update('csp', c => Unary(c));
-  } else {
-    s.deleteIn(['csp', 'solvable', 'Unary']);
-  }
-
-  // normalize and separate variables and constraints into individual components
+  // enfore unary consistency, normalize, and separate variables and constraints into individual components
   s.update('csp', c => reduceComponents(c));
 
   // get the variable domains
@@ -180,27 +140,30 @@ export default state => state.withMutations(s => {
   s.setIn(['csp', 'domains'], getDomains(constraints));
 
   // reduce the domains with BTS
-  if (s.getIn(['csp', 'isActive', 'BTS'])
-  && (s.getIn(['csp', 'isActive', 'BC'])
-  || s.getIn(['csp', 'isActive', 'FC']) || s.getIn(['csp', 'isActive', 'FCSTR']))) {
-    s.update('csp', c => BTS(c));
+  if (s.getIn(['csp', 'algorithms', 'BT', 'isActive'])
+  && (s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'BC']) || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC'])
+  || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC-STR']))) {
+    s.update('csp', c => BT(c));
   } else {
-    s.deleteIn(['csp', 'solvable', 'BTS']);
+    s.deleteIn(['csp', 'solvable', 'BT']);
   }
 
   // reduce the constraints with STR
-  if (s.getIn(['csp', 'isActive', 'STR'])) {
-    s.update('csp', c => STR(c));
+  if (s.getIn(['csp', 'algorithms', 'STR2', 'isActive'])) {
+    s.update('csp', c => STR2(c));
   } else {
-    s.deleteIn(['csp', 'solvable', 'STR']);
+    s.deleteIn(['csp', 'solvable', 'STR2']);
   }
 
   // reduce the contstraints with PWC
-  if (s.getIn(['csp', 'isActive', 'MWC'])) {
-    s.update('csp', c => MWC(c));
+  if (s.getIn(['csp', 'algorithms', 'mWC', 'isActive'])) {
+    s.update('csp', c => mWC(c));
   } else {
-    s.deleteIn(['csp', 'solvable', 'MWC']);
+    s.deleteIn(['csp', 'solvable', 'mWC']);
   }
+
+  // parse the solvable cells
+  s.updateIn(['csp', 'solvable'], o => parseSolvable(o, s.getIn(['csp', 'variables'])));
 
   // color the solvable cells
   s.updateIn(['minefield', 'cells'], c => colorSolvable(c, s.get('csp')));

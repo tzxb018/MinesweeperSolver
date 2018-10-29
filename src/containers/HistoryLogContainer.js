@@ -21,7 +21,7 @@ const mapDispatchToProps = dispatch => ({
   },
 
   jump: numSteps => {
-    dispatch(ActionCreators.jump(numSteps));
+    dispatch(ActionCreators.jump(-numSteps));
   },
 });
 

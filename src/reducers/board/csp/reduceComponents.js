@@ -1,4 +1,29 @@
 /**
+ * Enforces unary consistency on all constraints. Constraints with a scope of only one variable are tested against all
+ * other constraints. Each unary constraint is then enforced on the constraints. The unary specs are then returned.
+ * @param {Constraint[]} constraints list of Constraints
+ * @returns {{key: number, value: boolean}[]} unary specs that can be solved
+ */
+const enforceUnary = constraints => {
+  // find all unary specs
+  const unary = [];
+  constraints.forEach(constraint => {
+    if (constraint.scope.length === 1 && constraint.numAlive === 1) {
+      unary.push({
+        key: constraint.scope[0],
+        value: constraint.tuples[0][0],
+      });
+    }
+  });
+
+  // enfore unary consistency
+  constraints.forEach(constraint => constraint.killIf(unary));
+
+  return unary;
+};
+
+
+/**
  * Normalizes the constraints such that any constraint that is a subset of another constraint is removed, reducing the
  * total number of constraints. A constraint is a subset of another constraint if all of the variables within its scope
  * are also within the scope of the other constraint. Any constraint that completely envelopes that subset has its
@@ -37,6 +62,9 @@ const normalize = constraints => {
  * @returns {Immutable.Map} csp with normalized constraints and variables consolidated into components
  */
 export default csp => {
+  // enforce unary consistency on the constraints
+  const unary = enforceUnary(csp.get('constraints'));
+
   // normalize constraints and add the visited property to the variables
   const components = [];
   const normalized = normalize(csp.get('constraints'));
@@ -79,7 +107,12 @@ export default csp => {
   });
 
   return csp.withMutations(c => {
-    c.set('constraints', normalized);
+    c.delete('constraints');
     c.set('components', components);
+    if (unary.length > 0) {
+      c.setIn(['solvable', 'Unary'], unary);
+    } else {
+      c.deleteIn(['solvable', 'Unary']);
+    }
   });
 };

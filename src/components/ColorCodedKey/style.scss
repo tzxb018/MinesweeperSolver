@@ -1,30 +1,42 @@
+@import 'colors';
+
 :local {
-  .dropdown {
-    position: relative;
+  .left {
+    grid-column: 1 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
-  .dropdown-content {
-    background-color: rgb(128, 128, 128);
-    color: white;
-    display: none;
-    left: 75px;
-    padding: 1px;
-    position: absolute;
-    top: -20px;
-    width: 70px;
-    z-index: 1;
-  }
-
-  .dropdown:hover .dropdown-content {
-    display: block;
+  .right {
+    grid-column: 3 4;
   }
 
   .container {
-    background-color: rgb(192, 192, 192);
-    grid-column: 3 / 4;
-    grid-row: 1 / 3;
-    height: 104px;
-    padding: 5px;
-    width: 105px;
+    color: $unl_light_cream;
+    background-color: $unl_red;
+    border-radius: 5px;
+    padding: 10px;
+  }
+
+  .backbone {
+    @extend .container;
+    display: grid;
+    grid-template-columns: auto auto auto;
+  }
+
+  .selector {
+    margin-left: 10px;
+    width: 40px;
+  }
+
+  .gap {
+    height: 10px;
+  }
+
+  .bracket {
+    font-size: 55px;
+    grid-column: 2 3;
+    margin-top: -8px;
   }
 }

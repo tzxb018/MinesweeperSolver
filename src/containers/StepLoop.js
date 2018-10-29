@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 
-import StepButton from 'components/StepButton';
-import { step } from 'actions/boardActions';
+import StepLoop from 'components/StepLoop';
+import { loop, step } from 'actions/boardActions';
 import { changeSmile } from 'actions/smileActions';
 
 const mapStateToProps = state => ({
@@ -14,6 +14,10 @@ const mapDispatchToProps = dispatch => ({
     dispatch(changeSmile(newSmile));
   },
 
+  loop: () => {
+    dispatch(loop());
+  },
+
   step: () => {
     dispatch(step());
   },
@@ -22,4 +26,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(StepButton);
+)(StepLoop);

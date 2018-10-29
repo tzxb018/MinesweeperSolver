@@ -1,13 +1,20 @@
+@import 'colors';
+
 :local {
   .container {
-    grid-column: 4 / 5;
-    grid-row: 1 / 2;
-    justify-self: center;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
   }
 
   .button {
+    background-color: $unl_gray;
+    border-radius: 5px;
     height: 35px;
-    margin: 10px;
-    width: 58px;
+    width: 70px;
+  }
+
+  .gap {
+    min-width: 10px;
   }
 }

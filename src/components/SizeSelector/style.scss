@@ -1,10 +1,10 @@
+@import 'colors';
+
 :local {
   .container {
-    background-color: rgb(192, 192, 192);
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-    height: 60px;
-    padding: 5px;
-    width: 105px;
+    border-radius: 5px;
+    color: $unl_light_cream;
+    background-color: $unl_red;
+    padding: 10px;
   }
 }

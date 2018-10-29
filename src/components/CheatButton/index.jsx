@@ -12,7 +12,7 @@ export default class CheatButton extends Component {
   }
 
   state = {
-    random: true,
+    random: false,
   }
 
   clickHandler = () => {
@@ -25,7 +25,7 @@ export default class CheatButton extends Component {
         <button className={styles['button']} onClick={this.clickHandler} disabled={!this.props.canCheat}>
           Cheat
         </button>
-        <div className={styles['radio']}>
+        <div>
           <input type="radio"
             id="random"
             checked={this.state.random}
@@ -33,7 +33,7 @@ export default class CheatButton extends Component {
           />
           <label htmlFor="random">random</label>
         </div>
-        <div className={styles['radio']}>
+        <div>
           <input type="radio"
             id="fringeOnly"
             checked={!this.state.random}

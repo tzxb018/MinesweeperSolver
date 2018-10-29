@@ -5,3 +5,10 @@
  * @returns {Set<*>} new set of the intersect of set1 and set2
  */
 export const intersect = (set1, set2) => new Set([...set1].filter(value => set2.has(value)));
+
+/**
+ * Formats the given number with commas separating each three digits.
+ * @param {number} num number to format with commas
+ * @param {string} formatted number
+ */
+export const numberWithCommas = num => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');

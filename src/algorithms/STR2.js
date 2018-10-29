@@ -1,4 +1,4 @@
-import Constraint from 'reducers/board/csp/Constraint';
+import Constraint from 'Constraint';
 import { intersect } from './utils';
 
 /**
@@ -25,11 +25,13 @@ const mapVarsToConstraints = constraints => {
  * If reduced is provided, any killed tuples are recorded there. Otherwise they are ignored.
  * @param {Constraint} constraint a table constraint to be revised
  * @param {Map<number, Set<boolean>>} domains the set of allowed variable domains
+ * @param {Object} diagnostics execution metrics object
+ * @param {number} diagnostics.tuplesKilled number of tuples killed
  * @param {Map<Constraint, Set<number>>} [reduced] table constraints mapped to their killed tuples
  * @returns {Map<number, Set<boolean>>} variables mapped to their new allowed domains, undefined if the constraint is
  * dead
  */
-export const revise = (constraint, domains, reduced = undefined) => {
+export const revise = (constraint, domains, diagnostics, reduced = undefined) => {
   // convert the domains to specs
   const specs = Constraint.domainsToSpecs(domains);
 
@@ -40,6 +42,7 @@ export const revise = (constraint, domains, reduced = undefined) => {
     const killedTuples = startTuples.filter(id => !endTuples.includes(id));
     killedTuples.forEach(id => reduced.get(constraint).add(id));
   }
+  diagnostics.tuplesKilled += startTuples.length - endTuples.length;
 
   return constraint.supportedDomains();
 };
@@ -52,8 +55,19 @@ export const revise = (constraint, domains, reduced = undefined) => {
  * @returns {Immutable.Map} csp with GAC and any solvable cells identified
  */
 export default csp => csp.withMutations(c => {
+  if (!c.getIn(['diagnostics', 'STR2'])) {
+    const diagnostics = {
+      time: 0,
+      revisions: 0,
+      tuplesKilled: 0,
+    };
+    c.setIn(['diagnostics', 'STR2'], diagnostics);
+  }
+  const diagnostics = c.getIn(['diagnostics', 'STR2']);
   const STR = [];
   const domains = c.get('domains');
+  const startTime = performance.now();
+
   c.get('components').forEach(component => {
     const constraintMap = mapVarsToConstraints(component.constraints);
     const queue = [];
@@ -63,8 +77,9 @@ export default csp => csp.withMutations(c => {
       // continually check constraints until no more changes can be made
       while (queue.length > 0) {
         // revise the next constraint in the queue
+        diagnostics.revisions++;
         const constraint = queue.shift();
-        const newDomains = revise(constraint, domains);
+        const newDomains = revise(constraint, domains, diagnostics);
         if (!newDomains) {
           throw constraint.scope;
         }
@@ -95,23 +110,19 @@ export default csp => csp.withMutations(c => {
     // solve any variables with a domain of only one value
     domains.forEach((values, key) => {
       if (values.size === 1) {
-        const variable = component.variables.find(element => element.key === key);
-        if (variable !== undefined) {
-          STR.push({
-            col: variable.col,
-            key,
-            row: variable.row,
-            value: [...values][0],
-          });
-        }
+        STR.push({
+          key,
+          value: [...values][0],
+        });
       }
     });
   });
+  diagnostics.time += performance.now() - startTime;
 
   // add all STR cells to the list of solvable cells
   if (STR.length > 0) {
-    c.setIn(['solvable', 'STR'], STR);
+    c.setIn(['solvable', 'STR2'], STR);
   } else {
-    c.deleteIn(['solvable', 'STR']);
+    c.deleteIn(['solvable', 'STR2']);
   }
 });

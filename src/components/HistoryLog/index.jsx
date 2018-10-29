@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import HistoryLogItem from 'HistoryLog';
 
 import styles from './style';
 
@@ -17,30 +18,35 @@ export default class HistoryLog extends Component {
     jump: PropTypes.func.isRequired,
   }
 
+  componentDidMount() {
+    HistoryLogItem.clearer(this.props.clear);
+    HistoryLogItem.clickHandler(this.clickHandler);
+    HistoryLogItem.highlighter(this.props.highlight);
+    HistoryLogItem.styles(styles);
+  }
+
   // auto-scrolls the history log
   componentDidUpdate() {
     this.scrollBottom.scrollIntoView({ behavior: 'smooth' });
   }
 
-  clickHandler = key => {
+  clickHandler = numJumps => {
     this.props.clear();
-    this.props.jump(key);
+    this.props.jump(numJumps);
   }
 
   // formats each history log for display
   formatter = () => {
+    let numJumps = 0;
+    this.props.historyLog.forEach(log => (log.canJump ? numJumps++ : null));
     const size = this.props.historyLog.size;
     return this.props.historyLog.map((log, index) => {
       const key = index - size + 1;
-      return (<div className={styles[log.color ? log.color : 'log']}
-        key={key}
-        onClick={log.undoable ? () => this.clickHandler(key) : null}
-        onMouseEnter={() => this.props.highlight(log.cells)}
-        onMouseLeave={this.props.clear}
-      >
-        {log.message}
-      </div>
-      );
+      if (log.canJump) {
+        log.numJumps = numJumps;
+        numJumps--;
+      }
+      return log.display(key);
     });
   }
 

@@ -1,5 +1,5 @@
 import { constraintFilter } from './forwardCheck';
-import { revise } from '../STR';
+import { revise } from '../STR2';
 
 /**
  * Reduces the domains based on the newDomains, adding necessary elements to the queue, and storing reductions in
@@ -46,8 +46,10 @@ const reduce = (reduced, newDomains, domains, queue, constraintMap, constraint) 
  * @param {Map<(number|Constraint), Set<(boolean|number)>[]>} reductions variables and constraints mapped to their
  * domain and tuple reductions respectively
  * @param {Map<number, Set<boolean>>} domains variables mapped to their valid domain
+ * @param {object} diagnostics execution metrics object
+ * @param {number} diagnostics.tuplesKilled number of tuples killed
  */
-const restore = (restoreKey, assignmentOrder, constraintMap, reductions, domains) => {
+const restore = (restoreKey, assignmentOrder, constraintMap, reductions, domains, diagnostics) => {
   const futureConstraints = new Set();
   assignmentOrder.slice(assignmentOrder.indexOf(restoreKey) + 1).forEach(key => {
     [...reductions.get(key).pop()].forEach(d => domains.get(key).add(d));
@@ -58,6 +60,7 @@ const restore = (restoreKey, assignmentOrder, constraintMap, reductions, domains
   futureConstraints.forEach(constraint => {
     const tuplesToRestore = [...reductions.get(constraint).pop()];
     tuplesToRestore.forEach(id => constraint.revive(id));
+    diagnostics.tuplesKilled -= tuplesToRestore.length;
   });
 };
 
@@ -70,9 +73,11 @@ const restore = (restoreKey, assignmentOrder, constraintMap, reductions, domains
  * @param {Map<number, Set<boolean>>} domains current variable domains
  * @param {Map<(number|Constraint), Set<(boolean|number)>[]>} reductions variables and constraints mapped to their
  * domain and tuple reductions respectively
+ * @param {Object} diagnostics execution metrics object
+ * @param {number} diagnostics.tuplesKilled number of tuples killed
  * @returns {boolean} true if consistent, false otherwise
  */
-const forwardCheckSTR = (stack, constraintMap, domains, reductions) => {
+const forwardCheckSTR = (stack, constraintMap, domains, reductions, diagnostics) => {
   const current = stack.slice(-1)[0];
   const future = [...constraintMap.keys()].slice(stack.length);
   const reduced = new Map();
@@ -101,7 +106,7 @@ const forwardCheckSTR = (stack, constraintMap, domains, reductions) => {
   while (consistent && queue.length > 0) {
     // revise the next constraint in the queue
     const constraint = queue.shift();
-    const newDomains = revise(constraint, domains, reduced);
+    const newDomains = revise(constraint, domains, diagnostics, reduced);
     if (newDomains) {
       [...newDomains.keys()].forEach(key => {
         if (!future.includes(key)) {
@@ -155,7 +160,7 @@ const label = (stack, key, constraintMap, domains, reductions, diagnostics) => {
       value: [...domains.get(key)][0],
     });
     const startTime = performance.now();
-    if (forwardCheckSTR(stack, constraintMap, domains, reductions)) {
+    if (forwardCheckSTR(stack, constraintMap, domains, reductions, diagnostics)) {
       consistent = true;
     } else {
       const value = stack.pop().value;
@@ -177,12 +182,14 @@ const label = (stack, key, constraintMap, domains, reductions, diagnostics) => {
  * @param {Map<number, Set<boolean>>} domains current variable domains
  * @param {Map<(number|Constraint), Set<(boolean|number)>[]>} reductions variables and constraints mapped to their
  * domain and tuple reductions respectively
+ * @param {Object} diagnostics execution metrics object
+ * @param {number} diagnostics.tuplesKilled number of tuples killed
  * @return {boolean} true if consistent, false if more unlabeling needed
  */
-const unlabel = (stack, assignmentOrder, constraintMap, domains, reductions) => {
+const unlabel = (stack, assignmentOrder, constraintMap, domains, reductions, diagnostics) => {
   const variable = stack.pop();
   if (variable) {
-    restore(variable.key, assignmentOrder, constraintMap, reductions, domains);
+    restore(variable.key, assignmentOrder, constraintMap, reductions, domains, diagnostics);
     domains.get(variable.key).delete(variable.value);
     reductions.get(variable.key).slice(-1)[0].add(variable.value);
     if (domains.get(variable.key).size > 0) {
@@ -221,7 +228,7 @@ const search = (stack, domains, reductions, constraintMap, assignmentOrder, diag
         currentLevel++;
       }
     } else {
-      consistent = unlabel(stack, assignmentOrder, constraintMap, domains, reductions);
+      consistent = unlabel(stack, assignmentOrder, constraintMap, domains, reductions, diagnostics);
       currentLevel--;
       diagnostics.backtracks++;
     }
@@ -242,6 +249,9 @@ const search = (stack, domains, reductions, constraintMap, assignmentOrder, diag
  * @returns {{key: number, value: boolean}[]} list of solvable variables
  */
 export default (domains, constraints, assignmentOrder, diagnostics) => {
+  if (!diagnostics.tuplesKilled) {
+    diagnostics.tuplesKilled = 0;
+  }
   // filter the constraints
   const filterTime = performance.now();
   const constraintMap = constraintFilter(constraints, assignmentOrder);
@@ -274,13 +284,13 @@ export default (domains, constraints, assignmentOrder, diagnostics) => {
         if (currentDomains.get(top.key).size > 1) {
           next = top;
         } else {  // restore the reductions to clean up for the next search
-          restore(top.key, assignmentOrder, constraintMap, reductions, currentDomains);
+          restore(top.key, assignmentOrder, constraintMap, reductions, currentDomains, diagnostics);
         }
       }
 
       // remove the domain so the same solution isn't found again
       if (next) {
-        restore(next.key, assignmentOrder, constraintMap, reductions, currentDomains);
+        restore(next.key, assignmentOrder, constraintMap, reductions, currentDomains, diagnostics);
         reductions.get(next.key).slice(-1)[0].add(next.value);
         currentDomains.get(next.key).delete(next.value);
       } else {

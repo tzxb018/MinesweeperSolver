@@ -37,8 +37,8 @@ export default class Board extends Component {
     }
 
     return (
-      <svg className={styles['svg']} height={height} width={width} >
-        <polgyon points={`0,0 ${width},0 ${width - 2},2 2,${height - 2} 0,${height}`} style={this.lightBorderGray} />
+      <svg className={styles['svg']} height={height} width={width}>
+        <polygon points={`0,0 ${width},0 ${width - 2},2 2,${height - 2} 0,${height}`} style={this.lightBorderGray} />
         <polygon points={`${width},${height} 0,${height} 2,${height - 2} ${width - 2},2 ${width},0`}
           style={this.darkBorderGray}
         />
