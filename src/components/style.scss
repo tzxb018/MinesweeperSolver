@@ -3,19 +3,29 @@
 :local {
   .container {
     display: flex;
-    justify-content: space-evenly;
   }
 
-  .v_container {
-    min-width: 150px;
-    height: 318px;
+  .control_container {
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
   }
 
+  .solve_container {
+    @extend .control_container;
+
+  }
+
   .gap {
+    min-width: 10px;
     min-height: 10px;
     flex-grow: 1;
+  }
+
+  .static_gap {
+    min-width: 10px;
+    min-height: 10px;
+    flex-grow: 0;
   }
 
   .log_container {

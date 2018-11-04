@@ -16,21 +16,24 @@ export default class App extends Component {
   render() {
     return (
       <div className={styles['container']}>
-        <div className={styles['v_container']}>
+        <div className={styles['control_container']}>
           <SizeSelector />
-          <div className={styles['gap']} />
+          <div className={styles['static_gap']} />
           <CheatButton />
-          <div className={styles['gap']} />
+          <div className={styles['static_gap']} />
           <TestButton />
         </div>
+        <div className={styles['gap']} />
         <Board />
-        <div className={styles['v_container']}>
+        <div className={styles['gap']} />
+        <div className={styles['solve_container']}>
           <ColorCodedKey />
-          <div className={styles['gap']} />
+          <div className={styles['static_gap']} />
           <PeekToggle />
-          <div className={styles['gap']} />
+          <div className={styles['static_gap']} />
           <StepLoop />
         </div>
+        <div className={styles['static_gap']} />
         <div className={styles['log_container']}>
           <UndoRedo />
           <HistoryLog />

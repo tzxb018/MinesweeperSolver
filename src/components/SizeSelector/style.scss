@@ -7,4 +7,15 @@
     background-color: $unl_red;
     padding: 10px;
   }
+
+  .selector {
+    width: 57px;
+  }
+
+  .customSelectors {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    grid-template-columns: 57px auto;
+    grid-column-gap: 5px;
+  }
 }

@@ -1,5 +1,10 @@
 import Immutable from 'immutable';
 
+/**
+ * Handles the initialize board action.
+ * @param {number} numRows number of rows in the board
+ * @param {number} numCols number of columns in the board
+ */
 const initialState = (numRows, numCols) => Immutable.List().withMutations(c => {
   for (let i = 0; i < numRows; i++) {
     const row = Immutable.List().withMutations(r => {
@@ -33,19 +38,10 @@ const clear = state => state.withMutations(s => s.forEach((row, rowIndex) => {
 
 /**
  * Handles the change size action
- * @param {string} newSize new size to make the cell highlight
+ * @param {object} newSize new size to make the cell highlight
  * @returns {Immutable.List<Immutable.List<boolean>>} new state
  */
-const changeSize = newSize => {
-  let numRows;
-  let numCols;
-  switch (newSize) {
-  case 'beginner': numRows = 9; numCols = 9; break;
-  case 'expert': numRows = 16; numCols = 30; break;
-  default: numRows = 16; numCols = 16;
-  }
-  return initialState(numRows, numCols);
-};
+const changeSize = newSize => initialState(newSize.rows, newSize.cols);
 
 /**
  * Reducer for the cell highlight

@@ -12,7 +12,8 @@ import styles from './style';
 export default class Board extends Component {
   static propTypes = {
     // state props
-    size: PropTypes.string.isRequired,
+    numRows: PropTypes.number.isRequired,
+    numCols: PropTypes.number.isRequired,
   }
 
   lightBorderGray = { fill: 'white' };
@@ -20,21 +21,8 @@ export default class Board extends Component {
   gray = { fill: 'rgb(192, 192, 192)' };
 
   background = () => {
-    let height;
-    let width;
-    switch (this.props.size) {
-    case 'beginner':
-      height = 206;
-      width = 164;
-      break;
-    case 'expert':
-      height = 318;
-      width = 500;
-      break;
-    default:
-      height = 318;
-      width = 276;
-    }
+    const height = this.props.numRows * 16 + 62;
+    const width = this.props.numCols * 16 + 20;
 
     return (
       <svg className={styles['svg']} height={height} width={width}>
@@ -62,11 +50,15 @@ export default class Board extends Component {
     return (
       <div className={styles['container']} >
         {this.background()}
-        <MineCounter />
-        <ResetButton />
-        <Timer />
-        <Minefield />
-        <CellHighlight />
+        <div className={styles['header']} >
+          <MineCounter />
+          <ResetButton />
+          <Timer />
+        </div>
+        <div className={styles['cells']} >
+          <Minefield />
+          <CellHighlight />
+        </div>
       </div>
     );
   }
