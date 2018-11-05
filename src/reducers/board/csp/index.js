@@ -109,13 +109,17 @@ export const getDomains = constraints => {
   const domains = new Map();
   constraints.forEach(constraint => {
     const newDomains = constraint.supportedDomains();
-    newDomains.forEach((values, key) => {
-      if (!domains.has(key)) {
-        domains.set(key, new Set([...values]));
-      } else {
-        domains.set(key, intersect(domains.get(key), values));
-      }
-    });
+    if (newDomains) {
+      newDomains.forEach((values, key) => {
+        if (!domains.has(key)) {
+          domains.set(key, new Set([...values]));
+        } else {
+          domains.set(key, intersect(domains.get(key), values));
+        }
+      });
+    } else {
+      constraint.scope.forEach(key => domains.set(key, new Set()));
+    }
   });
   return domains;
 };

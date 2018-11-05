@@ -4,7 +4,6 @@ import Board from 'containers/BoardContainer';
 import CheatButton from 'containers/CheatButtonContainer';
 import ColorCodedKey from 'containers/ColorCodedKeyContainer';
 import HistoryLog from 'containers/HistoryLogContainer';
-import PeekToggle from 'containers/PeekToggleContainer';
 import SizeSelector from 'containers/SizeSelectorContainer';
 import StepLoop from 'containers/StepLoop';
 import TestButton from 'containers/TestButtonContainer';
@@ -28,8 +27,6 @@ export default class App extends Component {
         <div className={styles['gap']} />
         <div className={styles['solve_container']}>
           <ColorCodedKey />
-          <div className={styles['static_gap']} />
-          <PeekToggle />
           <div className={styles['static_gap']} />
           <StepLoop />
         </div>

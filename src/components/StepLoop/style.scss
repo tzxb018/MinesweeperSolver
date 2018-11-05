@@ -2,11 +2,15 @@
 
 :local {
   .container {
-    color: $unl_light_cream;
-    display: flex;
     background-color: $unl_red;
-    border-radius: 5px;
     padding: 10px;
+    border-radius: 5px;
+    color: $unl_light_cream;
+  }
+
+  .flexContainer {
+    margin-top: 5px;
+    display: flex;
     justify-content: space-between;
   }
 

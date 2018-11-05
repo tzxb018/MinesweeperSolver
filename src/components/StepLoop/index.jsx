@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import PeekToggle from 'containers/PeekToggleContainer';
 import styles from './style';
 
 export default class StepButton extends Component {
@@ -29,21 +30,24 @@ export default class StepButton extends Component {
   render() {
     return (
       <div className={styles['container']}>
-        <button className={styles['button']}
-          onClick={() => this.clickHandler(false)}
-          onMouseDown={this.mouseDownHandler}
-          disabled={!this.props.canStep}
-        >
-          Step
-        </button>
-        <div className={styles['gap']} />
-        <button className={styles['button']}
-          onClick={() => this.clickHandler(true)}
-          onMouseDown={this.mouseDownHandler}
-          disabled={!this.props.canStep}
-        >
-          Loop
-        </button>
+        <PeekToggle />
+        <div className={styles['flexContainer']}>
+          <button className={styles['button']}
+            onClick={() => this.clickHandler(false)}
+            onMouseDown={this.mouseDownHandler}
+            disabled={!this.props.canStep}
+          >
+            Step
+          </button>
+          <div className={styles['gap']} />
+          <button className={styles['button']}
+            onClick={() => this.clickHandler(true)}
+            onMouseDown={this.mouseDownHandler}
+            disabled={!this.props.canStep}
+          >
+            Loop
+          </button>
+        </div>
       </div>
     );
   }
