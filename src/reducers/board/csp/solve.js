@@ -1,7 +1,10 @@
 import Immutable from 'immutable';
 import HistoryLog from 'HistoryLog';
 
-import { revealNeighbors } from '../cellUtils';
+import {
+  getChangedCells,
+  revealNeighbors,
+} from '../cellUtils';
 import {
   algorithms,
   loseGame,
@@ -79,11 +82,12 @@ export const parseSolvable = (solvableSpecs, variables) => {
  */
 export default (state, doLog = true) => state.withMutations(s => {
   // solve each cell
-  const changedCells = [];
   const oldNumFlagged = s.getIn(['minefield', 'numFlagged']);
   const oldNumRevealed = s.getIn(['minefield', 'numRevealed']);
   let lostGame = false;
   const solvedCount = new Map();
+  const neighborQueue = [];
+
   s.getIn(['csp', 'solvable']).forEach((cells, algorithm) => {
     const numRevealed = s.getIn(['minefield', 'numRevealed']);
     let numFlagged = 0;
@@ -93,23 +97,19 @@ export default (state, doLog = true) => state.withMutations(s => {
         s.setIn(['minefield', 'cells', cell.row, cell.col, 'isFlagged'], true);
         s.updateIn(['minefield', 'numFlagged'], n => n + 1);
         numFlagged++;
-        changedCells.push({
-          col: cell.col,
-          row: cell.row,
-        });
-      // else if the cell should be revealed and hasn't been inadvertently revealed already, reveal it
-      } else if (!cell.value && s.getIn(['minefield', 'cells', cell.row, cell.col, 'isHidden'])) {
+      // else if the cell should be revealed, reveal it
+      } else if (!cell.value) {
         s.setIn(['minefield', 'cells', cell.row, cell.col, 'isHidden'], false);
         s.updateIn(['minefield', 'numRevealed'], n => n + 1);
         if (s.getIn(['minefield', 'cells', cell.row, cell.col, 'content']) === 0) {
-          s.update('minefield', m => revealNeighbors(m, cell.row, cell.col));
+          neighborQueue.push({
+            row: cell.row,
+            col: cell.col,
+            algorithm,
+          });
         } else if (s.getIn(['minefield', 'cells', cell.row, cell.col, 'content']) === -1) {
           lostGame = true;
         }
-        changedCells.push({
-          col: cell.col,
-          row: cell.row,
-        });
       }
     });
     // record the results
@@ -117,6 +117,12 @@ export default (state, doLog = true) => state.withMutations(s => {
       numRevealed: s.getIn(['minefield', 'numRevealed']) - numRevealed,
       numFlagged,
     });
+  });
+  // handle any neighbors that need revealing
+  neighborQueue.forEach(cell => {
+    const numRevealed = s.getIn(['minefield', 'numRevealed']);
+    s.update('minefield', m => revealNeighbors(m, cell.row, cell.col));
+    solvedCount.get(cell.algorithm).numRevealed += s.getIn(['minefield', 'numRevealed']) - numRevealed;
   });
   s.updateIn(['csp', 'solvable'], o => o.clear());
 
@@ -136,6 +142,7 @@ export default (state, doLog = true) => state.withMutations(s => {
       cellOrCells = 'cell';
     }
     const message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[flag]`;
+    const changedCells = getChangedCells(state.getIn(['minefield', 'cells']), s.getIn(['minefield', 'cells']));
     const log = new HistoryLog(message, 'log', true, changedCells);
 
     solvedCount.forEach((count, algorithm) => {

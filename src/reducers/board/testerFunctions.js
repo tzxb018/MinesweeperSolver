@@ -1,5 +1,7 @@
 import Immutable from 'immutable';
-import unary from 'algorithms/unary';
+import BT from 'algorithms/BT/index';
+import STR2 from 'algorithms/STR2';
+import mWC from 'algorithms/mWC';
 import {
   checkWinCondition,
   placeMines,
@@ -8,22 +10,30 @@ import {
 import generateCSP from './csp/generateCSP';
 import { getDomains } from './csp/index';
 import { reduceComponents } from './csp/reduceComponents';
+import { parseSolvable } from './csp/solve';
 
 /**
- * Reveals a random safe cell so the test can resume.
- * @param {Map<string, *>} minefield state of the virtual board
- * @returns {Map<string, *>} new minefield with a random safe cell revealed
+ * Reveals a random safe fringe cell so the test can resume.
+ * @param {Immutable.Map<string, number|object>} minefield state of the virtual board
+ * @param {object[]} variables array of fringe cells
+ * @returns {Immutable.Map<string, number|object>} new minefield with a random safe cell revealed
  */
-const cheat = minefield => {
+const cheat = (minefield, variables) => {
   const numRows = minefield.get('cells').size;
   const numCols = minefield.getIn(['cells', 0]).size;
 
-  // find a random safe cell that can be revealed
+  // find a random safe fringe cell that can be revealed
   let x = Math.floor(Math.random() * numRows);
   let y = Math.floor(Math.random() * numCols);
-  while (!minefield.getIn(['cells', x, y, 'isHidden']) || minefield.getIn(['cells', x, y, 'content']) === -1) {
-    x = Math.floor(Math.random() * numRows);
-    y = Math.floor(Math.random() * numCols);
+  if (variables.length > 0) {
+    const index = Math.floor(Math.random() * variables.length);
+    x = variables[index].row;
+    y = variables[index].col;
+  } else {
+    while (!minefield.getIn(['cells', x, y, 'isHidden']) || minefield.getIn(['cells', x, y, 'content']) === -1) {
+      x = Math.floor(Math.random() * numRows);
+      y = Math.floor(Math.random() * numCols);
+    }
   }
 
   // reveal the cell
@@ -42,7 +52,7 @@ const cheat = minefield => {
  * @param {number} numRows number of rows on the virtual board
  * @param {number} numCols number of cols on the virtual board
  * @param {number} numMines number of mines on the virtual board
- * @returns {{*}} immutable minesweeper puzzle
+ * @returns {Immutable.Map<string, number|object>} immutable minesweeper puzzle
  */
 const initializeBoard = (numRows, numCols, numMines) => {
   // create the empty cell matrix
@@ -92,10 +102,11 @@ const initializeBoard = (numRows, numCols, numMines) => {
  * @param {Map<string, *>} minefield state of the virtual board
  * @param {Map<number, {row: number, col: number, value: boolean}>} solvableCells variable keys mapped to their
  * solution information
+ * @param {object} diagnostics algorithm metrics object
  * @returns {Map<string, *>} new minefield with all solvable cells solved
- * @throws if a mine is revealed or a safe cell is flagged
+ * @throws {error} if a mine is revealed or a safe cell is flagged
  */
-const solve = (minefield, solvableCells) => {
+const solve = (minefield, solvableCells, diagnostics) => {
   const revealNeighborQueue = [];
 
   // solve all the solvable cells, checking for errors along the way
@@ -130,28 +141,46 @@ const solve = (minefield, solvableCells) => {
 
 /**
  * Performs one processing cycle on the minefield, returning the result.
- * @param {{*}} state immutable state of the virtual board
- * @param {Function} algorithm method of solving the csp
- * @param {{*}} diagnostics object with properties of the algorithm to be recorded
- * @returns {{*}} updated state with solved CSP and any minefield changes
+ * @param {Immutable.Map<string, object>} state immutable state of the virtual board
+ * @param {Immutable.Map<string, boolean | Immutable.Map<string, boolean>>} isActive method of solving the csp
+ * @param {object} diagnostics object with properties of the algorithm to be recorded
+ * @returns {Immutable.Map<string, object>} updated state with solved CSP and any minefield changes
  * @throws if an error is made during solving
  */
-const step = (state, algorithm, diagnostics) => {
+const step = (state, isActive, diagnostics) => {
+  // process the new csp
   let csp = generateCSP(new Immutable.Map(), state.getIn(['minefield', 'cells']));
-  csp = algorithm(csp, diagnostics);
-  if (csp.get('solvable').size > 0) {
-    return state.update('minefield', m => solve(m, csp.get('solvable'))).set('csp', csp);
+  csp = reduceComponents(csp);
+  const constraints = [];
+  csp.get('components').forEach(component => constraints.push(...component.constraints));
+  csp = csp.set('domains', getDomains(constraints));
+
+  // run the active algorithms
+  if (isActive.getIn(['BT', 'isActive'])) {
+    csp = BT(csp, isActive.getIn(['BT', 'subSets']));
   }
-  return state;
+  if (isActive.get('STR2')) {
+    csp = STR2(csp);
+  }
+  if (isActive.get('mWC')) {
+    csp = mWC(csp);
+  }
+
+  // process the solvable cells
+  csp = csp.update('solvable', s => parseSolvable(s, csp.get('variables')));
+  if (csp.get('solvable').size > 0) {
+    return state.update('minefield', m => solve(m, csp.get('solvable'), diagnostics)).set('csp', csp);
+  }
+  return state.set('variables', csp.get('variables'));
 };
 
 /**
  * Solves the initial minefield with the given algorithm, returning the diagnostics of the test.
  * @param {Map<string, *>} initialMinefield state of the virtual board
  * @param {Function} algorithm method of solving the csp
- * @param {Array<string>} diagnosticKeys array of diagnostic keys to record
+ * @param {string[]} diagnosticKeys array of diagnostic keys to record
  * @param {boolean} [allowCheats=true] true if cheats are allowed, false otherwise
- * @returns {{*}} diagnostics object
+ * @returns {object} diagnostics object
  */
 const test = (initialMinefield, algorithm, diagnosticKeys, allowCheats = true) => {
   let state = Immutable.Map({
@@ -160,17 +189,17 @@ const test = (initialMinefield, algorithm, diagnosticKeys, allowCheats = true) =
   const diagnostics = {};
   diagnosticKeys.forEach(key => { diagnostics[key] = 0; });
 
-  let oldState = state;
+  let oldMinefield = state.get('minefield');
   let puzzleIsSolved = false;
   try {
     while (!puzzleIsSolved) {
       do {
-        oldState = state;
-        state = step(oldState, algorithm);
+        oldMinefield = state.get('minefield');
+        state = step(state, algorithm);
         puzzleIsSolved = checkWinCondition(state.get('minefield'));
-      } while (oldState !== state && !puzzleIsSolved);
+      } while (oldMinefield !== state.get('minefield') && !puzzleIsSolved);
       if (allowCheats && !puzzleIsSolved) {
-        state = state.update('minefield', m => cheat(m));
+        state = state.update('minefield', m => cheat(m, state.get('variables'))).delete('variables');
       }
     }
   } catch (e) {
@@ -181,26 +210,4 @@ const test = (initialMinefield, algorithm, diagnosticKeys, allowCheats = true) =
   }
   diagnostics.success = true;
   return diagnostics;
-};
-
-/**
- * Wraps the provided algorithms into one function that can then be tested repeatedly.
- * @param {boolean} checkUnary true if unary constraints should be dealt with beforehand, false to ignore them
- * @param {...Function} algorithms methods of solving the csp in order of execution
- * @returns {Function} wrapper function that takes csp and diagnostics as arguments
- */
-const wrapAlgorithms = (checkUnary, ...algorithms) => (csp, diagnostics) => {
-  let newCSP;
-  if (checkUnary) {
-    newCSP = unary(csp);
-  } else {
-    newCSP = csp;
-  }
-  newCSP = reduceComponents(newCSP);
-  const constraints = [];
-  newCSP.get('components').forEach(component => constraints.push(...component.constraints));
-  newCSP = newCSP.set('domains', getDomains(constraints));
-
-  algorithms.forEach(algorithm => { newCSP = algorithm(newCSP, diagnostics); });
-  return newCSP;
 };

@@ -147,7 +147,7 @@ export default state => state.withMutations(s => {
   if (s.getIn(['csp', 'algorithms', 'BT', 'isActive'])
   && (s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'BC']) || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC'])
   || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC-STR']))) {
-    s.update('csp', c => BT(c));
+    s.update('csp', c => BT(c, c.getIn(['algorithms', 'BT', 'subSets'])));
   } else {
     s.deleteIn(['csp', 'solvable', 'BT']);
   }
