@@ -170,7 +170,8 @@ export default class Cell extends Component {
         <svg height="16" width="16">
           {this.props.isHidden ? this.hiddenCell() : this.revealedCell()}
         </svg>
-        {this.props.isHidden && this.props.cspColor > 0 && this.props.isPeeking ? this.tooltip() : null}
+        {this.props.isHidden && !this.props.isFlagged && this.props.cspColor > 0
+          && this.props.isPeeking ? this.tooltip() : null}
       </div>
     );
   }
