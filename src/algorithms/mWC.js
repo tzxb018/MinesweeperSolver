@@ -36,12 +36,12 @@ const findPairs = (constraints) => {
  * has a supporting tuple in the other constraints of the pair.
  * @param {Constraint[]} pair list of Constraints that form the pair
  * @param {number[]} pair.scope list of variables common to the pair
- * @param {Object} diagnostics execution metrics object
+ * @param {Object} [diagnostics] execution metrics object
  * @param {number} diagnostics.tuplesKilled number of tuples killed
  * @returns {Constraint[]} list of Constraints that were revised, undefined if one of the constraints of the pair is
  * dead
  */
-const revise = (pair, diagnostics) => {
+export const revise = (pair, diagnostics) => {
   let isConsistent = true;
   // regionalize each constraint and find the common regions
   const regionMaps = pair.map(constraint => constraint.regionalize(pair.scope));
@@ -55,7 +55,9 @@ const revise = (pair, diagnostics) => {
     regionMap.forEach((tuples, domain) => {
       if (!commonRegions.includes(domain)) {
         tuples.forEach(id => pair[index].kill(id));
-        diagnostics.tuplesKilled += tuples.length;
+        if (diagnostics) {
+          diagnostics.tuplesKilled += tuples.length;
+        }
         revised = true;
       }
     });
