@@ -13,7 +13,7 @@
   }
 
   .log {
-    background-color: $unl_gray;
+    background-color: $light_gray;
     position: relative;
     z-index: 1;
     border-radius: 5px;
@@ -23,25 +23,25 @@
 
   .green {
     @extend .log;
-    background-color: $unl_dark_accent_green;
+    background-color: $green;
     color: $unl_light_cream;
   }
 
   .red {
     @extend .log;
-    background-color: $unl_desaturated_red;
+    background-color: $light_red_80;
     color: $unl_light_cream;
   }
 
   .log:hover {
-    background-color: $unl_dark_gray;
+    background-color: $unl_gray;
   }
 
   .green:hover {
-    background-color: #5a580c;
+    background-color: $unl_dark_green;
   }
 
   .red:hover {
-    background-color: #b21f1f;
+    background-color: $red_80;
   }
 }

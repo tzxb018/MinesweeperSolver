@@ -261,7 +261,7 @@ export const initialize = () => {
 /**
  * Converts the loop action into a series of step actions that advance the csp as far as possible.
  * @param state state of the board
- * @param {boolean} isLogged true (default) solve action will be logged, false if logging should be ignored
+ * @param {boolean} [isLogged] true (default) solve action will be logged, false if logging should be ignored
  * @returns newState, or oldState if no changes could be made
  */
 export const loop = (state, isLogged = true) => {
@@ -269,13 +269,16 @@ export const loop = (state, isLogged = true) => {
   let oldState = state;
   let newState;
   if (oldState.getIn(['csp', 'solvable']).size > 0) {
-    if (oldState.getIn(['csp', 'count']) === undefined) {
+    if (!oldState.getIn(['csp', 'count'])) {
       newState = oldState.setIn(['csp', 'count'], new Map());
     } else {
       newState = oldState;
       oldState = undefined;
     }
   } else {
+    if (!isLogged) {
+      return oldState.setIn(['csp', 'count'], new Map());
+    }
     return oldState;
   }
   while (newState !== oldState) {

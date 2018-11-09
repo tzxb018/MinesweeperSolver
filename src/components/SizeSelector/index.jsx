@@ -59,6 +59,7 @@ export default class SizeSelector extends Component {
           />
           expert
         </div>
+        <div className={styles['gap']} />
         <div className="radio">
           <input type="radio"
             checked={this.props.size === 'CUSTOM'}
@@ -70,7 +71,7 @@ export default class SizeSelector extends Component {
           <NumericInput id="rows"
             className={styles['selector']}
             min={9}
-            max={30}
+            max={40}
             value={this.state.rows}
             onChange={value => {
               const maxNumMines = value * this.state.cols - 9;
@@ -90,7 +91,7 @@ export default class SizeSelector extends Component {
           <NumericInput id="cols"
             className={styles['selector']}
             min={9}
-            max={45}
+            max={42}
             value={this.state.cols}
             onChange={value => {
               const maxNumMines = this.state.rows * value - 9;
