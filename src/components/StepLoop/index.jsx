@@ -29,24 +29,31 @@ export default class StepButton extends Component {
 
   render() {
     return (
-      <div className={styles['container']}>
-        <PeekToggle />
-        <div className={styles['flexContainer']}>
-          <button className={styles['button']}
-            onClick={() => this.clickHandler(false)}
-            onMouseDown={this.mouseDownHandler}
-            disabled={!this.props.canStep}
-          >
-            Step
-          </button>
-          <div className={styles['gap']} />
-          <button className={styles['button']}
-            onClick={() => this.clickHandler(true)}
-            onMouseDown={this.mouseDownHandler}
-            disabled={!this.props.canStep}
-          >
-            Loop
-          </button>
+      <div>
+        <div style={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}
+        >Solve</div>
+        <div className={styles['container']}>
+          <PeekToggle />
+          <div className={styles['flexContainer']}>
+            <button className={styles['button']}
+              onClick={() => this.clickHandler(false)}
+              onMouseDown={this.mouseDownHandler}
+              disabled={!this.props.canStep}
+            >
+              Step
+            </button>
+            <div className={styles['gap']} />
+            <button className={styles['button']}
+              onClick={() => this.clickHandler(true)}
+              onMouseDown={this.mouseDownHandler}
+              disabled={!this.props.canStep}
+            >
+              Loop
+            </button>
+          </div>
         </div>
       </div>
     );

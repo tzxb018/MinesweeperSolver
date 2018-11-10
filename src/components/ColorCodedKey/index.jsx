@@ -43,6 +43,11 @@ export default class ColorCodedKey extends Component {
   render() {
     return (
       <div>
+        <div style={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}
+        >Backbone Search</div>
         <div className={styles['backbone']}>
           <div className={styles['top']}>
             <button className={styles['button']}
@@ -77,6 +82,11 @@ export default class ColorCodedKey extends Component {
           </div>
         </div>
         <div style={{ height: '10px' }} />
+        <div style={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}
+        >Consistency</div>
         <div className={styles['container']}>
           <button className={styles['STR2']}
             style={{ borderStyle: this.props.STR2 ? 'inset' : 'outset' }}

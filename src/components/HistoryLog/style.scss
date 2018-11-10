@@ -3,13 +3,12 @@
 :local {
   .container {
     border-radius: 5px;
-    flex-grow: 1;
     min-width: 400px;
     background-color: $unl_light_cream;
     overflow: auto;
     padding: 10px;
     white-space: pre-wrap;
-    height: 512px;
+    flex-grow: 1;
   }
 
   .log {

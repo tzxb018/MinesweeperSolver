@@ -31,9 +31,16 @@ export default class App extends Component {
           <StepLoop />
         </div>
         <div className={styles['static_gap']} />
-        <div className={styles['log_container']}>
-          <UndoRedo />
-          <HistoryLog />
+        <div className={styles['stretch_container']}>
+          <div style={{
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}
+          >History Log</div>
+          <div className={styles['log_container']}>
+            <UndoRedo />
+            <HistoryLog />
+          </div>
         </div>
       </div>
     );

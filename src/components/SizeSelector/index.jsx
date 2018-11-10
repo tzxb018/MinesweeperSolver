@@ -37,92 +37,99 @@ export default class SizeSelector extends Component {
 
   render() {
     return (
-      <div className={styles['container']}>
-        <div className="radio">
-          <input type="radio"
-            checked={this.props.size === 'BEGINNER'}
-            onChange={() => this.props.changeSize(this.sizes.BEGINNER)}
-          />
-          beginner
-        </div>
-        <div className="radio">
-          <input type="radio"
-            checked={this.props.size === 'INTERMEDIATE'}
-            onChange={() => this.props.changeSize(this.sizes.INTERMEDIATE)}
-          />
-          intermediate
-        </div>
-        <div className="radio">
-          <input type="radio"
-            checked={this.props.size === 'EXPERT'}
-            onChange={() => this.props.changeSize(this.sizes.EXPERT)}
-          />
-          expert
-        </div>
-        <div className={styles['gap']} />
-        <div className="radio">
-          <input type="radio"
-            checked={this.props.size === 'CUSTOM'}
-            onChange={() => this.customSizeHandler({})}
-          />
-          custom
-        </div>
-        <div className={styles['customSelectors']}>
-          <NumericInput id="rows"
-            className={styles['selector']}
-            min={9}
-            max={40}
-            value={this.state.rows}
-            onChange={value => {
-              const maxNumMines = value * this.state.cols - 9;
-              const newState = {
-                rows: value,
-                maxNumMines,
-                numMines: this.state.numMines > maxNumMines ? maxNumMines : this.state.numMines,
-              };
-              if (this.props.size === 'CUSTOM') {
-                this.customSizeHandler(newState);
-              }
-              this.setState(newState);
-            }}
-            strict
-          />
-          rows
-          <NumericInput id="cols"
-            className={styles['selector']}
-            min={9}
-            max={42}
-            value={this.state.cols}
-            onChange={value => {
-              const maxNumMines = this.state.rows * value - 9;
-              const newState = {
-                cols: value,
-                maxNumMines,
-                numMines: this.state.numMines > maxNumMines ? maxNumMines : this.state.numMines,
-              };
-              if (this.props.size === 'CUSTOM') {
-                this.customSizeHandler(newState);
-              }
-              this.setState(newState);
-            }}
-            strict
-          />
-          cols
-          <NumericInput id="numMines"
-            className={styles['selector']}
-            min={10}
-            max={this.state.maxNumMines}
-            value={this.state.numMines}
-            onChange={value => {
-              const newState = { numMines: value };
-              if (this.props.size === 'CUSTOM') {
-                this.customSizeHandler(newState);
-              }
-              this.setState(newState);
-            }}
-            strict
-          />
-          # of mines
+      <div>
+        <div style={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}
+        >Board Size</div>
+        <div className={styles['container']}>
+          <div className="radio">
+            <input type="radio"
+              checked={this.props.size === 'BEGINNER'}
+              onChange={() => this.props.changeSize(this.sizes.BEGINNER)}
+            />
+            beginner
+          </div>
+          <div className="radio">
+            <input type="radio"
+              checked={this.props.size === 'INTERMEDIATE'}
+              onChange={() => this.props.changeSize(this.sizes.INTERMEDIATE)}
+            />
+            intermediate
+          </div>
+          <div className="radio">
+            <input type="radio"
+              checked={this.props.size === 'EXPERT'}
+              onChange={() => this.props.changeSize(this.sizes.EXPERT)}
+            />
+            expert
+          </div>
+          <div className={styles['gap']} />
+          <div className="radio">
+            <input type="radio"
+              checked={this.props.size === 'CUSTOM'}
+              onChange={() => this.customSizeHandler({})}
+            />
+            custom
+          </div>
+          <div className={styles['customSelectors']}>
+            <NumericInput id="rows"
+              className={styles['selector']}
+              min={9}
+              max={40}
+              value={this.state.rows}
+              onChange={value => {
+                const maxNumMines = value * this.state.cols - 9;
+                const newState = {
+                  rows: value,
+                  maxNumMines,
+                  numMines: this.state.numMines > maxNumMines ? maxNumMines : this.state.numMines,
+                };
+                if (this.props.size === 'CUSTOM') {
+                  this.customSizeHandler(newState);
+                }
+                this.setState(newState);
+              }}
+              strict
+            />
+            rows
+            <NumericInput id="cols"
+              className={styles['selector']}
+              min={9}
+              max={42}
+              value={this.state.cols}
+              onChange={value => {
+                const maxNumMines = this.state.rows * value - 9;
+                const newState = {
+                  cols: value,
+                  maxNumMines,
+                  numMines: this.state.numMines > maxNumMines ? maxNumMines : this.state.numMines,
+                };
+                if (this.props.size === 'CUSTOM') {
+                  this.customSizeHandler(newState);
+                }
+                this.setState(newState);
+              }}
+              strict
+            />
+            cols
+            <NumericInput id="numMines"
+              className={styles['selector']}
+              min={10}
+              max={this.state.maxNumMines}
+              value={this.state.numMines}
+              onChange={value => {
+                const newState = { numMines: value };
+                if (this.props.size === 'CUSTOM') {
+                  this.customSizeHandler(newState);
+                }
+                this.setState(newState);
+              }}
+              strict
+            />
+            # of mines
+          </div>
         </div>
       </div>
     );
