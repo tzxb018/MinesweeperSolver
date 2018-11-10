@@ -75,10 +75,10 @@ const checkConsistency = state => state.withMutations(s => {
 const colorSolvable = (cells, csp) => cells.withMutations(c => {
   // defined colors
   const colors = new Map([
-    ['Unary', 1],   // blue
-    ['BT', 2],      // darkGreen
-    ['STR2', 4],    // darkBlue
-    ['PWC', 5],     // darkRed
+    ['Unary', 1],
+    ['BT', 2],
+    ['STR2', 3],
+    ['PWC', 4],
   ]);
 
   // clear previous coloring

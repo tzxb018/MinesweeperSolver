@@ -9,6 +9,7 @@
   }
 
   .selector {
+    background-color: $unl_light_cream;
     width: 57px;
   }
 
@@ -19,6 +20,7 @@
   .customSelectors {
     position: relative;
     left: 16px;
+    margin-right: 16px;
     display: grid;
     grid-template-rows: auto auto auto;
     grid-template-columns: 57px auto;
