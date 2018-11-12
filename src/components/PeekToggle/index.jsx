@@ -1,8 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import styles from './style';
-
 export default class PeekToggle extends Component {
   static propTypes = {
     // state props
@@ -17,7 +15,7 @@ export default class PeekToggle extends Component {
 
   render() {
     return (
-      <div className={styles['container']}>
+      <div>
         <input type="checkbox" id="peek" checked={this.props.isPeeking} onChange={this.changeHandler} />
         <label htmlFor="peek">Peek</label>
       </div>

@@ -272,24 +272,29 @@ export default class Constraint {
   }
 
   /**
-   * Ensures any tuples that don't fulfill the given domain specifications are dead. Updates numAlive if necessary.
+   * Ensures any tuples that don't fulfill the given domain specifications are dead. Updates numAlive if necessary. If
+   * specs is undefined, behaves just as killAll().
    * @param {Object[]} specs domain specifications to enforce on the tuples
    * @param {number} specs[].key variable key
    * @param {boolean} specs[].value variable domain restriction
    * @returns {boolean[][]} new set of alive tuples
    */
   killIf(specs) {
-    specs.forEach(restriction => {
-      const index = this._scope.indexOf(restriction.key);
-      if (index >= 0) {
-        this.tuples.forEach(tuple => {
-          if (tuple[index] !== restriction.value) {
-            this._numAlive--;
-            tuple.alive = false;
-          }
-        });
-      }
-    });
+    if (specs) {
+      specs.forEach(restriction => {
+        const index = this._scope.indexOf(restriction.key);
+        if (index >= 0) {
+          this.tuples.forEach(tuple => {
+            if (tuple[index] !== restriction.value) {
+              this._numAlive--;
+              tuple.alive = false;
+            }
+          });
+        }
+      });
+    } else {
+      this.killAll();
+    }
     return this.tuples;
   }
 

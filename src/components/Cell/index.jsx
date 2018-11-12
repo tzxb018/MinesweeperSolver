@@ -24,15 +24,15 @@ export default class Cell extends Component {
   }
 
   colors = [
-    'rgb(192, 192, 192)',
-    'blue',
-    'rgb(0, 128, 0)',
-    'red',
-    'rgb(0, 0, 128)',
-    'rgb(128, 0, 0)',
-    'rgb(0, 128, 128)',
-    'black',
-    'rgb(128, 128, 128)',
+    '#c0c0c0',  // $background_grey
+    '#24576b',  // $unl_dark_blue
+    '#808285',  // $unl_dark_gray
+    '#7d7a10',  // $unl_dark_green
+    '#ffd74f',  // $unl_wheat
+    '#a5228d',  // $unl_magenta
+    '#f58a1f',  // $unl_orange
+    '#7398b1',  // $unl_blue
+    '#808080',  // $border_grey
   ];
   flag = [
     <polygon key="flag" points="9,3 8,3 4,5 4,6 8,8 9,8" style={{ fill: 'red' }} />,
@@ -124,7 +124,7 @@ export default class Cell extends Component {
       <polygon key="hiddenCellFill"
         points="2,2, 2,14, 14,14 14,2"
         style={{ fill: this.props.isPeeking && !this.props.isFlagged ?
-          this.colors[this.props.cspColor] : 'rgb(192, 192, 192' }}
+          this.colors[this.props.cspColor] : 'rgb(192, 192, 192)' }}
       />,
     ];
     if (this.props.isFlagged && this.props.content !== -2) {
@@ -170,7 +170,8 @@ export default class Cell extends Component {
         <svg height="16" width="16">
           {this.props.isHidden ? this.hiddenCell() : this.revealedCell()}
         </svg>
-        {this.props.isHidden && this.props.cspColor > 0 && this.props.isPeeking ? this.tooltip() : null}
+        {this.props.isHidden && !this.props.isFlagged && this.props.cspColor > 0
+          && this.props.isPeeking ? this.tooltip() : null}
       </div>
     );
   }

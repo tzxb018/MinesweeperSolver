@@ -1,42 +1,51 @@
 @import 'colors';
 
 :local {
-  .left {
-    grid-column: 1 2;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  .top {
+    grid-row: 1 2;
   }
 
-  .right {
-    grid-column: 3 4;
+  .bottom {
+    position: relative;
+    left: 20px;
+    grid-row: 2 3;
   }
 
   .container {
+    background-color: $unl_dark_blue;
     color: $unl_light_cream;
-    background-color: $unl_red;
     border-radius: 5px;
     padding: 10px;
   }
 
   .backbone {
     @extend .container;
+    background-color: $unl_dark_gray;
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-rows: auto auto;
   }
 
   .selector {
+    background-color: $unl_light_cream;
     margin-left: 10px;
     width: 40px;
   }
 
-  .gap {
-    height: 10px;
+  .button {
+    border-radius: 5px;
+    background-color: $unl_light_cream;
+    font-weight: bold;
+    width: 100%;
   }
 
-  .bracket {
-    font-size: 55px;
-    grid-column: 2 3;
-    margin-top: -8px;
+  .STR2 {
+    @extend .button;
+    background-color: $unl_dark_green;
+  }
+
+  .mWC {
+    @extend .button;
+    background-color: $unl_wheat;
+    width: 61%;
   }
 }

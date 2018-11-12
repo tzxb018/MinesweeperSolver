@@ -85,7 +85,7 @@ export default class ResetButton extends Component {
   render() {
     return (
       <svg
-        className={styles['container']}
+        className={styles['svg']}
         height="26"
         width="26"
         onMouseUp={this.mouseUpHandler}

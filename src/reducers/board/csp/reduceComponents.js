@@ -1,3 +1,5 @@
+import { revise as revisePair } from 'algorithms/mWC';
+
 /**
  * Enforces unary consistency on all constraints. Constraints with a scope of only one variable are tested against all
  * other constraints. Each unary constraint is then enforced on the constraints. The unary specs are then returned.
@@ -39,9 +41,9 @@ const normalize = constraints => {
     constraints.forEach(constraint => {
       // if constraint envelopes subConstraint, it is a subset
       if (subConstraint !== constraint && subConstraint.scope.every(key => constraint.isInScope(key))) {
-        const specs = subConstraint.supportedSpecs();
-        // filter out any tuples that are not supported by the subConstraint
-        constraint.killIf(specs);
+        const pair = [constraint, subConstraint];
+        pair.scope = subConstraint.scope;
+        revisePair(pair);
         wasSubset = true;
       }
     });

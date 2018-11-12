@@ -21,25 +21,32 @@ export default class CheatButton extends Component {
 
   render() {
     return (
-      <div className={styles['container']}>
-        <button className={styles['button']} onClick={this.clickHandler} disabled={!this.props.canCheat}>
-          Cheat
-        </button>
-        <div>
-          <input type="radio"
-            id="random"
-            checked={this.state.random}
-            onChange={() => this.setState({ random: true })}
-          />
-          <label htmlFor="random">random</label>
-        </div>
-        <div>
-          <input type="radio"
-            id="fringeOnly"
-            checked={!this.state.random}
-            onChange={() => this.setState({ random: false })}
-          />
-          <label htmlFor="fringeOnly">fringe only</label>
+      <div>
+        <div style={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}
+        >Cheats</div>
+        <div className={styles['container']}>
+          <button className={styles['button']} onClick={this.clickHandler} disabled={!this.props.canCheat}>
+            Cheat
+          </button>
+          <div>
+            <input type="radio"
+              id="random"
+              checked={this.state.random}
+              onChange={() => this.setState({ random: true })}
+            />
+            <label htmlFor="random">random</label>
+          </div>
+          <div>
+            <input type="radio"
+              id="fringeOnly"
+              checked={!this.state.random}
+              onChange={() => this.setState({ random: false })}
+            />
+            <label htmlFor="fringeOnly">fringe only</label>
+          </div>
         </div>
       </div>
     );

@@ -11,7 +11,7 @@ const store = createStore(
 );
 
 ReactDOM.render(
-  <Provider store={store}>
+  <Provider store={store} style={{ height: '100%' }}>
     <App />
   </Provider>,
   document.getElementById('app'),

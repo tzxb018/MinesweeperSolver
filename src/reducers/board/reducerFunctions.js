@@ -145,32 +145,12 @@ export const step = (state, isLogged = true) => {
  * @return newState
  */
 export const changeSize = (state, newSize) => state.withMutations(s => {
-  // change size settings based on new size
-  let numRows;
-  let numCols;
-  let numMines;
-  switch (newSize) {
-  case 'beginner':
-    numRows = 9;
-    numCols = 9;
-    numMines = 10;
-    break;
-  case 'expert':
-    numRows = 16;
-    numCols = 30;
-    numMines = 99;
-    break;
-  default:
-    numRows = 16;
-    numCols = 16;
-    numMines = 40;
+  s.updateIn(['minefield', 'cells'], c => c.setSize(newSize.rows));
+  for (let i = 0; i < newSize.rows; i++) {
+    s.setIn(['minefield', 'cells', i], Immutable.List().setSize(newSize.cols));
   }
-  s.updateIn(['minefield', 'cells'], c => c.setSize(numRows));
-  for (let i = 0; i < numRows; i++) {
-    s.setIn(['minefield', 'cells', i], Immutable.List().setSize(numCols));
-  }
-  s.setIn(['minefield', 'numMines'], numMines);
-  s.set('size', newSize);
+  s.setIn(['minefield', 'numMines'], newSize.numMines);
+  s.set('size', newSize.size);
 
   // reset the board
   return reset(s);
@@ -274,14 +254,14 @@ export const initialize = () => {
     historyLog: Immutable.List(),
     isGameRunning: false,
     minefield,
-    size: 'intermediate',
+    size: 'INTERMEDIATE',
   });
 };
 
 /**
  * Converts the loop action into a series of step actions that advance the csp as far as possible.
  * @param state state of the board
- * @param {boolean} isLogged true (default) solve action will be logged, false if logging should be ignored
+ * @param {boolean} [isLogged] true (default) solve action will be logged, false if logging should be ignored
  * @returns newState, or oldState if no changes could be made
  */
 export const loop = (state, isLogged = true) => {
@@ -289,13 +269,16 @@ export const loop = (state, isLogged = true) => {
   let oldState = state;
   let newState;
   if (oldState.getIn(['csp', 'solvable']).size > 0) {
-    if (oldState.getIn(['csp', 'count']) === undefined) {
+    if (!oldState.getIn(['csp', 'count'])) {
       newState = oldState.setIn(['csp', 'count'], new Map());
     } else {
       newState = oldState;
       oldState = undefined;
     }
   } else {
+    if (!isLogged) {
+      return oldState.setIn(['csp', 'count'], new Map());
+    }
     return oldState;
   }
   while (newState !== oldState) {

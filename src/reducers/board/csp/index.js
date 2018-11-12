@@ -75,10 +75,10 @@ const checkConsistency = state => state.withMutations(s => {
 const colorSolvable = (cells, csp) => cells.withMutations(c => {
   // defined colors
   const colors = new Map([
-    ['Unary', 1],   // blue
-    ['BT', 2],      // darkGreen
-    ['STR2', 4],    // darkBlue
-    ['PWC', 5],     // darkRed
+    ['Unary', 1],
+    ['BT', 2],
+    ['STR2', 3],
+    ['PWC', 4],
   ]);
 
   // clear previous coloring
@@ -109,13 +109,17 @@ export const getDomains = constraints => {
   const domains = new Map();
   constraints.forEach(constraint => {
     const newDomains = constraint.supportedDomains();
-    newDomains.forEach((values, key) => {
-      if (!domains.has(key)) {
-        domains.set(key, new Set([...values]));
-      } else {
-        domains.set(key, intersect(domains.get(key), values));
-      }
-    });
+    if (newDomains) {
+      newDomains.forEach((values, key) => {
+        if (!domains.has(key)) {
+          domains.set(key, new Set([...values]));
+        } else {
+          domains.set(key, intersect(domains.get(key), values));
+        }
+      });
+    } else {
+      constraint.scope.forEach(key => domains.set(key, new Set()));
+    }
   });
   return domains;
 };
@@ -143,7 +147,7 @@ export default state => state.withMutations(s => {
   if (s.getIn(['csp', 'algorithms', 'BT', 'isActive'])
   && (s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'BC']) || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC'])
   || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC-STR']))) {
-    s.update('csp', c => BT(c));
+    s.update('csp', c => BT(c, c.getIn(['algorithms', 'BT', 'subSets'])));
   } else {
     s.deleteIn(['csp', 'solvable', 'BT']);
   }

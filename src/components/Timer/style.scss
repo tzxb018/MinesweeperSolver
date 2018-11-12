@@ -10,16 +10,11 @@
 
 :local {
   .container {
-    justify-self: right;
     background-color: black;
     color: red;
     font-family: 'Pixel-LCD-7';
     font-size: 20pt;
-    grid-column: 3 / 4;
-    grid-row: 1 / 2;
     height: 26px;
-    margin-right: 3px;
-    margin-top: 13px;
     width: 56px;
   }
 }

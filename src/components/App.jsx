@@ -4,7 +4,6 @@ import Board from 'containers/BoardContainer';
 import CheatButton from 'containers/CheatButtonContainer';
 import ColorCodedKey from 'containers/ColorCodedKeyContainer';
 import HistoryLog from 'containers/HistoryLogContainer';
-import PeekToggle from 'containers/PeekToggleContainer';
 import SizeSelector from 'containers/SizeSelectorContainer';
 import StepLoop from 'containers/StepLoop';
 import TestButton from 'containers/TestButtonContainer';
@@ -16,24 +15,32 @@ export default class App extends Component {
   render() {
     return (
       <div className={styles['container']}>
-        <div className={styles['v_container']}>
+        <div className={styles['control_container']}>
           <SizeSelector />
-          <div className={styles['gap']} />
+          <div className={styles['static_gap']} />
           <CheatButton />
-          <div className={styles['gap']} />
+          <div className={styles['static_gap']} />
           <TestButton />
         </div>
+        <div className={styles['gap']} />
         <Board />
-        <div className={styles['v_container']}>
+        <div className={styles['gap']} />
+        <div className={styles['solve_container']}>
           <ColorCodedKey />
-          <div className={styles['gap']} />
-          <PeekToggle />
-          <div className={styles['gap']} />
+          <div className={styles['static_gap']} />
           <StepLoop />
         </div>
-        <div className={styles['log_container']}>
-          <UndoRedo />
-          <HistoryLog />
+        <div className={styles['static_gap']} />
+        <div className={styles['stretch_container']}>
+          <div style={{
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}
+          >History Log</div>
+          <div className={styles['log_container']}>
+            <UndoRedo />
+            <HistoryLog />
+          </div>
         </div>
       </div>
     );

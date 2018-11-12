@@ -4,7 +4,6 @@ import CellHighlight from 'components/CellHighlight';
 
 const mapStateToProps = state => ({
   cells: state.cellHighlight,
-  size: state.board.present.get('size'),
 });
 
 const mapDispatchToProps = () => ({

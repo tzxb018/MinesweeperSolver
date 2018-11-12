@@ -25,10 +25,10 @@ export default class ColorCodedKey extends Component {
   colorCodedIcon = color => {
     let fill;
     switch (color) {
-    case 'darkGreen': fill = { fill: 'rgb(0, 128, 0)' }; break;
-    case 'darkBlue': fill = { fill: 'rgb(0, 0, 128)' }; break;
-    case 'darkRed': fill = { fill: 'rgb(128, 0, 0)' }; break;
-    case 'darkCyan': fill = { fill: 'rgb(0, 128, 128)' }; break;
+    case 'darkBlue': fill = { fill: '#24576b' }; break;
+    case 'darkGray': fill = { fill: '#808285' }; break;
+    case 'darkGreen': fill = { fill: '#7d7a10' }; break;
+    case 'orange': fill = { fill: '#f58a1f' }; break;
     default: fill = { fill: 'rgb(192, 192, 192)' };
     }
     return (
@@ -43,19 +43,21 @@ export default class ColorCodedKey extends Component {
   render() {
     return (
       <div>
+        <div style={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}
+        >Backbone Search</div>
         <div className={styles['backbone']}>
-          <div className={styles['left']}>
-            <div>
-              {this.colorCodedIcon('darkGreen')}
-              <input type="checkbox"
-                id="BT"
-                checked={this.props.BT}
-                onChange={() => this.changeHandler('BT')}
-              />BT
-            </div>
+          <div className={styles['top']}>
+            <button className={styles['button']}
+              style={{ borderStyle: this.props.BT ? 'inset' : 'outset' }}
+              onClick={() => this.changeHandler('BT')}
+            >
+              BT
+            </button>
           </div>
-          <text className={styles['bracket']}>{'{'}</text>
-          <div className={styles['right']}>
+          <div className={styles['bottom']}>
             <div>
               <input type="checkbox"
                 id="BC"
@@ -75,27 +77,31 @@ export default class ColorCodedKey extends Component {
                 id="FC-STR"
                 checked={this.props['FC-STR']}
                 onChange={() => this.changeHandler('BT', 'FC-STR')}
-              />FC-STR
+              />STR2
             </div>
           </div>
         </div>
-        <div className={styles['gap']} />
+        <div style={{ height: '10px' }} />
+        <div style={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}
+        >Consistency</div>
         <div className={styles['container']}>
+          <button className={styles['STR2']}
+            style={{ borderStyle: this.props.STR2 ? 'inset' : 'outset' }}
+            onClick={() => this.changeHandler('STR2')}
+          >
+            STR2
+          </button>
+          <div style={{ height: '10px' }} />
           <div>
-            {this.colorCodedIcon('darkBlue')}
-            <input type="checkbox"
-              id="STR2"
-              checked={this.props.STR2}
-              onChange={() => this.changeHandler('STR2')}
-            />STR2
-          </div>
-          <div>
-            {this.colorCodedIcon('darkRed')}
-            <input type="checkbox"
-              id="mWC"
-              checked={this.props.mWC}
-              onChange={() => this.changeHandler('mWC')}
-            />mWC
+            <button className={styles['mWC']}
+              style={{ borderStyle: this.props.mWC ? 'inset' : 'outset' }}
+              onClick={() => this.changeHandler('mWC')}
+            >
+              mWC
+            </button>
             <NumericInput id="m"
               className={styles['selector']}
               min={2}

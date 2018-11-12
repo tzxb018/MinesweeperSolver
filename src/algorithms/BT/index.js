@@ -35,9 +35,11 @@ const mapVariablesToConstraints = constraints => {
  * Performs a backtracking search on the csp until a viable solution is found or the entire search tree is traversed,
  * indicating that the problem is impossible.
  * @param {Immutable.Map} csp constraint model of the minefield
+ * @param {Immutable.Map<string, boolean> | Map<string, boolean>} isActive backtracking algorithms mapped to whether
+ * they are active or not
  * @returns {Immutable.Map} updated constraint model
  */
-export default csp => csp.withMutations(c => {
+export default (csp, isActive) => csp.withMutations(c => {
   c.setIn(['solvable', 'BT'], []);
   const solvable = new Map();
   [...algorithms.keys()].forEach(key => solvable.set(key, []));
@@ -50,7 +52,7 @@ export default csp => csp.withMutations(c => {
 
     // search the tree with each active algorithm
     algorithms.forEach((search, algorithmKey) => {
-      if (c.getIn(['algorithms', 'BT', 'subSets', algorithmKey])) {
+      if (isActive.get(algorithmKey)) {
         if (!c.getIn(['diagnostics', algorithmKey])) {
           const diagnostics = {
             nodesVisited: 0,

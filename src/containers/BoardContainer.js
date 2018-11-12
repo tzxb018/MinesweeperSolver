@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import Board from 'components/Board';
 
 const mapStateToProps = state => ({
-  size: state.board.present.get('size'),
+  numRows: state.board.present.getIn(['minefield', 'cells']).size,
+  numCols: state.board.present.getIn(['minefield', 'cells', 0]).size,
 });
 
 const mapDispatchToProps = () => ({

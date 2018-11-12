@@ -2,19 +2,24 @@
 
 :local {
   .container {
-    color: $unl_light_cream;
-    display: flex;
     background-color: $unl_red;
-    border-radius: 5px;
     padding: 10px;
-    max-width: 170px;
+    border-radius: 5px;
+    color: $unl_light_cream;
+  }
+
+  .flexContainer {
+    margin-top: 5px;
+    display: flex;
+    justify-content: space-between;
   }
 
   .button {
     background-color: $unl_gray;
     border-radius: 5px;
-    height: 35px;
-    width: 70px;
+    font-size: 12pt;
+    height: 30px;
+    width: 60px;
   }
 
   .gap {

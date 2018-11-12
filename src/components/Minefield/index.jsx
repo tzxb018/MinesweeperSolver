@@ -3,17 +3,21 @@ import React, { Component } from 'react';
 
 import CellContainer from 'containers/CellContainer.js';
 
-import styles from './style';
-
 export default class Minefield extends Component {
   static propTypes = {
     // state props
     cols: PropTypes.number.isRequired,
     rows: PropTypes.number.isRequired,
-    size: PropTypes.string.isRequired,
   }
 
   render() {
+    const style = {
+      position: 'absolute',
+      display: 'grid',
+      gridTemplateColumns: `repeat(${this.props.cols}, 16px)`,
+      gridTemplateRows: `repeat(${this.props.rows}, 16px)`,
+      zIndex: 1,
+    };
     const formattedCells = [];
     for (let i = 0; i < this.props.rows; i++) {
       formattedCells.push([]);
@@ -22,8 +26,8 @@ export default class Minefield extends Component {
       }
     }
     return (
-      <div className={styles[this.props.size]} >
-        { formattedCells }
+      <div style={style}>
+        {formattedCells}
       </div>
     );
   }

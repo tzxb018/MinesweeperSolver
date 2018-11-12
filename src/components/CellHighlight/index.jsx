@@ -11,7 +11,6 @@ export default class CellHighlight extends Component {
       PropTypes.instanceOf(Immutable.List),
       PropTypes.instanceOf(Array),
     ]).isRequired,
-    size: PropTypes.string.isRequired,
   }
 
   formatter = () => {
@@ -21,14 +20,32 @@ export default class CellHighlight extends Component {
       cells.push(<div key={key} className={styles[cell ? 'highlight' : 'cell']} />);
       key++;
     }));
-    return cells;
+    let style;
+    if (this.props.cells.some(row => row.some(cell => cell))) {
+      style = {
+        position: 'absolute',
+        display: 'grid',
+        gridTemplateColumns: `repeat(${this.props.cells.get(0).size}, 16px)`,
+        gridTemplateRows: `repeat(${this.props.cells.size}, 16px)`,
+        zIndex: 2,
+      };
+    } else {
+      style = {
+        position: 'absolute',
+        display: 'grid',
+        gridTemplateColumns: `repeat(${this.props.cells.get(0).size}, 16px)`,
+        gridTemplateRows: `repeat(${this.props.cells.size}, 16px)`,
+        zIndex: 0,
+      };
+    }
+    return (
+      <div style={style}>
+        {cells}
+      </div>
+    );
   }
 
   render() {
-    return (
-      <div className={styles[this.props.size]} >
-        {this.formatter()}
-      </div>
-    );
+    return this.formatter();
   }
 }
