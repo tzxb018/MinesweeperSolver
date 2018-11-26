@@ -244,7 +244,8 @@ export default (csp, size = 2) => {
             if (!revisedConstraints) {
               throw pair;
             }
-            revisedConstraints.forEach(constraint => queue.push(...constraintsToPairs.get(constraint)));
+            revisedConstraints.forEach(constraint =>
+              queue.push(...constraintsToPairs.get(constraint).filter(p => p !== pair && !queue.includes(p))));
           }
         } catch (error) {
           error.forEach(constraint => constraint.killAll());
