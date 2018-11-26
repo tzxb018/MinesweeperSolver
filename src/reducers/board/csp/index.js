@@ -78,7 +78,10 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     ['Unary', 1],
     ['BT', 2],
     ['STR2', 3],
-    ['PWC', 4],
+    ['mWC-1', 3],
+    ['mWC-2', 4],
+    ['mWC-3', 5],
+    ['mWC-4', 6],
   ]);
 
   // clear previous coloring
@@ -161,9 +164,11 @@ export default state => state.withMutations(s => {
 
   // reduce the contstraints with PWC
   if (s.getIn(['csp', 'algorithms', 'mWC', 'isActive'])) {
-    s.update('csp', c => mWC(c));
+    s.update('csp', c => mWC(c, c.getIn(['algorithms', 'mWC', 'm'])));
   } else {
-    s.deleteIn(['csp', 'solvable', 'mWC']);
+    for (let i = 1; i <= 4; i++) {
+      s.deleteIn(['csp', 'solvable', `mWC-${i}`]);
+    }
   }
 
   // parse the solvable cells

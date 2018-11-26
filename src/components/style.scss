@@ -34,12 +34,12 @@
     border-radius: 5px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    height: 100%;
   }
 
   .stretch_container {
     display: flex;
     flex-direction: column;
-    min-height: 650px;
+    height: 650px;
   }
 }

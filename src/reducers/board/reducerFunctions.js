@@ -13,7 +13,7 @@ import {
   revealNeighbors,
 } from './cellUtils';
 
-export const algorithms = ['Unary', 'BT', 'STR2', 'PWC'];
+export const algorithms = ['Unary', 'BT', 'STR2', 'mWC-1', 'mWC-2', 'mWC-3', 'mWC-4'];
 
 /**
  * Handles the reset action by reverting the cells, csp model, and undo history to their starting states.
@@ -233,10 +233,10 @@ export const initialize = () => {
           FC: true,
           'FC-STR': true,
         }),
-        isActive: true,
+        isActive: false,
       }),
       STR2: Immutable.Map({
-        isActive: true,
+        isActive: false,
       }),
       mWC: Immutable.Map({
         isActive: true,
@@ -507,23 +507,25 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
     logs.push(str2);
   }
 
-  // PWC logging
+  // mWC logging
   if (newState.getIn(['csp', 'algorithms', 'mWC', 'isActive'])) {
-    const pwc = new HistoryLog('PWC:', 'log', false);
-    const diagnostics = newState.getIn(['csp', 'diagnostics', 'PWC']);
-    Object.keys(diagnostics).forEach(key => {
-      const average = diagnostics[key] / numRuns;
-      let detail;
-      switch (key) {
-      case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
-      case 'revisions': detail = `# pairs checked\t\t\t${Math.round(average)}`; break;
-      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
-      case 'timePairing': detail = `time spent pairing\t\t\t${Math.round(average * 100) / 100} ms`; break;
-      default: detail = `${key}\t\t\t\t${Math.round(average)}`;
-      }
-      pwc.addDetail(detail);
-    });
-    logs.push(pwc);
+    const mWC = new HistoryLog('m-Wise Consistency:', 'log', false);
+    for (let m = 1; m <= newState.getIn(['csp', 'algorithms', 'mWC', 'm']); m++) {
+      mWC.addDetail(`\nmWC-${m}:`, true);
+      const diagnostics = newState.getIn(['csp', 'diagnostics', `mWC-${m}`]);
+      Object.keys(diagnostics).forEach(key => {
+        const average = diagnostics[key] / numRuns;
+        let detail;
+        switch (key) {
+        case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
+        case 'revisions': detail = `# pairs checked\t\t\t${Math.round(average)}`; break;
+        case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+        default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+        }
+        mWC.addDetail(detail);
+      });
+    }
+    logs.push(mWC);
   }
 
   newState = newState.updateIn(['csp', 'diagnostics'], d => d.clear());
