@@ -1,6 +1,11 @@
 import Constraint from 'Constraint';
+import HistoryLog from 'HistoryLog';
+
 import STR2 from './STR2';
-import { intersect } from './utils';
+import {
+  intersect,
+  numberWithCommas,
+} from './utils';
 
 /**
  * Finds all the edges in the graph formed by the given constraints.
@@ -273,4 +278,32 @@ export default (csp, size = 2) => {
       }
     });
   });
+};
+
+/**
+ * Creates a formatted HistoryLog object to represent the diagnostics of the mWC iteration.
+ * @param {Immutable.Map} csp constraint model of the board
+ * @param {number} [numRuns=1] number of iterations recorded in the diagnostics
+ * @returns {HistoryLog} new HistoryLog of the diagnostics
+ */
+export const logDiagnostics = (csp, numRuns = 1) => {
+  const log = new HistoryLog('m-Wise Consistency:', 'log', false);
+  for (let m = 1; m <= csp.getIn(['algorithms', 'mWC', 'm']); m++) {
+    if (csp.getIn(['diagnostics', `mWC-${m}`])) {
+      log.addDetail(`\nmWC-${m}:`, true);
+      const diagnostics = csp.getIn(['diagnostics', `mWC-${m}`]);
+      Object.keys(diagnostics).forEach(key => {
+        const average = diagnostics[key] / numRuns;
+        let detail;
+        switch (key) {
+        case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
+        case 'revisions': detail = `# pairs checked\t\t\t${Math.round(average)}`; break;
+        case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+        default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+        }
+        log.addDetail(detail);
+      });
+    }
+  }
+  return log;
 };

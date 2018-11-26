@@ -1,3 +1,6 @@
+import HistoryLog from 'HistoryLog';
+import { numberWithCommas } from 'algorithms/utils';
+
 import backCheckSearch from './backCheck';
 import forwardCheckSearch from './forwardCheck';
 import forwardCheckSTRSearch from './forwardCheckSTR';
@@ -79,3 +82,33 @@ export default (csp, isActive) => csp.withMutations(c => {
     c.deleteIn(['solvable', 'BT']);
   }
 });
+
+/**
+ * Creates a formatted HistoryLog object to represent the diagnostics of the search iteration.
+ * @param {Immutable.Map} csp constraint model of the board
+ * @param {number} [numRuns=1] number of iterations recorded in the diagnostics
+ * @returns {HistoryLog} new HistoryLog of the diagnostics
+ */
+export const logDiagnostics = (csp, numRuns = 1) => {
+  const log = new HistoryLog('Search', 'log', false);
+  csp.getIn(['algorithms', 'BT', 'subSets']).forEach((isActive, algorithm) => {
+    if (isActive) {
+      const diagnostics = csp.getIn(['diagnostics', algorithm]);
+      log.addDetail(`\n${algorithm}:`, true);
+      Object.keys(diagnostics).forEach(key => {
+        const average = diagnostics[key] / numRuns;
+        let detail;
+        switch (key) {
+        case 'nodesVisisted': detail = `# nodes visited\t\t\t${numberWithCommas(Math.round(average))}`; break;
+        case 'backtracks': detail = `# backtracks\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+        case 'timeChecking': detail = `time spent checking\t\t${Math.round(average * 100) / 100} ms`; break;
+        case 'timeFiltering': detail = `time spent filtering\t\t\t${Math.round(average * 100) / 100} ms`; break;
+        case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+        default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+        }
+        log.addDetail(detail);
+      });
+    }
+  });
+  return log;
+};

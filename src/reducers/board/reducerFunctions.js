@@ -1,6 +1,8 @@
 import Immutable from 'immutable';
 import HistoryLog from 'HistoryLog';
-import { numberWithCommas } from 'algorithms/utils';
+import { logDiagnostics as logBT } from 'algorithms/BT';
+import { logDiagnostics as logSTR2 } from 'algorithms/STR2';
+import { logDiagnostics as logmWC } from 'algorithms/mWC';
 
 import processCSP from './csp/index';
 import solveCSP from './csp/solve';
@@ -466,65 +468,19 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
 
   // search logging
   if (newState.getIn(['csp', 'algorithms', 'BT', 'isActive'])) {
-    const search = new HistoryLog('Search', 'log', false);
-    newState.getIn(['csp', 'algorithms', 'BT', 'subSets']).forEach((isActive, algorithm) => {
-      if (isActive) {
-        const diagnostics = newState.getIn(['csp', 'diagnostics', algorithm]);
-        search.addDetail(`\n${algorithm}:`, true);
-        Object.keys(diagnostics).forEach(key => {
-          const average = diagnostics[key] / numRuns;
-          let detail;
-          switch (key) {
-          case 'nodesVisited': detail = `# nodes visited\t\t\t${numberWithCommas(Math.round(average))}`; break;
-          case 'backtracks': detail = `# backtracks\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
-          case 'timeChecking': detail = `time spent checking\t\t${Math.round(average * 100) / 100} ms`; break;
-          case 'timeFiltering': detail = `time spent filtering\t\t\t${Math.round(average * 100) / 100} ms`; break;
-          case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
-          default: detail = `${key}\t\t\t\t${Math.round(average)}`;
-          }
-          search.addDetail(detail);
-        });
-      }
-    });
+    const search = logBT(newState.get('csp'), numRuns);
     logs.push(search);
   }
 
   // STR2 logging
   if (newState.getIn(['csp', 'algorithms', 'STR2', 'isActive'])) {
-    const str2 = new HistoryLog('STR2:', 'log', false);
-    const diagnostics = newState.getIn(['csp', 'diagnostics', 'STR2']);
-    Object.keys(diagnostics).forEach(key => {
-      const average = diagnostics[key] / numRuns;
-      let detail;
-      switch (key) {
-      case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
-      case 'revisions': detail = `# constraints checked\t\t${Math.round(average)}`; break;
-      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
-      default: detail = `${key}\t\t\t\t${Math.round(average)}`;
-      }
-      str2.addDetail(detail);
-    });
+    const str2 = logSTR2(newState.get('csp'), numRuns);
     logs.push(str2);
   }
 
   // mWC logging
   if (newState.getIn(['csp', 'algorithms', 'mWC', 'isActive'])) {
-    const mWC = new HistoryLog('m-Wise Consistency:', 'log', false);
-    for (let m = 1; m <= newState.getIn(['csp', 'algorithms', 'mWC', 'm']); m++) {
-      mWC.addDetail(`\nmWC-${m}:`, true);
-      const diagnostics = newState.getIn(['csp', 'diagnostics', `mWC-${m}`]);
-      Object.keys(diagnostics).forEach(key => {
-        const average = diagnostics[key] / numRuns;
-        let detail;
-        switch (key) {
-        case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
-        case 'revisions': detail = `# pairs checked\t\t\t${Math.round(average)}`; break;
-        case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
-        default: detail = `${key}\t\t\t\t${Math.round(average)}`;
-        }
-        mWC.addDetail(detail);
-      });
-    }
+    const mWC = logmWC(newState.get('csp'), numRuns);
     logs.push(mWC);
   }
 

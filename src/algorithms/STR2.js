@@ -1,5 +1,9 @@
 import Constraint from 'Constraint';
-import { intersect } from './utils';
+import HistoryLog from 'HistoryLog';
+import {
+  intersect,
+  numberWithCommas,
+} from 'algorithms/utils';
 
 /**
  * Maps all variables to the list of their constraints.
@@ -126,3 +130,26 @@ export default csp => csp.withMutations(c => {
     c.deleteIn(['solvable', 'STR2']);
   }
 });
+
+/**
+ * Creates a formatted HistoryLog object to represent the diagnostics of the STR2 iteration.
+ * @param {Immutable.Map} csp constraint model of the board
+ * @param {number} [numRuns=1] number of iterations recorded in the diagnostics
+ * @returns {HistoryLog} new HistoryLog of the diagnostics
+ */
+export const logDiagnostics = (csp, numRuns = 1) => {
+  const log = new HistoryLog('STR2:', 'log', false);
+  const diagnostics = csp.getIn(['diagnostics', 'STR2']);
+  Object.keys(diagnostics).forEach(key => {
+    const average = diagnostics[key] / numRuns;
+    let detail;
+    switch (key) {
+    case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
+    case 'revisions': detail = `# constraints checked\t\t${Math.round(average)}`; break;
+    case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+    default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+    }
+    log.addDetail(detail);
+  });
+  return log;
+};
