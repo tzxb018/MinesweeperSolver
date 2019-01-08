@@ -51,9 +51,9 @@ const changeSize = newSize => initialState(newSize.rows, newSize.cols);
  */
 export default (state = initialState(16, 16), action) => {
   switch (action.type) {
-  case 'CHANGE_SIZE': return changeSize(action.newSize);
-  case 'CLEAR': return clear(state);
-  case 'HIGHLIGHT': return highlight(state, action.cells);
-  default: return state;
+    case 'CHANGE_SIZE': return changeSize(action.newSize);
+    case 'CLEAR': return clear(state);
+    case 'HIGHLIGHT': return highlight(state, action.cells);
+    default: return state;
   }
 };

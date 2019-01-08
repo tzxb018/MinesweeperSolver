@@ -25,11 +25,11 @@ export default class ColorCodedKey extends Component {
   colorCodedIcon = color => {
     let fill;
     switch (color) {
-    case 'darkBlue': fill = { fill: '#24576b' }; break;
-    case 'darkGray': fill = { fill: '#808285' }; break;
-    case 'darkGreen': fill = { fill: '#7d7a10' }; break;
-    case 'orange': fill = { fill: '#f58a1f' }; break;
-    default: fill = { fill: 'rgb(192, 192, 192)' };
+      case 'darkBlue': fill = { fill: '#24576b' }; break;
+      case 'darkGray': fill = { fill: '#808285' }; break;
+      case 'darkGreen': fill = { fill: '#7d7a10' }; break;
+      case 'orange': fill = { fill: '#f58a1f' }; break;
+      default: fill = { fill: 'rgb(192, 192, 192)' };
     }
     return (
       <svg height="16" width="16">

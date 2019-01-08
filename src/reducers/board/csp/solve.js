@@ -33,27 +33,42 @@ export const parseSolvable = (solvableSpecs, variables) => {
   const solutions = new Map();
   const contradictions = new Set();
 
-  // filter solvable
+  // separate any old solvable from the list
+  const oldSolvable = new Map();
   solvable.forEach((specs, algorithm) => {
-    if (solvable.has(algorithm)) {
-      const newSolvable = [];
-      specs.forEach(spec => {
+    const oldSpecs = [];
+    const newSpecs = specs.filter(spec => {
+      if (spec.row !== undefined) {
         if (solutions.has(spec.key)) {
           if (solutions.get(spec.key) !== spec.value) {
             contradictions.add(spec.key);
           }
         } else {
           solutions.set(spec.key, spec.value);
-          newSolvable.push(spec);
+          oldSpecs.push(spec);
         }
-      });
-      solvable.set(algorithm, newSolvable);
-    }
+        return false;
+      }
+      return true;
+    });
+    solvable.set(algorithm, newSpecs);
+    oldSolvable.set(algorithm, oldSpecs);
   });
+
+  // filter solvable
   solvable.forEach((specs, algorithm) => {
-    if (specs.length === 0) {
-      solvable.delete(algorithm);
-    }
+    const newSolvable = [];
+    specs.forEach(spec => {
+      if (solutions.has(spec.key)) {
+        if (solutions.get(spec.key) !== spec.value) {
+          contradictions.add(spec.key);
+        }
+      } else {
+        solutions.set(spec.key, spec.value);
+        newSolvable.push(spec);
+      }
+    });
+    solvable.set(algorithm, newSolvable);
   });
 
   // map solvable specs to their cells
@@ -68,7 +83,13 @@ export const parseSolvable = (solvableSpecs, variables) => {
         col: variable.col,
       };
     });
-    solvable.set(algorithm, solvableCells);
+    solvable.set(algorithm,
+      solvableCells.concat(oldSolvable.get(algorithm).filter(spec => !contradictions.has(spec.key))));
+  });
+  solvable.forEach((specs, algorithm) => {
+    if (specs.length === 0) {
+      solvable.delete(algorithm);
+    }
   });
 
   return Immutable.Map(solvable);

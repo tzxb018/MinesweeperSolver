@@ -8,9 +8,9 @@ const initialState = 'SMILE';
  */
 export default (state = initialState, action) => {
   switch (action.type) {
-  case 'CHANGE_SIZE': return initialState;
-  case 'CHANGE_SMILE': return action.newSmile;
-  case 'RESET': return initialState;
-  default: return state;
+    case 'CHANGE_SIZE': return initialState;
+    case 'CHANGE_SMILE': return action.newSmile;
+    case 'RESET': return initialState;
+    default: return state;
   }
 };

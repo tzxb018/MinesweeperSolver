@@ -69,8 +69,7 @@ export default csp => {
 
   // normalize constraints and add the visited property to the variables
   const components = [];
-  const normalized = normalize(csp.get('constraints'));
-  const constraints = normalized.slice();
+  const constraints = normalize(csp.get('constraints'));
   const variables = csp.get('variables');
   const isVisited = new Map();
   variables.forEach(variable => isVisited.set(variable.key, false));

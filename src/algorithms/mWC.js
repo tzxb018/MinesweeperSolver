@@ -179,14 +179,15 @@ const revise = (pair, diagnostics) => {
  * intersect over at least 2 variables. Tuple consistency means every alive tuple of each constraint in the pair has an
  * alive supporting tuple in all other constraints of the pair.
  * @param {Immutable.Map} csp constraint representation of the minesweeper board
+ * @param {number} componentIndex index of component to operate on
  * @param {number} [size=2] the maximum number of constraints to form pairs with
  */
-export default (csp, size = 2) => {
+export default (csp, componentIndex, size = 2) => {
   let newCSP = csp;
 
   // run GAC as mWC-1 if it has not already been done
   if (!csp.getIn(['algorithms', 'STR2', 'isActive'])) {
-    newCSP = STR2(csp).withMutations(c => {
+    newCSP = STR2(csp, componentIndex).withMutations(c => {
       if (!c.getIn(['diagnostics', 'mWC-1'])) {
         const diagnostics = {
           time: 0,
@@ -209,72 +210,71 @@ export default (csp, size = 2) => {
   // run PWC for each additional level of m
   return newCSP.withMutations(c => {
     const mWC = [[], [], []];
-    c.get('components').forEach(component => {
-      // get all the edges
-      const edges = findEdges(component.constraints);
-      for (let m = 2; m <= size; m++) {
-        if (!c.getIn(['diagnostics', `mWC-${m}`])) {
-          const diagnostics = {
-            time: 0,
-            revisions: 0,
-            tuplesKilled: 0,
-          };
-          c.setIn(['diagnostics', `mWC-${m}`], diagnostics);
-        }
-        const diagnostics = c.getIn(['diagnostics', `mWC-${m}`]);
-        const PWC = [];
-        const startTime = performance.now();
-
-        // build the pairs and map each constraint to its pairs
-        const pairs = findPairs(mapEdges(edges), edges, m);
-        const constraintsToPairs = new Map();
-        pairs.forEach(pair => {
-          const constraints = new Set();
-          pair.forEach(edge => edge.forEach(constraint => constraints.add(constraint)));
-          constraints.forEach(constraint => {
-            if (!constraintsToPairs.has(constraint)) {
-              constraintsToPairs.set(constraint, []);
-            }
-            constraintsToPairs.get(constraint).push(pair);
-          });
-        });
-
-        // revise the pairs until they reach a steady state
-        const queue = [...pairs];
-        try {
-          while (queue.length > 0) {
-            diagnostics.revisions++;
-            const pair = queue.shift();
-            const revisedConstraints = revise(pair, diagnostics);
-            if (!revisedConstraints) {
-              throw pair;
-            }
-            revisedConstraints.forEach(constraint =>
-              queue.push(...constraintsToPairs.get(constraint).filter(p => p !== pair && !queue.includes(p))));
-          }
-        } catch (error) {
-          error.forEach(constraint => constraint.killAll());
-        }
-
-        // solve any variables with a domain of only one value
-        component.constraints.forEach(constraint => {
-          const specs = constraint.supportedSpecs();
-          if (specs) {
-            PWC.push(...specs);
-          }
-        });
-        diagnostics.time += performance.now() - startTime;
-
-        // add all PWC cells to the list of solvable cells
-        mWC[m - 2].push(...PWC);
+    // get all the edges
+    const edges = findEdges(c.get('components')[componentIndex].constraints);
+    for (let m = 2; m <= size; m++) {
+      if (!c.getIn(['diagnostics', `mWC-${m}`])) {
+        const diagnostics = {
+          time: 0,
+          revisions: 0,
+          tuplesKilled: 0,
+        };
+        c.setIn(['diagnostics', `mWC-${m}`], diagnostics);
       }
-    });
+      const diagnostics = c.getIn(['diagnostics', `mWC-${m}`]);
+      const PWC = [];
+      const startTime = performance.now();
+
+      // build the pairs and map each constraint to its pairs
+      const pairs = findPairs(mapEdges(edges), edges, m);
+      const constraintsToPairs = new Map();
+      pairs.forEach(pair => {
+        const constraints = new Set();
+        pair.forEach(edge => edge.forEach(constraint => constraints.add(constraint)));
+        constraints.forEach(constraint => {
+          if (!constraintsToPairs.has(constraint)) {
+            constraintsToPairs.set(constraint, []);
+          }
+          constraintsToPairs.get(constraint).push(pair);
+        });
+      });
+
+      // revise the pairs until they reach a steady state
+      const queue = [...pairs];
+      try {
+        while (queue.length > 0) {
+          diagnostics.revisions++;
+          const pair = queue.shift();
+          const revisedConstraints = revise(pair, diagnostics);
+          if (!revisedConstraints) {
+            throw pair;
+          }
+          revisedConstraints.forEach(constraint =>
+            queue.push(...constraintsToPairs.get(constraint).filter(p => p !== pair && !queue.includes(p))));
+        }
+      } catch (error) {
+        error.forEach(constraint => constraint.killAll());
+      }
+
+      // solve any variables with a domain of only one value
+      c.get('components')[componentIndex].constraints.forEach(constraint => {
+        const specs = constraint.supportedSpecs();
+        if (specs) {
+          PWC.push(...specs);
+        }
+      });
+      diagnostics.time += performance.now() - startTime;
+
+      // add all PWC cells to the list of solvable cells
+      mWC[m - 2].push(...PWC);
+    }
     mWC.forEach((cells, index) => {
       const m = index + 2;
       if (cells.length > 0) {
-        c.setIn(['solvable', `mWC-${m}`], cells);
-      } else {
-        c.deleteIn(['solvable', `mWC-${m}`]);
+        if (!c.getIn(['solvable', `mWC-${m}`])) {
+          c.setIn(['solvable', `mWC-${m}`], []);
+        }
+        c.updateIn(['solvable', `mWC-${m}`], x => x.concat(cells));
       }
     });
   });
@@ -296,10 +296,10 @@ export const logDiagnostics = (csp, numRuns = 1) => {
         const average = diagnostics[key] / numRuns;
         let detail;
         switch (key) {
-        case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
-        case 'revisions': detail = `# pairs checked\t\t\t${Math.round(average)}`; break;
-        case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
-        default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+          case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
+          case 'revisions': detail = `# pairs checked\t\t\t${Math.round(average)}`; break;
+          case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+          default: detail = `${key}\t\t\t\t${Math.round(average)}`;
         }
         log.addDetail(detail);
       });

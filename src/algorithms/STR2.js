@@ -56,9 +56,10 @@ export const revise = (constraint, domains, diagnostics, reduced = undefined) =>
  * generalized arc consistency (GAC) across all constraint tables. Any variables with a domain of only one value are
  * added to the list of solvable cells.
  * @param {Immutable.Map} csp csp model of the minefield
+ * @param {number} componentIndex index of component to operate on
  * @returns {Immutable.Map} csp with GAC and any solvable cells identified
  */
-export default csp => csp.withMutations(c => {
+export default (csp, componentIndex) => csp.withMutations(c => {
   if (!c.getIn(['diagnostics', 'STR2'])) {
     const diagnostics = {
       time: 0,
@@ -72,62 +73,61 @@ export default csp => csp.withMutations(c => {
   const domains = c.get('domains');
   const startTime = performance.now();
 
-  c.get('components').forEach(component => {
-    const constraintMap = mapVarsToConstraints(component.constraints);
-    const queue = [];
-    component.constraints.forEach(element => queue.push(element));
+  const constraintMap = mapVarsToConstraints(c.get('components')[componentIndex].constraints);
+  const queue = [];
+  c.get('components')[componentIndex].constraints.forEach(element => queue.push(element));
 
-    try {
-      // continually check constraints until no more changes can be made
-      while (queue.length > 0) {
-        // revise the next constraint in the queue
-        diagnostics.revisions++;
-        const constraint = queue.shift();
-        const newDomains = revise(constraint, domains, diagnostics);
-        if (!newDomains) {
-          throw constraint.scope;
-        }
-
-        newDomains.forEach((values, key) => {
-          // if the new domain set is different, intersect the new and old domain sets
-          if (domains.get(key).size !== values.size) {
-            domains.set(key, intersect(domains.get(key), values));
-            // add any constraints affected by this variable back to the queue
-            constraintMap.get(key).forEach(element => {
-              if (element !== constraint && !queue.includes(element)) {
-                queue.push(element);
-              }
-            });
-          }
-          // if the domain is inconsistent, break
-          if (domains.get(key).size === 0) {
-            throw new Array(key);
-          }
-        });
+  try {
+    // continually check constraints until no more changes can be made
+    while (queue.length > 0) {
+      // revise the next constraint in the queue
+      diagnostics.revisions++;
+      const constraint = queue.shift();
+      const newDomains = revise(constraint, domains, diagnostics);
+      if (!newDomains) {
+        throw constraint.scope;
       }
-    } catch (error) {
-      error.forEach(key => {
-        constraintMap.get(key).forEach(constraint => constraint.killAll());
+
+      newDomains.forEach((values, key) => {
+        // if the new domain set is different, intersect the new and old domain sets
+        if (domains.get(key).size !== values.size) {
+          domains.set(key, intersect(domains.get(key), values));
+          // add any constraints affected by this variable back to the queue
+          constraintMap.get(key).forEach(element => {
+            if (element !== constraint && !queue.includes(element)) {
+              queue.push(element);
+            }
+          });
+        }
+        // if the domain is inconsistent, break
+        if (domains.get(key).size === 0) {
+          throw new Array(key);
+        }
       });
     }
-
-    // solve any variables with a domain of only one value
-    domains.forEach((values, key) => {
-      if (values.size === 1) {
-        STR.push({
-          key,
-          value: [...values][0],
-        });
-      }
+  } catch (error) {
+    error.forEach(key => {
+      constraintMap.get(key).forEach(constraint => constraint.killAll());
     });
+  }
+
+  // solve any variables with a domain of only one value
+  domains.forEach((values, key) => {
+    if (values.size === 1) {
+      STR.push({
+        key,
+        value: [...values][0],
+      });
+    }
   });
   diagnostics.time += performance.now() - startTime;
 
   // add all STR cells to the list of solvable cells
   if (STR.length > 0) {
-    c.setIn(['solvable', 'STR2'], STR);
-  } else {
-    c.deleteIn(['solvable', 'STR2']);
+    if (!c.getIn(['solvable', 'STR2'])) {
+      c.setIn(['solvable', 'STR2'], []);
+    }
+    c.updateIn(['solvable', 'STR2'], x => x.concat(STR));
   }
 });
 
@@ -144,10 +144,10 @@ export const logDiagnostics = (csp, numRuns = 1) => {
     const average = diagnostics[key] / numRuns;
     let detail;
     switch (key) {
-    case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
-    case 'revisions': detail = `# constraints checked\t\t${Math.round(average)}`; break;
-    case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
-    default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+      case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
+      case 'revisions': detail = `# constraints checked\t\t${Math.round(average)}`; break;
+      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+      default: detail = `${key}\t\t\t\t${Math.round(average)}`;
     }
     log.addDetail(detail);
   });

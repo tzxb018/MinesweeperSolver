@@ -132,14 +132,37 @@ export const getDomains = constraints => {
  * model into its distinct component problems. Enforces any further consistency algorithms specified by the state.
  * Checks that the proposed solution is consistent with all constraints.
  * @param {Immutable.Map} state state of the board
+ * @param {boolean} [forceReevaluation=false] flag variable to force all components to be reevaluated whether they
+ * changed or not
  * @returns {Immutable.Map} state with csp model, solvable cells colored, and any inconsistencies colored
  */
-export default state => state.withMutations(s => {
+export default (state, forceReevaluation = false) => state.withMutations(s => {
   // generate the csp model of the minefield
   s.update('csp', c => generateCSP(c, s.getIn(['minefield', 'cells'])));
 
   // enfore unary consistency, normalize, and separate variables and constraints into individual components
   s.update('csp', c => reduceComponents(c));
+
+  // filter out any components that did not change
+  const activeComponents = [];
+  console.log(state);
+  if (state.getIn(['csp', 'components']) && !forceReevaluation) {
+    s.getIn(['csp', 'components']).forEach((component, i) => {
+      const changed = !state.getIn(['csp', 'components']).some(oldComponent =>
+        oldComponent.variables.length === component.variables.length
+        && oldComponent.variables.every(oldVariable => component.variables.some(variable =>
+          variable.key === oldVariable.key)));
+      if (changed) {
+        console.log('changed');
+        activeComponents.push(i);
+      }
+    });
+  } else {
+    console.log('reevaluating all');
+    for (let i = 0; i < s.getIn(['csp', 'components']).length; i++) {
+      activeComponents.push(i);
+    }
+  }
 
   // get the variable domains
   const constraints = [];
@@ -150,21 +173,27 @@ export default state => state.withMutations(s => {
   if (s.getIn(['csp', 'algorithms', 'BT', 'isActive'])
   && (s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'BC']) || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC'])
   || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC-STR']))) {
-    s.update('csp', c => BT(c, c.getIn(['algorithms', 'BT', 'subSets'])));
+    activeComponents.forEach(componentIndex => {
+      s.update('csp', c => BT(c, componentIndex, c.getIn(['algorithms', 'BT', 'subSets'])));
+    });
   } else {
     s.deleteIn(['csp', 'solvable', 'BT']);
   }
 
   // reduce the constraints with STR
   if (s.getIn(['csp', 'algorithms', 'STR2', 'isActive'])) {
-    s.update('csp', c => STR2(c));
+    activeComponents.forEach(componentIndex => {
+      s.update('csp', c => STR2(c, componentIndex));
+    });
   } else {
     s.deleteIn(['csp', 'solvable', 'STR2']);
   }
 
   // reduce the contstraints with PWC
   if (s.getIn(['csp', 'algorithms', 'mWC', 'isActive'])) {
-    s.update('csp', c => mWC(c, c.getIn(['algorithms', 'mWC', 'm'])));
+    activeComponents.forEach(componentIndex => {
+      s.update('csp', c => mWC(c, componentIndex, c.getIn(['algorithms', 'mWC', 'm'])));
+    });
   } else {
     for (let i = 1; i <= 4; i++) {
       s.deleteIn(['csp', 'solvable', `mWC-${i}`]);

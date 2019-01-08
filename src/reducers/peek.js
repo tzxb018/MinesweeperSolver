@@ -8,7 +8,7 @@ const initialState = false;
  */
 export default (state = initialState, action) => {
   switch (action.type) {
-  case 'TOGGLE_PEEK': return !state;
-  default: return state;
+    case 'TOGGLE_PEEK': return !state;
+    default: return state;
   }
 };

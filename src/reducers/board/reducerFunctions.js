@@ -68,18 +68,19 @@ export const winGame = state => state.withMutations(s => {
 export const revealCell = (state, row, col) => {
   // if there are no mines already, place mines and start the game
   let oldCells = state.getIn(['minefield', 'cells']);
-  let newState = state;
+  let newState;
   let popFromHistory = true;
-  if (newState.getIn(['minefield', 'numRevealed']) === 0) {
-    newState = newState.updateIn(['minefield', 'cells'], c =>
-      placeMines(c, newState.getIn(['minefield', 'numMines']), row, col));
+  if (state.getIn(['minefield', 'numRevealed']) === 0) {
+    newState = state.updateIn(['minefield', 'cells'], c =>
+      placeMines(c, state.getIn(['minefield', 'numMines']), row, col));
     newState = newState.set('isGameRunning', true);
     oldCells = newState.getIn(['minefield', 'cells']);
     popFromHistory = false;
   }
 
   // if the game is running, reveal the cell, else do nothing and return the old state
-  if (newState.get('isGameRunning')) {
+  if (state.get('isGameRunning') || !popFromHistory) {
+    newState = popFromHistory ? state.set('isGameRunning', true) : newState.set('isGameRunning', true);
     return newState.withMutations(s => {
       // reveal the cell
       const oldNumRevealed = s.getIn(['minefield', 'numRevealed']);
@@ -498,16 +499,16 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
 export const toggleActive = (state, algorithm, modifier) => state.withMutations(s => {
   if (modifier) {
     switch (algorithm) {
-    case 'BT': s.updateIn(['csp', 'algorithms', 'BT', 'subSets', modifier], a => !a); break;
-    case 'mWC': s.setIn(['csp', 'algorithms', 'mWC', 'm'], modifier); break;
-    default:
+      case 'BT': s.updateIn(['csp', 'algorithms', 'BT', 'subSets', modifier], a => !a); break;
+      case 'mWC': s.setIn(['csp', 'algorithms', 'mWC', 'm'], modifier); break;
+      default:
     }
   } else {
     s.updateIn(['csp', 'algorithms', algorithm, 'isActive'], a => !a);
   }
   if (s.get('isGameRunning')) {
     s.update('historyLog', h => h.pop());
-    return processCSP(s);
+    return processCSP(s, true);
   }
   return s;
 });

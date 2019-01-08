@@ -38,48 +38,48 @@ const mapVariablesToConstraints = constraints => {
  * Performs a backtracking search on the csp until a viable solution is found or the entire search tree is traversed,
  * indicating that the problem is impossible.
  * @param {Immutable.Map} csp constraint model of the minefield
+ * @param {number} componentIndex index of component to operate on
  * @param {Immutable.Map<string, boolean> | Map<string, boolean>} isActive backtracking algorithms mapped to whether
  * they are active or not
  * @returns {Immutable.Map} updated constraint model
  */
-export default (csp, isActive) => csp.withMutations(c => {
-  c.setIn(['solvable', 'BT'], []);
+export default (csp, componentIndex, isActive) => csp.withMutations(c => {
   const solvable = new Map();
   [...algorithms.keys()].forEach(key => solvable.set(key, []));
 
-  c.get('components').forEach(component => {
-    // sort the constraints and set the assignment order
-    const constraints = mapVariablesToConstraints(component.constraints);
-    const assignmentOrder = [...constraints.keys()];
-    assignmentOrder.sort((a, b) => c.get('domains').get(a).size - c.get('domains').get(b).size);
+  // sort the constraints and set the assignment order
+  const constraints = mapVariablesToConstraints(c.get('components')[componentIndex].constraints);
+  const assignmentOrder = [...constraints.keys()];
+  assignmentOrder.sort((a, b) => c.get('domains').get(a).size - c.get('domains').get(b).size);
 
-    // search the tree with each active algorithm
-    algorithms.forEach((search, algorithmKey) => {
-      if (isActive.get(algorithmKey)) {
-        if (!c.getIn(['diagnostics', algorithmKey])) {
-          const diagnostics = {
-            nodesVisited: 0,
-            backtracks: 0,
-            timeChecking: 0,
-            timeFiltering: 0,
-          };
-          c.setIn(['diagnostics', algorithmKey], diagnostics);
-        }
-
-        // search the tree
-        const solvableVars =
-          search(c.get('domains'), constraints, assignmentOrder, c.getIn(['diagnostics', algorithmKey]));
-
-        solvable.set(algorithmKey, solvable.get(algorithmKey).concat(solvableVars));
+  // search the tree with each active algorithm
+  algorithms.forEach((search, algorithmKey) => {
+    if (isActive.get(algorithmKey)) {
+      if (!c.getIn(['diagnostics', algorithmKey])) {
+        const diagnostics = {
+          nodesVisited: 0,
+          backtracks: 0,
+          timeChecking: 0,
+          timeFiltering: 0,
+        };
+        c.setIn(['diagnostics', algorithmKey], diagnostics);
       }
-    });
+
+      // search the tree
+      const solvableVars =
+        search(c.get('domains'), constraints, assignmentOrder, c.getIn(['diagnostics', algorithmKey]));
+
+      solvable.set(algorithmKey, solvable.get(algorithmKey).concat(solvableVars));
+    }
   });
 
   const solvableSet = [...solvable.values()][0];
-  c.updateIn(['solvable', 'BT'], x => x.concat(solvableSet));
-  solvableSet.forEach(cell => c.get('domains').set(cell.key, new Set([cell.value])));
-  if (c.getIn(['solvable', 'BT']).length === 0) {
-    c.deleteIn(['solvable', 'BT']);
+  if (solvableSet.length > 0) {
+    if (!c.getIn(['solvable', 'BT'])) {
+      c.setIn(['solvable', 'BT'], []);
+    }
+    c.updateIn(['solvable', 'BT'], x => x.concat(solvableSet));
+    solvableSet.forEach(cell => c.get('domains').set(cell.key, new Set([cell.value])));
   }
 });
 
@@ -99,12 +99,12 @@ export const logDiagnostics = (csp, numRuns = 1) => {
         const average = diagnostics[key] / numRuns;
         let detail;
         switch (key) {
-        case 'nodesVisisted': detail = `# nodes visited\t\t\t${numberWithCommas(Math.round(average))}`; break;
-        case 'backtracks': detail = `# backtracks\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
-        case 'timeChecking': detail = `time spent checking\t\t${Math.round(average * 100) / 100} ms`; break;
-        case 'timeFiltering': detail = `time spent filtering\t\t\t${Math.round(average * 100) / 100} ms`; break;
-        case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
-        default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+          case 'nodesVisisted': detail = `# nodes visited\t\t\t${numberWithCommas(Math.round(average))}`; break;
+          case 'backtracks': detail = `# backtracks\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+          case 'timeChecking': detail = `time spent checking\t\t${Math.round(average * 100) / 100} ms`; break;
+          case 'timeFiltering': detail = `time spent filtering\t\t\t${Math.round(average * 100) / 100} ms`; break;
+          case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+          default: detail = `${key}\t\t\t\t${Math.round(average)}`;
         }
         log.addDetail(detail);
       });

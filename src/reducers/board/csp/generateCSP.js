@@ -8,7 +8,6 @@ import { isOnFringe } from '../cellUtils';
  */
 const getVariables = cells => {
   const variables = [];
-  let key = 0;
   const numRows = cells.size;
   const numCols = cells.get(0).size;
 
@@ -16,6 +15,7 @@ const getVariables = cells => {
   for (let row = 0; row < numRows; row++) {
     for (let col = 0; col < numCols; col++) {
       if (cells.getIn([row, col, 'isHidden']) && isOnFringe(cells, row, col)) {
+        const key = (row * numCols) + col;
         // variable object
         variables.push({
           col,                                              // column of cell
@@ -23,7 +23,6 @@ const getVariables = cells => {
           key,                                              // variable number
           row,                                              // row of cell
         });
-        key++;
       }
     }
   }
