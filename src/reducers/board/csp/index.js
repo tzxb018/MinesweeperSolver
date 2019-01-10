@@ -2,7 +2,7 @@ import BT from 'algorithms/BT/index';
 import mWC from 'algorithms/mWC';
 import STR2 from 'algorithms/STR2';
 import { intersect } from 'algorithms/utils';
-import HistoryLog from 'HistoryLog';
+import HistoryLogItem from 'objects/HistoryLogItem';
 
 import generateCSP from './generateCSP';
 import reduceComponents from './reduceComponents';
@@ -42,7 +42,7 @@ const checkConsistency = state => state.withMutations(s => {
       cellOrCells = 'inconsistency';
     }
     const message = `Processing stopped due to ${inconsistentCount} ${cellOrCells}`;
-    log = new HistoryLog(message, 'red', true);
+    log = new HistoryLogItem(message, 'red', true);
   } else {
     let count = 0;
     const details = [];
@@ -60,7 +60,7 @@ const checkConsistency = state => state.withMutations(s => {
       cellOrCells = 'cell';
     }
     const message = `Finds ${count} solvable ${cellOrCells}`;
-    log = new HistoryLog(message, 'log', false);
+    log = new HistoryLogItem(message, 'log', false);
     details.forEach(detail => log.addDetail(detail));
   }
   s.update('historyLog', h => h.push(log));

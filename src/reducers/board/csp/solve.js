@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import HistoryLog from 'HistoryLog';
+import HistoryLogItem from 'objects/HistoryLogItem';
 
 import {
   getChangedCells,
@@ -164,7 +164,7 @@ export default (state, doLog = true) => state.withMutations(s => {
     }
     const message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[flag]`;
     const changedCells = getChangedCells(state.getIn(['minefield', 'cells']), s.getIn(['minefield', 'cells']));
-    const log = new HistoryLog(message, 'log', true, changedCells);
+    const log = new HistoryLogItem(message, 'log', true, changedCells);
 
     solvedCount.forEach((count, algorithm) => {
       cellOrCells = 'cells';

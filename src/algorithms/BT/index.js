@@ -1,4 +1,4 @@
-import HistoryLog from 'HistoryLog';
+import HistoryLogItem from 'objects/HistoryLogItem';
 import { numberWithCommas } from 'algorithms/utils';
 
 import backCheckSearch from './backCheck';
@@ -84,13 +84,13 @@ export default (csp, componentIndex, isActive) => csp.withMutations(c => {
 });
 
 /**
- * Creates a formatted HistoryLog object to represent the diagnostics of the search iteration.
+ * Creates a formatted HistoryLogItem object to represent the diagnostics of the search iteration.
  * @param {Immutable.Map} csp constraint model of the board
  * @param {number} [numRuns=1] number of iterations recorded in the diagnostics
- * @returns {HistoryLog} new HistoryLog of the diagnostics
+ * @returns {HistoryLogItem} new HistoryLogItem of the diagnostics
  */
 export const logDiagnostics = (csp, numRuns = 1) => {
-  const log = new HistoryLog('Search', 'log', false);
+  const log = new HistoryLogItem('Search', 'log', false);
   csp.getIn(['algorithms', 'BT', 'subSets']).forEach((isActive, algorithm) => {
     if (isActive) {
       const diagnostics = csp.getIn(['diagnostics', algorithm]);

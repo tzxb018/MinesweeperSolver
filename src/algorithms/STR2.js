@@ -1,5 +1,5 @@
-import Constraint from 'Constraint';
-import HistoryLog from 'HistoryLog';
+import Constraint from 'objects/Constraint';
+import HistoryLogItem from 'objects/HistoryLogItem';
 import {
   intersect,
   numberWithCommas,
@@ -132,13 +132,13 @@ export default (csp, componentIndex) => csp.withMutations(c => {
 });
 
 /**
- * Creates a formatted HistoryLog object to represent the diagnostics of the STR2 iteration.
+ * Creates a formatted HistoryLogItem object to represent the diagnostics of the STR2 iteration.
  * @param {Immutable.Map} csp constraint model of the board
  * @param {number} [numRuns=1] number of iterations recorded in the diagnostics
- * @returns {HistoryLog} new HistoryLog of the diagnostics
+ * @returns {HistoryLogItem} new HistoryLogItem of the diagnostics
  */
 export const logDiagnostics = (csp, numRuns = 1) => {
-  const log = new HistoryLog('STR2:', 'log', false);
+  const log = new HistoryLogItem('STR2:', 'log', false);
   const diagnostics = csp.getIn(['diagnostics', 'STR2']);
   Object.keys(diagnostics).forEach(key => {
     const average = diagnostics[key] / numRuns;

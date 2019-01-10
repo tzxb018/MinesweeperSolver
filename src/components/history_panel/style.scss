@@ -1,0 +1,71 @@
+@import 'colors';
+
+:local {
+  .gap {
+    min-width: 10px;
+  }
+
+  .history_log {
+    border-radius: 5px;
+    min-width: 400px;
+    background-color: $unl_light_cream;
+    overflow: auto;
+    padding: 10px;
+    white-space: pre-wrap;
+    height: 100%;
+  }
+
+  .log {
+    background-color: $unl_light_gray;
+    position: relative;
+    z-index: 1;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 5px;
+
+    &:hover {
+      background-color: $unl_gray;
+    }
+  }
+
+  .log_container {
+    padding: 10px;
+    background-color: $unl_red;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .green {
+    @extend .log;
+    background-color: $green;
+    color: $unl_light_cream;
+
+    &:hover {
+      background-color: $unl_dark_green;
+    }
+  }
+
+  .red {
+    @extend .log;
+    background-color: $light_red_80;
+    color: $unl_light_cream;
+
+    &:hover {
+      background-color: $red_80;
+    }
+  }
+
+  .stretch_container {
+    display: flex;
+    flex-direction: column;
+    height: 650px;
+  }
+
+  .undo_redo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+}

@@ -1,5 +1,5 @@
-import Constraint from 'Constraint';
-import HistoryLog from 'HistoryLog';
+import Constraint from 'objects/Constraint';
+import HistoryLogItem from 'objects/HistoryLogItem';
 
 import STR2 from './STR2';
 import {
@@ -281,13 +281,13 @@ export default (csp, componentIndex, size = 2) => {
 };
 
 /**
- * Creates a formatted HistoryLog object to represent the diagnostics of the mWC iteration.
+ * Creates a formatted HistoryLogItem object to represent the diagnostics of the mWC iteration.
  * @param {Immutable.Map} csp constraint model of the board
  * @param {number} [numRuns=1] number of iterations recorded in the diagnostics
- * @returns {HistoryLog} new HistoryLog of the diagnostics
+ * @returns {HistoryLogItem} new HistoryLogItem of the diagnostics
  */
 export const logDiagnostics = (csp, numRuns = 1) => {
-  const log = new HistoryLog('m-Wise Consistency:', 'log', false);
+  const log = new HistoryLogItem('m-Wise Consistency:', 'log', false);
   for (let m = 1; m <= csp.getIn(['algorithms', 'mWC', 'm']); m++) {
     if (csp.getIn(['diagnostics', `mWC-${m}`])) {
       log.addDetail(`\nmWC-${m}:`, true);

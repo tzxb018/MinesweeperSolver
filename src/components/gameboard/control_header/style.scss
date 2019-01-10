@@ -1,0 +1,25 @@
+@font-face {
+  font-family: 'Pixel-LCD-7';
+  src:url('../../../fonts/Pixel-LCD-7/Pixel-LCD-7.woff') format('woff'),
+      url('../../../fonts/Pixel-LCD-7/Pixel-LCD-7.svg#Pixel-LCD-7') format('svg'),
+      url('../../../fonts/Pixel-LCD-7/Pixel-LCD-7.eot'),
+      url('../../../fonts/Pixel-LCD-7/Pixel-LCD-7.eot?#iefix') format('embedded-opentype'); 
+  font-weight: normal;
+  font-style: normal;
+}
+
+:local {
+  .container {
+    background-color: black;
+    color: red;
+    font-family: 'Pixel-LCD-7';
+    font-size: 20pt;
+    height: 26px;
+    width: 56px;
+  }
+
+  .svg {
+    height: 26px;
+    width: 26px;
+  }
+}

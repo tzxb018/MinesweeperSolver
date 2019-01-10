@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import HistoryLog from 'HistoryLog';
+import HistoryLogItem from 'objects/HistoryLogItem';
 import { logDiagnostics as logBT } from 'algorithms/BT';
 import { logDiagnostics as logSTR2 } from 'algorithms/STR2';
 import { logDiagnostics as logmWC } from 'algorithms/mWC';
@@ -100,7 +100,7 @@ export const revealCell = (state, row, col) => {
       if (popFromHistory) {
         s.update('historyLog', h => h.pop());
       }
-      const log = new HistoryLog(message, 'log', true, getChangedCells(oldCells, s.getIn(['minefield', 'cells'])));
+      const log = new HistoryLogItem(message, 'log', true, getChangedCells(oldCells, s.getIn(['minefield', 'cells'])));
       s.update('historyLog', h => h.push(log));
 
       // check if the game has been won, and reprocess the csp
@@ -298,7 +298,7 @@ export const loop = (state, isLogged = true) => {
       cellOrCells = 'cell';
     }
     let message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[flag]`;
-    const log = new HistoryLog(
+    const log = new HistoryLogItem(
       message,
       'log',
       true,
@@ -319,7 +319,7 @@ export const loop = (state, isLogged = true) => {
     if (newState.get('isGameRunning')) {
       newState = newState.update('historyLog', h => h.pop().push(log));
       message = 'Finds 0 solvable cells';
-      newState = newState.update('historyLog', h => h.push(new HistoryLog(message, 'log', false)));
+      newState = newState.update('historyLog', h => h.push(new HistoryLogItem(message, 'log', false)));
     } else {
       newState = newState.update('historyLog', h => h.push(log));
     }
@@ -389,7 +389,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
         // stopped due to inconsistencies
         if (!newState.getIn(['csp', 'isConsistent'])) {
           const message = newState.get('historyLog').last().message;
-          log = new HistoryLog(message, 'red', false);
+          log = new HistoryLogItem(message, 'red', false);
           error = true;
         // could not solve without cheats
         } else {
@@ -400,18 +400,18 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
             cellOrCells = 'cell';
           }
           const message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[flag]`;
-          log = new HistoryLog(message, 'red', false);
+          log = new HistoryLogItem(message, 'red', false);
           log.addDetail('Cheats needed to advance further');
         }
       } else {
         // solved the puzzle
         if (checkWinCondition(newState.get('minefield'))) {
           const message = 'Successfully solved the puzzle';
-          log = new HistoryLog(message, 'green', false);
+          log = new HistoryLogItem(message, 'green', false);
         // made an error while solving
         } else {
           const message = 'Error made during solving';
-          log = new HistoryLog(message, 'red', false);
+          log = new HistoryLogItem(message, 'red', false);
           numFails++;
           error = true;
           isRed = true;
@@ -443,7 +443,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
       }
     } catch (e) {
       const message = 'Error thrown during solving';
-      const log = new HistoryLog(message, 'red', false);
+      const log = new HistoryLogItem(message, 'red', false);
       log.addDetail(`${e.toString()}`);
       numFails++;
       logs.push(log);
@@ -458,7 +458,7 @@ export const test = (state, numIterations, allowCheats = true, stopOnError = fal
   // log the results
   const accuracy = (numRuns - numFails) / numRuns * 100;
   const message = `Testing was ${Math.round(accuracy)}% successful`;
-  const log = new HistoryLog(message, 'log', false);
+  const log = new HistoryLogItem(message, 'log', false);
   const executionTime = Math.round((performance.now() - startTime) / 10) / 100;
   log.addDetail(`\nExecution Time: ${executionTime} seconds`, true);
   if (allowCheats) {
@@ -540,7 +540,7 @@ export const toggleFlag = (state, row, col) => {
       }
 
       // record the event in the history log and reprocess the csp
-      s.update('historyLog', h => h.pop().push(new HistoryLog(message, 'log', true)));
+      s.update('historyLog', h => h.pop().push(new HistoryLogItem(message, 'log', true)));
       return processCSP(s);
     });
   }

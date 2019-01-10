@@ -1,0 +1,21 @@
+@import '../colors';
+
+:local {
+  .container {
+    color: $unl_light_cream;
+    background-color: $unl_red;
+    border-radius: 5px;
+    padding: 10px;
+  }
+  
+  .button {
+    margin-bottom: 10px;
+  }
+
+  .selector {
+    align-self: center;
+    background-color: $unl_light_cream;
+    margin-left: 10px;
+    width: 66px;
+  }
+}

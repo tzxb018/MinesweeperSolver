@@ -1,0 +1,68 @@
+@import 'colors';
+
+:local {
+  .bottom {
+    position: relative;
+    left: 20px;
+    grid-row: 2 3;
+  }
+
+  .button {
+    font-weight: bold;
+    grid-row: 1 2;
+    width: 100%;
+  }
+
+  .container {
+    background-color: $unl_dark_blue;
+    color: $unl_light_cream;
+    border-radius: 5px;
+    padding: 10px;
+  }
+
+  .flex_container {
+    margin-top: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .gap {
+    min-height: 10px;
+    min-width: 10px;
+  }
+
+  .mWC {
+    @extend .button;
+    background-color: $unl_wheat;
+    width: 61%;
+  }
+
+  .panel_container {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .search {
+    @extend .container;
+    background-color: $unl_dark_gray;
+    display: grid;
+    grid-template-rows: auto auto;
+  }
+
+  .selector {
+    background-color: $unl_light_cream;
+    margin-left: 10px;
+    width: 40px;
+  }
+
+  .solve {
+    @extend .container;
+    background-color: $unl_red;
+  }
+
+  .STR2 {
+    @extend .button;
+    background-color: $unl_dark_green;
+  }
+}
