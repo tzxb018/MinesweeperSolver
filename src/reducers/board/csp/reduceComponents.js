@@ -81,6 +81,7 @@ export default csp => {
       // new component object
       const component = {
         constraints: [],  // list of relevant Constraints
+        id: '',
         variables: [],    // list of relevant variable objects
       };
       // grab all relevant variables and constraints until the component is completed
@@ -103,6 +104,14 @@ export default csp => {
         isVisited.set(currentKey, true);
         component.variables.push(currentVariable);
       }
+
+      // create a unique id for the component so it can be identified later
+      const keys = component.variables.map(v => v.key);
+      keys.sort((a, b) => a - b);
+      let id = `${keys[0]}`;
+      keys.slice(1).forEach(key => { id += `_${key}`; });
+      component.id = id;
+
       components.push(component);
     }
   });

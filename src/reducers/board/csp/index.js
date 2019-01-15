@@ -145,20 +145,14 @@ export default (state, forceReevaluation = false) => state.withMutations(s => {
 
   // filter out any components that did not change
   const activeComponents = [];
-  console.log(state);
-  if (state.getIn(['csp', 'components']) && !forceReevaluation) {
+  if (state.get('csp').has('components') && !forceReevaluation) {
     s.getIn(['csp', 'components']).forEach((component, i) => {
-      const changed = !state.getIn(['csp', 'components']).some(oldComponent =>
-        oldComponent.variables.length === component.variables.length
-        && oldComponent.variables.every(oldVariable => component.variables.some(variable =>
-          variable.key === oldVariable.key)));
+      const changed = !state.getIn(['csp', 'components']).some(oldComponent => oldComponent.id === component.id);
       if (changed) {
-        console.log('changed');
         activeComponents.push(i);
       }
     });
   } else {
-    console.log('reevaluating all');
     for (let i = 0; i < s.getIn(['csp', 'components']).length; i++) {
       activeComponents.push(i);
     }
@@ -182,6 +176,7 @@ export default (state, forceReevaluation = false) => state.withMutations(s => {
 
   // reduce the constraints with STR
   if (s.getIn(['csp', 'algorithms', 'STR2', 'isActive'])) {
+    s.deleteIn(['csp', 'solvable', 'mWC-1']);
     activeComponents.forEach(componentIndex => {
       s.update('csp', c => STR2(c, componentIndex));
     });

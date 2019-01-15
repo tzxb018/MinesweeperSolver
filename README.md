@@ -12,6 +12,3 @@
 * deploy
 * add tooltips with option to hide them
 * test and optimize algorithms (mWC and search especially)
-* fix component change recognition and algorithm activation change recognition
-
-* reorganize folders and make code more readable and more consistent in style

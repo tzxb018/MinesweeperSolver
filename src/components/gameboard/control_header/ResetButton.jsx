@@ -18,17 +18,17 @@ export default class ResetButton extends Component {
 
   /* static display components */
 
-  static background = [
-    <polygon key="border" points="1,1 25,1 1,25" style={{ fill: 'white' }} />,
-    <polygon key="background" points="3,3 23,3 23,23 3,23" style={{ fill: 'rgb(192, 192, 192)' }} />,
-    <circle key="face" cx="13.5" cy="13.5" r="8.5" style={ResetButton.face} />,
-  ];
-
   static face = {
     fill: 'yellow',
     stroke: 'black',
     strokeWidth: '1',
   };
+
+  static background = [
+    <polygon key="border" points="1,1 25,1 1,25" style={{ fill: 'white' }} />,
+    <polygon key="background" points="3,3 23,3 23,23 3,23" style={{ fill: 'rgb(192, 192, 192)' }} />,
+    <circle key="face" cx="13.5" cy="13.5" r="8.5" style={ResetButton.face} />,
+  ];
 
   static mouth = {
     fill: 'transparent',
@@ -88,11 +88,11 @@ export default class ResetButton extends Component {
 
   /* event handlers */
 
-  mouseDownHandler() {
+  mouseDownHandler = () => {
     this.props.changeSmile('PRESSED');
   }
 
-  mouseUpHandler() {
+  mouseUpHandler = () => {
     this.props.reset();
   }
 
@@ -107,8 +107,8 @@ export default class ResetButton extends Component {
         onMouseDown={this.mouseDownHandler}
       >
         <polygon points="0,0 26,0 26,26 0,26" style={{ fill: 'rgb(128, 128, 128)' }} />
-        {this.props.smile !== 'PRESSED' ? this.background : null}
-        {this.smiles.get(this.props.smile)}
+        {this.props.smile !== 'PRESSED' ? ResetButton.background : null}
+        {ResetButton.smiles.get(this.props.smile)}
       </svg>
     );
   }

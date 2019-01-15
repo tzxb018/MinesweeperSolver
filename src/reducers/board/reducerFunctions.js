@@ -81,7 +81,7 @@ export const revealCell = (state, row, col) => {
   // if the game is running, reveal the cell, else do nothing and return the old state
   if (state.get('isGameRunning') || !popFromHistory) {
     newState = popFromHistory ? state.set('isGameRunning', true) : newState.set('isGameRunning', true);
-    return newState.withMutations(s => {
+    newState = newState.withMutations(s => {
       // reveal the cell
       const oldNumRevealed = s.getIn(['minefield', 'numRevealed']);
       s.setIn(['minefield', 'cells', row, col, 'isHidden'], false);
@@ -102,14 +102,15 @@ export const revealCell = (state, row, col) => {
       }
       const log = new HistoryLogItem(message, 'log', true, getChangedCells(oldCells, s.getIn(['minefield', 'cells'])));
       s.update('historyLog', h => h.push(log));
-
-      // check if the game has been won, and reprocess the csp
-      if (checkWinCondition(s.get('minefield'))) {
-        return winGame(s);
-      }
-      // set the new csp model
-      return processCSP(s);
     });
+
+    // check if the game has been won
+    if (checkWinCondition(newState.get('minefield'))) {
+      return winGame(newState);
+    }
+
+    // set the new csp model
+    return processCSP(newState, !popFromHistory);
   }
   return state;
 };

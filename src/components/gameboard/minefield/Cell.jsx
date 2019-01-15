@@ -160,7 +160,7 @@ export default class Cell extends Component {
 
   /* event handlers */
 
-  clickHandler() {
+  clickHandler = () => {
     if (this.props.content === -1) {
       this.props.loseGame(this.props.row, this.props.col);
     } else {
@@ -169,13 +169,13 @@ export default class Cell extends Component {
     }
   }
 
-  mouseDownHandler(e) {
+  mouseDownHandler = e => {
     if (e.nativeEvent.which === 1) {
       this.props.changeSmile('SCARED');
     }
   }
 
-  rightClickHandler(e) {
+  rightClickHandler = e => {
     if (this.props.isGameRunning) {
       e.preventDefault();
       this.props.toggleFlag(this.props.row, this.props.col);

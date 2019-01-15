@@ -17,7 +17,7 @@ export default class StepLoop extends Component {
 
   /* event handlers */
 
-  clickHandler(loop) {
+  clickHandler = loop => {
     this.props.changeSmile('SMILE');
     if (loop) {
       this.props.loop();
@@ -26,7 +26,7 @@ export default class StepLoop extends Component {
     }
   }
 
-  mouseDownHandler() {
+  mouseDownHandler = () => {
     this.props.changeSmile('SCARED');
   }
 
