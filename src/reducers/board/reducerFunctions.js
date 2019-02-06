@@ -11,6 +11,7 @@ import {
   flagMines,
   getChangedCells,
   placeMines,
+  placeNumbers,
   revealMines,
   revealNeighbors,
 } from './cellUtils';
@@ -46,6 +47,31 @@ export const reset = state => state.withMutations(s => {
   s.setIn(['minefield', 'numFlagged'], 0);
   s.setIn(['minefield', 'numRevealed'], 0);
 });
+
+/**
+ * Handles the sendReport action by posting the current state to the server for emailing to the administrator.
+ * @param state
+ * @returns state with no changes
+ */
+export const sendReport = state => {
+  const url = 'http://localhost:8000/report';
+  const csp = state.get('csp').toJSON();
+  const minefield = state.get('minefield').toJSON();
+  const data = { csp, minefield };
+
+  fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(data, null, 2),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  .then(res => {
+    console.log(`Email Sent! ${res.statusText}`);
+  });
+
+  return state;
+};
 
 /**
  * Wins the game.
@@ -145,7 +171,11 @@ export const step = (state, isLogged = true) => {
 /**
  * Converts the change size action to a reset action.
  * @param state state of the board
- * @param {string} newSize new size to make the board
+ * @param {object} newSize new size to make the board
+ * @param {number} newSize.rows number of rows
+ * @param {number} newSize.cols number of cols
+ * @param {number} newSize.numMines number of mines
+ * @param {string} newSize.size string description of the new size
  * @return newState
  */
 export const changeSize = (state, newSize) => state.withMutations(s => {
@@ -259,6 +289,81 @@ export const initialize = () => {
     isGameRunning: false,
     minefield,
     size: 'INTERMEDIATE',
+  });
+};
+
+/**
+ * Loads the minefield given in the xml DOM into the state.
+ * @param state state of the board
+ * @param {Document} xmlDoc xml DOM representing a minefield
+ * @returns newState with the minefield loaded
+ */
+export const loadXMLDocument = (state, xmlDoc) => {
+  // parse the size of the board
+  const newSize = {};
+  const minSize = xmlDoc.getElementsByTagName('dimensions')[0];
+  newSize.rows = minSize.getAttribute('y');
+  newSize.cols = minSize.getAttribute('x');
+  if (newSize.rows <= 9 && newSize.cols <= 9) {
+    newSize.rows = 9;
+    newSize.cols = 9;
+    newSize.size = 'BEGINNER';
+  } else if (newSize.rows <= 16 && newSize.cols <= 16) {
+    newSize.rows = 16;
+    newSize.cols = 16;
+    newSize.size = 'INTERMEDIATE';
+  } else if (newSize.rows <= 16 && newSize.cols <= 30) {
+    newSize.rows = 16;
+    newSize.cols = 30;
+    newSize.size = 'EXPERT';
+  } else {
+    newSize.size = 'CUSTOM';
+  }
+  const bombs = xmlDoc.getElementsByTagName('bomb');
+  newSize.numMines = bombs.length;
+  const newState = changeSize(state, newSize);
+
+  // load the minefield
+  return newState.withMutations(s => {
+    // place the mines
+    const mines = [];
+    s.updateIn(['minefield', 'cells'], cells => cells.withMutations(c => {
+      for (let i = 0; i < bombs.length; i++) {
+        const row = parseInt(bombs[i].getAttribute('y'), 10);
+        const col = parseInt(bombs[i].getAttribute('x'), 10);
+        c.setIn([row, col, 'content'], -1);
+        mines.push({
+          row,
+          col,
+        });
+      }
+    }));
+
+    // place the numbers
+    s.updateIn(['minefield', 'cells'], c => placeNumbers(c, mines));
+
+    // reveal the known squares
+    s.set('isGameRunning', true);
+    const knownSquares = xmlDoc.getElementsByTagName('square');
+    const neighborQueue = [];
+    s.update('minefield', minefield => minefield.withMutations(m => {
+      for (let i = 0; i < knownSquares.length; i++) {
+        const row = parseInt(knownSquares[i].getAttribute('y'), 10);
+        const col = parseInt(knownSquares[i].getAttribute('x'), 10);
+        if (!mines.some(mine => mine.row === row && mine.col === col)) {
+          if (m.getIn(['cells', row, col, 'content']) === 0) {
+            neighborQueue.push({
+              row,
+              col,
+            });
+          } else if (m.getIn(['cells', row, col, 'content']) !== -1) {
+            m.setIn(['cells', row, col, 'isHidden'], false);
+          }
+        }
+      }
+      m.set('numRevealed', knownSquares.length);
+    }));
+    neighborQueue.forEach(({ row, col }) => s.update('minefield', m => revealNeighbors(m, row, col)));
   });
 };
 

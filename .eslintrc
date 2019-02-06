@@ -23,6 +23,7 @@
     "no-mixed-operators": ["off"],
     "no-param-reassign": ["error", { "props": false }],
     "no-plusplus": ["off"],
+    "no-throw-literal" : ["off"],
     "no-underscore-dangle": ["off"],
     "import/prefer-default-export": ["off"],
     "react/no-array-index-key": ["off"],

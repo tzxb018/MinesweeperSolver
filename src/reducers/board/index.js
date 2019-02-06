@@ -2,6 +2,7 @@ import {
   changeSize,
   cheat,
   initialize,
+  loadXMLDocument,
   loop,
   loseGame,
   reset,
@@ -25,6 +26,7 @@ export default (state = initialState, action) => {
     case 'CHANGE_SIZE': return changeSize(state, action.newSize);
     case 'CHEAT': return cheat(state, action.isRandom);
     case 'LOOP': return loop(state);
+    case 'LOAD_END': return loadXMLDocument(state, action.xmlDoc);
     case 'LOSE_GAME': return loseGame(state, action.row, action.col);
     case 'RESET': return reset(state);
     case 'REVEAL_CELL': return revealCell(state, action.row, action.col);

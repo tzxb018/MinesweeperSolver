@@ -12,3 +12,7 @@
 * deploy
 * add tooltips with option to hide them
 * test and optimize algorithms (mWC and search especially)
+
+* record current count of components
+* put the number selector for mWC inside the mWC button both after "mWC" and instead of the "m"
+* remove stop on error from tests

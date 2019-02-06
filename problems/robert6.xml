@@ -1,0 +1,26 @@
+<field>
+  <dimensions x="9" y="9" />
+  <bombs>
+    <bomb x="0" y="0" />
+    <bomb x="7" y="0" />
+    <bomb x="6" y="2" />
+    <bomb x="5" y="5" />
+    <bomb x="5" y="7" />
+    <bomb x="6" y="8" />
+    <bomb x="7" y="8" />
+  </bombs>
+  <knownsquares>
+    <square x="6" y="3" />
+    <square x="6" y="4" />
+    <square x="6" y="5" />
+    <square x="6" y="6" />
+    <square x="6" y="7" />
+    <square x="7" y="1" />
+    <square x="7" y="2" />
+    <square x="7" y="3" />
+    <square x="7" y="4" />
+    <square x="7" y="7" />
+    <square x="8" y="1" />
+    <square x="8" y="7" />
+  </knownsquares>
+</field>

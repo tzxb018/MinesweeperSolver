@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<field>
+  <dimensions x="8" y="3"/>
+  <bombs>
+    <bomb x="0" y="1"/>
+    <bomb x="1" y="0"/>
+    <bomb x="4" y="0"/>
+    <bomb x="6" y="0"/>
+    <bomb x="7" y="0"/>
+    <bomb x="7" y="1"/>
+    <bomb x="7" y="2"/>
+  </bombs>
+  <knownsquares>
+    <square x="5" y="2"/>
+  </knownsquares>
+</field>

@@ -27,16 +27,19 @@
     "jest": "^21.2.1",
     "path": "^0.12.7",
     "source-map-loader": "^0.2.1",
+    "webpack-node-externals": "^1.7.2",
     "webpack-stream": "^3.2.0"
   },
-  "main": "source/index.js",
+  "main": "src/index.jsx",
   "scripts": {
-    "lint:js": "eslint source/ webpack.*.js --cache",
+    "start": "node dist/bundle-back.node.js",
+    "lint:js": "eslint source/ webpack*.*.js --cache",
     "pretest": "npm run lint:js",
     "test": "jest",
-    "build": "webpack",
+    "build": "webpack --config webpack.config.js",
     "watch": "webpack-dev-server --content-base ./ --hot",
-    "clean": "rm -r dist/"
+    "clean": "rm -r dist/",
+    "rebuild": "npm run build && npm run start"
   },
   "repository": {
     "type": "git",
