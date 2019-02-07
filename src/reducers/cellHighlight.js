@@ -44,6 +44,30 @@ const clear = state => state.withMutations(s => s.forEach((row, rowIndex) => {
 const changeSize = newSize => initialState(newSize.rows, newSize.cols);
 
 /**
+ * Handles the load end action
+ * @param {Document} xmlDoc xml DOM representing a minefield
+ * @returns {Immutable.List<Immutable.List<boolean>>} new state
+ */
+const loadXMLDocument = xmlDoc => {
+  let rows;
+  let cols;
+  const minSize = xmlDoc.getElementsByTagName('dimensions')[0];
+  rows = minSize.getAttribute('y');
+  cols = minSize.getAttribute('x');
+  if (rows <= 9 && cols <= 9) {
+    rows = 9;
+    cols = 9;
+  } else if (rows <= 16 && cols <= 16) {
+    rows = 16;
+    cols = 16;
+  } else if (rows <= 16 && cols <= 30) {
+    rows = 16;
+    cols = 30;
+  }
+  return initialState(rows, cols);
+};
+
+/**
  * Reducer for the cell highlight
  * @param state state of the cell highlight
  * @param action redux action
@@ -54,6 +78,7 @@ export default (state = initialState(16, 16), action) => {
     case 'CHANGE_SIZE': return changeSize(action.newSize);
     case 'CLEAR': return clear(state);
     case 'HIGHLIGHT': return highlight(state, action.cells);
+    case 'LOAD_END': return loadXMLDocument(action.xmlDoc);
     default: return state;
   }
 };

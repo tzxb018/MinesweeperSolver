@@ -6,6 +6,7 @@
     color: $unl_light_cream;
     background-color: $unl_red;
     padding: 10px;
+    position: relative;
   }
 
   .selector {
@@ -25,5 +26,35 @@
     grid-template-rows: auto auto auto;
     grid-template-columns: 57px auto;
     grid-column-gap: 5px;
+  }
+
+  .menu {
+    background-color: white;
+    border-color: gray;
+    border-radius: 2px;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 3px 3px 5px #888888;
+    color: black;
+    display: none;
+    left: 70px;
+    padding-bottom: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 3px;
+    position: absolute;
+    top: 10px;
+    width: 150px;
+    z-index: 1;
+  }
+
+  .menu-item {
+    height: 20px;
+    width: auto;
+
+    &:hover {
+      background-color: lightgray;
+      cursor: pointer;
+    }
   }
 }
