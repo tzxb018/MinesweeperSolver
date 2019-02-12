@@ -12,9 +12,9 @@ http.createServer((req, res) => {
     .on('end', () => {
       body = Buffer.concat(body);
       const attachment = {
-        filename: 'instance.json',
+        filename: 'instance.xml',
         content: body,
-        contentType: 'application/json',
+        contentType: 'text/xml',
       };
       const report = new IssueReport('TEST1', body.toString(), attachment);
       report.sendReport();

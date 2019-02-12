@@ -1,6 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { loadProblem } from 'reducers/load';
+import {
+  loadFile,
+  loadProblem,
+} from 'reducers/load';
 
 import styles from './style';
 
@@ -14,11 +17,34 @@ export default class Load extends Component {
     loadStart: PropTypes.func.isRequired,
   }
 
-  blurHandler() {
-    document.getElementById('loadMenu').style.display = 'none';
+  state = {
+    file: null,
+    filename: '',
+  };
+
+  changeHandler(event) {
+    if (event.target.value !== '') {
+      event.persist();
+      document.getElementById('loadMenu').style.display = 'none';
+      this.props.loadStart();
+      loadFile(event.target.files[0]).then(response => {
+        document.getElementById('reload').style.display = 'block';
+        this.props.loadEnd(response);
+        this.setState({
+          file: response,
+          filename: event.target.files[0].name,
+        });
+      })
+      .catch(error => {
+        document.getElementById('reload').style.display = 'none';
+        this.props.loadFail(error);
+      });
+    } else {
+      document.getElementById('reload').style.display = 'none';
+    }
   }
 
-  clickHandler() {
+  loadClickHandler() {
     if (document.getElementById('loadMenu').style.display === 'none'
     || document.getElementById('loadMenu').style.display === '') {
       document.getElementById('loadMenu').style.display = 'block';
@@ -31,20 +57,39 @@ export default class Load extends Component {
     document.getElementById('loadMenu').style.display = 'none';
     this.props.loadStart();
     loadProblem(filename).then(response => {
+      document.getElementById('reload').style.display = 'block';
       this.props.loadEnd(response);
+      this.setState({
+        file: response,
+        filename,
+      });
     })
     .catch(error => {
+      document.getElementById('reload').style.display = 'none';
       this.props.loadFail(error);
     });
+  }
+
+  reloadClickHandler() {
+    document.getElementById('loadMenu').style.display = 'none';
+    this.props.loadStart();
+    this.props.loadEnd(this.state.file);
   }
 
   render() {
     return (
       <div>
-        <button onClick={this.clickHandler} disabled={this.props.isLoading} onBlur={this.blurHandler}>
-          Load
-        </button>
+        <div className={styles['load-buttons']}>
+          <button onClick={this.loadClickHandler} disabled={this.props.isLoading}>
+            Load
+          </button>
+          <button id="reload" className={styles['reload']} onClick={() => this.reloadClickHandler()}>
+            <span>{this.state.filename}</span>
+            <div className={styles['tooltip']}>{this.state.filename}</div>
+          </button>
+        </div>
         <div id="loadMenu" className={styles['menu']} tabIndex="-1">
+          <input type="file" id="file" accept=".xml" onChange={e => this.changeHandler(e)} />
           <div className={styles['menu-item']} onMouseDown={() => this.mouseDownHandler('1239297023.xml')}>
             1239297023
           </div>

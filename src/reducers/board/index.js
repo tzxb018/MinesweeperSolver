@@ -1,8 +1,8 @@
+import { loadXMLDocument } from 'objects/XMLParser';
 import {
   changeSize,
   cheat,
   initialize,
-  loadXMLDocument,
   loop,
   loseGame,
   reset,
