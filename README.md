@@ -3,7 +3,6 @@
 ## To do list
 * write a real README
 * set up email API for issue reporting
-* set up database of preloaded problems and implement loading them
 * implement using the number of mines available when a problem reaches steady state (certainty first, then option for probabalistic)
 * improve history log to not just be text based
 * testing and bug fixes

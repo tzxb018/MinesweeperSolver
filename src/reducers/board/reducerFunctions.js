@@ -46,6 +46,14 @@ export const reset = state => state.withMutations(s => {
   s.set('isGameRunning', false);
   s.setIn(['minefield', 'numFlagged'], 0);
   s.setIn(['minefield', 'numRevealed'], 0);
+
+  // reset the number of mines if necessary
+  switch (s.get('size')) {
+    case 'BEGINNER': s.setIn(['minefield', 'numMines'], 10); break;
+    case 'INTERMEDIATE': s.setIn(['minefield', 'numMines'], 40); break;
+    case 'EXPERT': s.setIn(['minefield', 'numMines'], 99); break;
+    default:
+  }
 });
 
 /**

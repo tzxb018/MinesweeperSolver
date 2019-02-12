@@ -90,6 +90,7 @@ export const loadXMLDocument = (state, xmlDoc) => {
         });
       }
     }));
+    s.setIn(['minefield', 'numMines'], mines.length);
 
     // place the numbers
     s.updateIn(['minefield', 'cells'], c => placeNumbers(c, mines));
