@@ -1,3 +1,5 @@
+import { Actions } from 'enums';
+
 const initialState = 'SMILE';
 
 /**
@@ -8,9 +10,9 @@ const initialState = 'SMILE';
  */
 export default (state = initialState, action) => {
   switch (action.type) {
-    case 'CHANGE_SIZE': return initialState;
-    case 'CHANGE_SMILE': return action.newSmile;
-    case 'RESET': return initialState;
+    case Actions.CHANGE_SIZE: return initialState;
+    case Actions.CHANGE_SMILE: return action.newSmile;
+    case Actions.RESET: return initialState;
     default: return state;
   }
 };

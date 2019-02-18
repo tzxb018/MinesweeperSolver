@@ -29,7 +29,7 @@ export default class Load extends Component {
       this.props.loadStart();
       loadFile(event.target.files[0]).then(response => {
         document.getElementById('reload').style.display = 'block';
-        this.props.loadEnd(response);
+        this.props.loadEnd(response, event.target.files[0].name);
         this.setState({
           file: response,
           filename: event.target.files[0].name,
@@ -58,7 +58,7 @@ export default class Load extends Component {
     this.props.loadStart();
     loadProblem(filename).then(response => {
       document.getElementById('reload').style.display = 'block';
-      this.props.loadEnd(response);
+      this.props.loadEnd(response, filename);
       this.setState({
         file: response,
         filename,
@@ -73,7 +73,7 @@ export default class Load extends Component {
   reloadClickHandler() {
     document.getElementById('loadMenu').style.display = 'none';
     this.props.loadStart();
-    this.props.loadEnd(this.state.file);
+    this.props.loadEnd(this.state.file, this.state.filename);
   }
 
   render() {

@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { Mines } from 'enums';
 
 import styles from './style';
 
@@ -94,7 +95,7 @@ export default class Cell extends Component {
     const graphic = [];
     if (this.props.content < 0) {
       graphic.push(...Cell.mine);
-      if (this.props.isFlagged) {
+      if (this.props.content === Mines.MINE_FALSE) {
         graphic.push(
           <polyline key="x"
             points="2,2 8.5,8.5 15,2 8.5,8.5 15,15 8.5,8.5 2,15 8.5,8.5"
@@ -130,8 +131,8 @@ export default class Cell extends Component {
       <polygon key="revealedBorder" points="0,0 16,0 16,16 0,16" style={{ fill: 'rgb(128, 128, 128)' }} />,
       <polygon key="revealedBackground"
         points="1,1 16,1 16,16 1,16"
-        style={(this.props.content === -2 && !this.props.isFlagged)
-          || (this.props.isPeeking && this.props.cspColor === -1) ? { fill: 'red' } : { fill: 'rgb(192, 192, 192)' }}
+        style={this.props.content === Mines.MINE_EXPLODED || (this.props.isPeeking && this.props.cspColor === -1)
+          ? { fill: 'red' } : { fill: 'rgb(192, 192, 192)' }}
       />,
     ];
     if (this.props.content !== 0) {

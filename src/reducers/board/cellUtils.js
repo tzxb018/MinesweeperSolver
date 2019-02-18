@@ -1,3 +1,5 @@
+import { Mines } from 'enums';
+
 // coordinate matrix of all adjacent cells
 const coords = [
   // [row, col]
@@ -41,14 +43,13 @@ export const placeNumbers = (cells, mines) => {
       coords.forEach(element => {
         const row = mine.row + element[0];
         const col = mine.col + element[1];
-        const numMines = c.getIn([row, col, 'content']);
         // if the coordinate exists on the board and doesn't have a mine, add to its number
         if (row >= 0
             && row < numRows
             && col >= 0
             && col < numCols
-            && numMines !== -1) {
-          c.setIn([row, col, 'content'], numMines + 1);
+            && c.getIn([row, col, 'content']) !== Mines.MINE) {
+          c.updateIn([row, col, 'content'], i => i + 1);
         }
       });
     });
@@ -64,17 +65,17 @@ export const revealMines = minefield => minefield.withMutations(m => {
   for (let row = 0; row < m.get('cells').size; row++) {
     for (let col = 0; col < m.getIn(['cells', 0]).size; col++) {
       // if the cell has a mine
-      if (m.getIn(['cells', row, col, 'content']) === -1) {
+      if (m.getIn(['cells', row, col, 'content']) === Mines.MINE) {
         // if the mine is already revealed, show it as an error
         if (!m.getIn(['cells', row, col, 'isHidden'])) {
-          m.setIn(['cells', row, col, 'content'], -2);
+          m.setIn(['cells', row, col, 'content'], Mines.MINE_EXPLODED);
         // else reveal the mine if it isn't flagged
         } else if (!m.getIn(['cells', row, col, 'isFlagged'])) {
           m.setIn(['cells', row, col, 'isHidden'], false);
         }
       // else if the cell is flagged, show it as an error
       } else if (m.getIn(['cells', row, col, 'isFlagged'])) {
-        m.setIn(['cells', row, col, 'content'], -2);
+        m.setIn(['cells', row, col, 'content'], Mines.MINE_FALSE);
         m.setIn(['cells', row, col, 'isHidden'], false);
         m.update('numFlagged', n => n - 1);
       }
@@ -176,7 +177,7 @@ export const placeMines = (cells, numMines, row, col) => {
       // if a random cell doesn't already have a mine and is not within range of the safe cell, then place a mine there
       if (c.getIn([y, x, 'content']) !== -1
         && !((y >= row - 1 && y <= row + 1) && (x >= col - 1 && x <= col + 1))) {
-        c.setIn([y, x, 'content'], -1);
+        c.setIn([y, x, 'content'], Mines.MINE);
         mines.push({
           col: x,
           row: y,
@@ -197,7 +198,7 @@ export const placeMines = (cells, numMines, row, col) => {
 export const flagMines = cells => cells.withMutations(c => {
   for (let row = 0; row < c.size; row++) {
     for (let col = 0; col < c.get(0).size; col++) {
-      if (c.getIn([row, col, 'content']) === -1 && !c.getIn([row, col, 'isFlagged'])) {
+      if (c.getIn([row, col, 'content']) === Mines.MINE && !c.getIn([row, col, 'isFlagged'])) {
         c.setIn([row, col, 'isFlagged'], true);
       }
     }

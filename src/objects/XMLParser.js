@@ -3,6 +3,9 @@ import {
   placeNumbers,
   revealNeighbors,
 } from 'reducers/board/cellUtils';
+import processCSP from 'reducers/board/csp';
+import { BoardSizes } from 'enums';
+import HistoryLogItem from './HistoryLogItem';
 
 /**
  * Translates the minefield into an XML Document.
@@ -48,9 +51,10 @@ export const createXMLDocument = minefield => {
  * Loads the minefield given in the xml DOM into the state.
  * @param state state of the board
  * @param {Document} xmlDoc xml DOM representing a minefield
+ * @param {string} filename name of the file that was fetched
  * @returns newState with the minefield loaded
  */
-export const loadXMLDocument = (state, xmlDoc) => {
+export const loadXMLDocument = (state, xmlDoc, filename) => {
   // parse the size of the board
   const newSize = {};
   const minSize = xmlDoc.getElementsByTagName('dimensions')[0];
@@ -59,17 +63,17 @@ export const loadXMLDocument = (state, xmlDoc) => {
   if (newSize.rows <= 9 && newSize.cols <= 9) {
     newSize.rows = 9;
     newSize.cols = 9;
-    newSize.size = 'BEGINNER';
+    newSize.size = BoardSizes.BEGINNER;
   } else if (newSize.rows <= 16 && newSize.cols <= 16) {
     newSize.rows = 16;
     newSize.cols = 16;
-    newSize.size = 'INTERMEDIATE';
+    newSize.size = BoardSizes.INTERMEDIATE;
   } else if (newSize.rows <= 16 && newSize.cols <= 30) {
     newSize.rows = 16;
     newSize.cols = 30;
-    newSize.size = 'EXPERT';
+    newSize.size = BoardSizes.EXPERT;
   } else {
-    newSize.size = 'CUSTOM';
+    newSize.size = BoardSizes.CUSTOM;
   }
   const bombs = xmlDoc.getElementsByTagName('bomb');
   newSize.numMines = bombs.length;
@@ -117,5 +121,10 @@ export const loadXMLDocument = (state, xmlDoc) => {
       m.set('numRevealed', knownSquares.length);
     }));
     neighborQueue.forEach(({ row, col }) => s.update('minefield', m => revealNeighbors(m, row, col)));
+    const message = `Successfully loaded ${filename}`;
+    const log = new HistoryLogItem(message, 'log', 'false');
+    s.update('historyLog', h => h.push(log));
+
+    return processCSP(s, true);
   });
 };

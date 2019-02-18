@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 import HistoryLogItem from 'objects/HistoryLogItem';
+import { Mines } from 'enums';
 
 import {
   getChangedCells,
@@ -128,7 +129,7 @@ export default (state, doLog = true) => state.withMutations(s => {
             col: cell.col,
             algorithm,
           });
-        } else if (s.getIn(['minefield', 'cells', cell.row, cell.col, 'content']) === -1) {
+        } else if (s.getIn(['minefield', 'cells', cell.row, cell.col, 'content']) === Mines.MINE) {
           lostGame = true;
         }
       }

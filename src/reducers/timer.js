@@ -1,4 +1,5 @@
 import Immutable from 'immutable';
+import { Actions } from 'enums';
 
 const initialState = Immutable.Map({
   counter: 0,
@@ -20,11 +21,11 @@ const resetTimer = state => state.set('counter', 0).update('timer', t => clearIn
  */
 export default (state = initialState, action) => {
   switch (action.type) {
-    case 'CHANGE_SIZE': return resetTimer(state);
-    case 'INCREMENT': return state.update('counter', c => c + 1);
-    case 'RESET': return resetTimer(state);
-    case 'START': return state.set('timer', action.newTimer);
-    case 'STOP': return state.update('timer', t => clearInterval(t));
+    case Actions.CHANGE_SIZE: return resetTimer(state);
+    case Actions.INCREMENT: return state.update('counter', c => c + 1);
+    case Actions.RESET: return resetTimer(state);
+    case Actions.START: return state.set('timer', action.newTimer);
+    case Actions.STOP: return state.update('timer', t => clearInterval(t));
     default: return state;
   }
 };

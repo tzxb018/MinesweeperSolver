@@ -1,4 +1,5 @@
 import { loadXMLDocument } from 'objects/XMLParser';
+import { Actions } from 'enums';
 import {
   changeSize,
   cheat,
@@ -23,17 +24,17 @@ const initialState = initialize();
  */
 export default (state = initialState, action) => {
   switch (action.type) {
-    case 'CHANGE_SIZE': return changeSize(state, action.newSize);
-    case 'CHEAT': return cheat(state, action.isRandom);
-    case 'LOOP': return loop(state);
-    case 'LOAD_END': return loadXMLDocument(state, action.xmlDoc);
-    case 'LOSE_GAME': return loseGame(state, action.row, action.col);
-    case 'RESET': return reset(state);
-    case 'REVEAL_CELL': return revealCell(state, action.row, action.col);
-    case 'STEP': return step(state);
-    case 'TEST': return test(state, action.numIterations, action.allowCheats, action.stopOnError);
-    case 'TOGGLE_ACTIVE': return toggleActive(state, action.algorithm, action.modifier);
-    case 'TOGGLE_FLAG': return toggleFlag(state, action.row, action.col);
+    case Actions.CHANGE_SIZE: return changeSize(state, action.newSize);
+    case Actions.CHEAT: return cheat(state, action.isRandom);
+    case Actions.LOOP: return loop(state);
+    case Actions.LOAD_END: return loadXMLDocument(state, action.xmlDoc, action.filename);
+    case Actions.LOSE_GAME: return loseGame(state, action.row, action.col);
+    case Actions.RESET: return reset(state);
+    case Actions.REVEAL_CELL: return revealCell(state, action.row, action.col);
+    case Actions.STEP: return step(state);
+    case Actions.TEST: return test(state, action.numIterations, action.allowCheats, action.stopOnError);
+    case Actions.TOGGLE_ACTIVE: return toggleActive(state, action.algorithm, action.modifier);
+    case Actions.TOGGLE_FLAG: return toggleFlag(state, action.row, action.col);
     default: return state;
   }
 };

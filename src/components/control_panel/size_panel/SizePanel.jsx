@@ -2,13 +2,14 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import NumericInput from 'react-numeric-input';
 import Load from 'components/control_panel/containers/LoadContainer';
+import { BoardSizes } from 'enums';
 
 import styles from './style';
 
 export default class SizePanel extends Component {
   static propTypes = {
     // state props
-    size: PropTypes.string.isRequired,
+    size: PropTypes.symbol.isRequired,
     // dispatch props
     changeSize: PropTypes.func.isRequired,
   }
@@ -16,9 +17,9 @@ export default class SizePanel extends Component {
   /* static display components */
 
   static sizes = {
-    BEGINNER: { size: 'BEGINNER', rows: 9, cols: 9, numMines: 10 },
-    INTERMEDIATE: { size: 'INTERMEDIATE', rows: 16, cols: 16, numMines: 40 },
-    EXPERT: { size: 'EXPERT', rows: 16, cols: 30, numMines: 99 },
+    BEGINNER: { size: BoardSizes.BEGINNER, rows: 9, cols: 9, numMines: 10 },
+    INTERMEDIATE: { size: BoardSizes.INTERMEDIATE, rows: 16, cols: 16, numMines: 40 },
+    EXPERT: { size: BoardSizes.EXPERT, rows: 16, cols: 30, numMines: 99 },
   }
 
 
@@ -37,7 +38,7 @@ export default class SizePanel extends Component {
 
   customSizeHandler(newState) {
     const state = {
-      size: 'CUSTOM',
+      size: BoardSizes.CUSTOM,
       rows: newState.rows || this.state.rows,
       cols: newState.cols || this.state.cols,
       numMines: newState.numMines || this.state.numMines,
@@ -52,7 +53,7 @@ export default class SizePanel extends Component {
       maxNumMines,
       numMines: (this.state.numMines > maxNumMines) ? maxNumMines : this.state.numMines,
     };
-    if (this.props.size === 'CUSTOM') {
+    if (this.props.size === BoardSizes.CUSTOM) {
       this.customSizeHandler(newState);
     }
     this.setState(newState);
@@ -60,7 +61,7 @@ export default class SizePanel extends Component {
 
   mineChangeHandler(newValue) {
     const newState = { numMines: newValue };
-    if (this.props.size === 'CUSTOM') {
+    if (this.props.size === BoardSizes.CUSTOM) {
       this.customSizeHandler(newState);
     }
     this.setState(newState);
@@ -73,7 +74,7 @@ export default class SizePanel extends Component {
       maxNumMines,
       numMines: (this.state.numMines > maxNumMines) ? maxNumMines : this.state.numMines,
     };
-    if (this.props.size === 'CUSTOM') {
+    if (this.props.size === BoardSizes.CUSTOM) {
       this.customSizeHandler(newState);
     }
     this.setState(newState);
@@ -88,21 +89,21 @@ export default class SizePanel extends Component {
           <Load />
           <div className="radio">
             <input type="radio"
-              checked={this.props.size === 'BEGINNER'}
+              checked={this.props.size === BoardSizes.BEGINNER}
               onChange={() => this.props.changeSize(SizePanel.sizes.BEGINNER)}
             />
             beginner
           </div>
           <div className="radio">
             <input type="radio"
-              checked={this.props.size === 'INTERMEDIATE'}
+              checked={this.props.size === BoardSizes.INTERMEDIATE}
               onChange={() => this.props.changeSize(SizePanel.sizes.INTERMEDIATE)}
             />
             intermediate
           </div>
           <div className="radio">
             <input type="radio"
-              checked={this.props.size === 'EXPERT'}
+              checked={this.props.size === BoardSizes.EXPERT}
               onChange={() => this.props.changeSize(SizePanel.sizes.EXPERT)}
             />
             expert
@@ -110,7 +111,7 @@ export default class SizePanel extends Component {
           <div className={styles['gap']} />
           <div className="radio">
             <input type="radio"
-              checked={this.props.size === 'CUSTOM'}
+              checked={this.props.size === BoardSizes.CUSTOM}
               onChange={() => this.customSizeHandler({})}
             />
             custom

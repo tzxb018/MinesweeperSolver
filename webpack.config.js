@@ -104,21 +104,16 @@ const backConfig = {
   entry: {
     app: ['./src/back.js'],
   },
-
   externals: [NodeExternals()],
-
   output: {
     path: `${__dirname}/dist`,
     filename: 'bundle-back.node.js',
   },
-
   resolve: {
     modules: ['src/', 'node_modules/'],
     extensions: ['.js', '.jsx', '/index.js', '/index.jsx', '.json', '.scss', '/index.scss', '.css'],
   },
-
   target: 'node',
-
   module: {
     rules: [
       {

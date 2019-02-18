@@ -1,12 +1,14 @@
+import { Actions } from 'enums';
+
 export const increment = () => ({
-  type: 'INCREMENT',
+  type: Actions.INCREMENT,
 });
 
 export const start = newTimer => ({
-  type: 'START',
+  type: Actions.START,
   newTimer,
 });
 
 export const stop = () => ({
-  type: 'STOP',
+  type: Actions.STOP,
 });

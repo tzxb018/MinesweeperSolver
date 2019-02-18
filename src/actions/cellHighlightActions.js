@@ -1,8 +1,10 @@
+import { Actions } from 'enums';
+
 export const clear = () => ({
-  type: 'CLEAR',
+  type: Actions.CLEAR,
 });
 
 export const highlight = cells => ({
-  type: 'HIGHLIGHT',
+  type: Actions.HIGHLIGHT,
   cells,
 });

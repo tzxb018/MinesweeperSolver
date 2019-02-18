@@ -1,4 +1,6 @@
+import { Actions } from 'enums';
+
 export const changeSmile = newSmile => ({
-  type: 'CHANGE_SMILE',
+  type: Actions.CHANGE_SMILE,
   newSmile,
 });

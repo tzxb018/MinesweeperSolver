@@ -1,13 +1,16 @@
+import { Actions } from 'enums';
+
 export const loadStart = () => ({
-  type: 'LOAD_START',
+  type: Actions.LOAD_START,
 });
 
-export const loadEnd = xmlDoc => ({
-  type: 'LOAD_END',
+export const loadEnd = (xmlDoc, filename) => ({
+  type: Actions.LOAD_END,
+  filename,
   xmlDoc,
 });
 
 export const loadFail = error => ({
-  type: 'LOAD_FAIL',
+  type: Actions.LOAD_FAIL,
   error,
 });

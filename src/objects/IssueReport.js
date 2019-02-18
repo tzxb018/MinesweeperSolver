@@ -2,8 +2,8 @@ import NodeMailer from 'nodemailer';
 
 export default class IssueReport {
   /* destination credentials */
-  static user = 'taylor.demint@gmail.com';
-  static pass = 'password';               // password removed for obvious reasons
+  static user = 'minesweeper.solver.unl@gmail.com';
+  static pass = '?dW5s$C+WGW5^?$9';
   static transporter = NodeMailer.createTransport({
     service: 'gmail',
     auth: {

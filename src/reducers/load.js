@@ -1,4 +1,5 @@
 import 'babel-polyfill';
+import { Actions } from 'enums';
 
 const initialState = false;
 
@@ -10,9 +11,9 @@ const initialState = false;
  */
 export default (state = initialState, action) => {
   switch (action.type) {
-    case 'LOAD_END': return false;
-    case 'LOAD_FAIL': console.log(action.error); return false;
-    case 'LOAD_START': return true;
+    case Actions.LOAD_END: return false;
+    case Actions.LOAD_FAIL: console.log(action.error); return false;
+    case Actions.LOAD_START: return true;
     default: return state;
   }
 };

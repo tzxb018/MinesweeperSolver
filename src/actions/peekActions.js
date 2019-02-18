@@ -1,3 +1,5 @@
+import { Actions } from 'enums';
+
 export const togglePeek = () => ({
-  type: 'TOGGLE_PEEK',
+  type: Actions.TOGGLE_PEEK,
 });

@@ -4,6 +4,10 @@ import { createXMLDocument } from 'objects/XMLParser';
 import { logDiagnostics as logBT } from 'algorithms/BT';
 import { logDiagnostics as logSTR2 } from 'algorithms/STR2';
 import { logDiagnostics as logmWC } from 'algorithms/mWC';
+import {
+  BoardSizes,
+  Mines,
+} from 'enums';
 
 import processCSP from './csp/index';
 import solveCSP from './csp/solve';
@@ -49,9 +53,9 @@ export const reset = state => state.withMutations(s => {
 
   // reset the number of mines if necessary
   switch (s.get('size')) {
-    case 'BEGINNER': s.setIn(['minefield', 'numMines'], 10); break;
-    case 'INTERMEDIATE': s.setIn(['minefield', 'numMines'], 40); break;
-    case 'EXPERT': s.setIn(['minefield', 'numMines'], 99); break;
+    case BoardSizes.BEGINNER: s.setIn(['minefield', 'numMines'], 10); break;
+    case BoardSizes.INTERMEDIATE: s.setIn(['minefield', 'numMines'], 40); break;
+    case BoardSizes.EXPERT: s.setIn(['minefield', 'numMines'], 99); break;
     default:
   }
 });
@@ -181,7 +185,7 @@ export const step = (state, isLogged = true) => {
  * @param {number} newSize.rows number of rows
  * @param {number} newSize.cols number of cols
  * @param {number} newSize.numMines number of mines
- * @param {string} newSize.size string description of the new size
+ * @param {symbol} newSize.size string description of the new size
  * @return newState
  */
 export const changeSize = (state, newSize) => state.withMutations(s => {
@@ -214,7 +218,8 @@ export const cheat = (state, isRandom = true) => {
     let variables = [];
     state.getIn(['csp', 'components']).forEach(component => variables.push(...component.variables));
     variables = variables.filter(variable =>
-      state.getIn(['minefield', 'cells', variable.row, variable.col, 'content']) !== -1 && !solvable.has(variable.key));
+      state.getIn(['minefield', 'cells', variable.row, variable.col, 'content']) !== Mines.MINE
+      && !solvable.has(variable.key));
     cellFound = variables[Math.floor(Math.random() * variables.length)];
     if (cellFound) {
       row = cellFound.row;
@@ -224,7 +229,7 @@ export const cheat = (state, isRandom = true) => {
   // else find a random safe cell
   if (!cellFound) {
     while (!state.getIn(['minefield', 'cells', row, col, 'isHidden'])
-    || state.getIn(['minefield', 'cells', row, col, 'content']) === -1) {
+    || state.getIn(['minefield', 'cells', row, col, 'content']) === Mines.MINE) {
       row = Math.floor(Math.random() * state.getIn(['minefield', 'cells']).size);
       col = Math.floor(Math.random() * state.getIn(['minefield', 'cells', 0]).size);
     }
@@ -295,7 +300,7 @@ export const initialize = () => {
     historyLog: Immutable.List(),
     isGameRunning: false,
     minefield,
-    size: 'INTERMEDIATE',
+    size: BoardSizes.INTERMEDIATE,
   });
 };
 

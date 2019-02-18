@@ -1,4 +1,5 @@
 import Immutable from 'immutable';
+import { Actions } from 'enums';
 
 /**
  * Handles the initialize board action.
@@ -75,10 +76,10 @@ const loadXMLDocument = xmlDoc => {
  */
 export default (state = initialState(16, 16), action) => {
   switch (action.type) {
-    case 'CHANGE_SIZE': return changeSize(action.newSize);
-    case 'CLEAR': return clear(state);
-    case 'HIGHLIGHT': return highlight(state, action.cells);
-    case 'LOAD_END': return loadXMLDocument(action.xmlDoc);
+    case Actions.CHANGE_SIZE: return changeSize(action.newSize);
+    case Actions.CLEAR: return clear(state);
+    case Actions.HIGHLIGHT: return highlight(state, action.cells);
+    case Actions.LOAD_END: return loadXMLDocument(action.xmlDoc);
     default: return state;
   }
 };
