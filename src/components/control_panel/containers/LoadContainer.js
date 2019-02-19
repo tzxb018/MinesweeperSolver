@@ -5,7 +5,7 @@ import {
   loadEnd,
   loadFail,
   loadStart,
-} from 'actions/loadActions';
+} from 'actions/asyncActions';
 
 const mapStateToProps = state => ({
   isLoading: state.load,

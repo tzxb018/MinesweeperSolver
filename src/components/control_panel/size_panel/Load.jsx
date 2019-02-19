@@ -22,7 +22,7 @@ export default class Load extends Component {
     filename: '',
   };
 
-  changeHandler(event) {
+  changeHandler = event => {
     if (event.target.value !== '') {
       event.persist();
       document.getElementById('loadMenu').style.display = 'none';
@@ -44,7 +44,7 @@ export default class Load extends Component {
     }
   }
 
-  loadClickHandler() {
+  loadClickHandler = () => {
     if (document.getElementById('loadMenu').style.display === 'none'
     || document.getElementById('loadMenu').style.display === '') {
       document.getElementById('loadMenu').style.display = 'block';
@@ -53,7 +53,7 @@ export default class Load extends Component {
     }
   }
 
-  mouseDownHandler(filename) {
+  mouseDownHandler = filename => {
     document.getElementById('loadMenu').style.display = 'none';
     this.props.loadStart();
     loadProblem(filename).then(response => {
@@ -70,7 +70,7 @@ export default class Load extends Component {
     });
   }
 
-  reloadClickHandler() {
+  reloadClickHandler = () => {
     document.getElementById('loadMenu').style.display = 'none';
     this.props.loadStart();
     this.props.loadEnd(this.state.file, this.state.filename);
@@ -83,7 +83,7 @@ export default class Load extends Component {
           <button onClick={this.loadClickHandler} disabled={this.props.isLoading}>
             Load
           </button>
-          <button id="reload" className={styles['reload']} onClick={() => this.reloadClickHandler()}>
+          <button id="reload" className={styles['reload']} onClick={this.reloadClickHandler}>
             <span>{this.state.filename}</span>
             <div className={styles['tooltip']}>{this.state.filename}</div>
           </button>

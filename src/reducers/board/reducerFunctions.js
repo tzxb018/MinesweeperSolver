@@ -1,6 +1,5 @@
 import Immutable from 'immutable';
 import HistoryLogItem from 'objects/HistoryLogItem';
-import { createXMLDocument } from 'objects/XMLParser';
 import { logDiagnostics as logBT } from 'algorithms/BT';
 import { logDiagnostics as logSTR2 } from 'algorithms/STR2';
 import { logDiagnostics as logmWC } from 'algorithms/mWC';
@@ -59,29 +58,6 @@ export const reset = state => state.withMutations(s => {
     default:
   }
 });
-
-/**
- * Handles the sendReport action by posting the current state to the server for emailing to the administrator.
- * @param state
- * @returns state with no changes
- */
-export const sendReport = state => {
-  const url = 'http://localhost:8000/report';
-  const xmlDoc = createXMLDocument(state.get('minefield'));
-
-  fetch(url, {
-    method: 'POST',
-    body: new XMLSerializer().serializeToString(xmlDoc),
-    headers: {
-      'Content-Type': 'text/xml',
-    },
-  })
-  .then(res => {
-    console.log(`Email Sent! ${res.statusText}`);
-  });
-
-  return state;
-};
 
 /**
  * Wins the game.
@@ -236,7 +212,6 @@ export const cheat = (state, isRandom = true) => {
   }
 
   // reveal the cell
-  sendReport(state);
   return revealCell(state, row, col);
 };
 
@@ -302,6 +277,31 @@ export const initialize = () => {
     minefield,
     size: BoardSizes.INTERMEDIATE,
   });
+};
+
+/**
+ * Logs the reason that the load attempt failed.
+ * @param state state of the board
+ * @param {string} error reason for the failure
+ */
+export const loadFail = (state, error) => {
+  const message = `Failed to load minefield: ${error}`;
+  const log = new HistoryLogItem(message, 'red', false);
+  return state.update('historyLog', h => h.push(log));
+};
+
+export const logErrorReport = (state, response) => {
+  let message;
+  let style;
+  if (response.ok) {
+    message = 'Successfully sent error report';
+    style = 'green';
+  } else {
+    message = `Failed to send error report: ${response}`;
+    style = 'red';
+  }
+  const log = new HistoryLogItem(message, style, false);
+  return state.update('historyLog', h => h.push(log));
 };
 
 /**

@@ -1,5 +1,18 @@
 import { Actions } from 'enums';
 
+export const reportErrorEnd = response => ({
+  type: Actions.REPORT_ERROR_END,
+  response,
+});
+
+export const reportErrorStart = () => ({
+  type: Actions.REPORT_ERROR_START,
+});
+
+export const reportErrorTimeout = () => ({
+  type: Actions.REPORT_ERROR_TIMEOUT,
+});
+
 export const loadStart = () => ({
   type: Actions.LOAD_START,
 });

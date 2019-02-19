@@ -12,7 +12,7 @@ const initialState = false;
 export default (state = initialState, action) => {
   switch (action.type) {
     case Actions.LOAD_END: return false;
-    case Actions.LOAD_FAIL: console.log(action.error); return false;
+    case Actions.LOAD_FAIL: return false;
     case Actions.LOAD_START: return true;
     default: return state;
   }
@@ -49,9 +49,8 @@ export const loadProblem = async filename => {
     method: 'GET',
   })
   .then(res => {
-    console.log(`Request returned status ${res.statusText}`);
-    if (res.statusText === 'Not Found') {
-      throw 'file not found';
+    if (!res.ok) {
+      throw Error(res.statusText);
     }
     return res.text();
   }).then(response => new DOMParser().parseFromString(response, 'text/xml'));

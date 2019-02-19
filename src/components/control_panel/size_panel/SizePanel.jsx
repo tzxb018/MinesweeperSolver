@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import NumericInput from 'react-numeric-input';
 import Load from 'components/control_panel/containers/LoadContainer';
+import ReportError from 'components/control_panel/containers/ReportErrorContainer';
 import { BoardSizes } from 'enums';
 
 import styles from './style';
@@ -86,6 +87,7 @@ export default class SizePanel extends Component {
       <div>
         <h1>Board Size</h1>
         <div className={styles['container']}>
+          <ReportError />
           <Load />
           <div className="radio">
             <input type="radio"

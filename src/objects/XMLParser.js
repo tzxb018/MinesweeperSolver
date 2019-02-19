@@ -122,7 +122,7 @@ export const loadXMLDocument = (state, xmlDoc, filename) => {
     }));
     neighborQueue.forEach(({ row, col }) => s.update('minefield', m => revealNeighbors(m, row, col)));
     const message = `Successfully loaded ${filename}`;
-    const log = new HistoryLogItem(message, 'log', 'false');
+    const log = new HistoryLogItem(message, 'green', 'false');
     s.update('historyLog', h => h.push(log));
 
     return processCSP(s, true);

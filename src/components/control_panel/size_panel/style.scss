@@ -32,6 +32,11 @@
     max-width: 175px;
   }
 
+  .load-buttons {
+    display: flex;
+    margin-bottom: 10px;
+  }
+
   .menu {
     background-color: white;
     border-color: gray;
@@ -58,9 +63,6 @@
       background-color: lightgray;
       cursor: pointer;
     }
-  }
-  .load-buttons {
-    display: flex;
   }
 
   .reload {
@@ -100,5 +102,9 @@
       opacity: 1;
       visibility: visible;
     }
+  }
+
+  .report-error {
+    margin-bottom: 10px;
   }
 }

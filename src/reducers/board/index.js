@@ -5,6 +5,8 @@ import {
   cheat,
   initialize,
   loop,
+  loadFail,
+  logErrorReport,
   loseGame,
   reset,
   revealCell,
@@ -28,9 +30,11 @@ export default (state = initialState, action) => {
     case Actions.CHEAT: return cheat(state, action.isRandom);
     case Actions.LOOP: return loop(state);
     case Actions.LOAD_END: return loadXMLDocument(state, action.xmlDoc, action.filename);
+    case Actions.LOAD_FAIL: return loadFail(state, action.error);
     case Actions.LOSE_GAME: return loseGame(state, action.row, action.col);
     case Actions.RESET: return reset(state);
     case Actions.REVEAL_CELL: return revealCell(state, action.row, action.col);
+    case Actions.REPORT_ERROR_END: return logErrorReport(state, action.response);
     case Actions.STEP: return step(state);
     case Actions.TEST: return test(state, action.numIterations, action.allowCheats, action.stopOnError);
     case Actions.TOGGLE_ACTIVE: return toggleActive(state, action.algorithm, action.modifier);
