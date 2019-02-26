@@ -1,15 +1,28 @@
+import Immutable from 'immutable';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import NumericInput from 'react-numeric-input';
+import { initTestState } from 'reducers/board/testFunctions';
+import TestWorker from 'web_workers/test.worker.js';
 
 import styles from './style';
+
+const worker = new TestWorker();
 
 export default class TestPanel extends Component {
   static propTypes = {
     // state props
-    canTest: PropTypes.bool.isRequired,
+    algorithms: PropTypes.oneOfType([
+      PropTypes.instanceOf(Immutable.Map),
+      PropTypes.instanceOf(Map),
+    ]).isRequired,
+    isTesting: PropTypes.bool.isRequired,
+    numCols: PropTypes.number.isRequired,
+    numMines: PropTypes.number.isRequired,
+    numRows: PropTypes.number.isRequired,
     // dispatch props
-    test: PropTypes.func.isRequired,
+    testEnd: PropTypes.func.isRequired,
+    testStart: PropTypes.func.isRequired,
   }
 
 
@@ -17,15 +30,32 @@ export default class TestPanel extends Component {
 
   state = {
     allowCheats: true,
-    stopOnError: true,
+    numIterations: 50,
   }
 
 
   /* event handlers */
 
   clickHandler = () => {
-    this.props.test(document.getElementById('numIterations').getValueAsNumber(), this.state.allowCheats,
-      this.state.stopOnError);
+    this.props.testStart();
+    const boardSettings = {
+      numRows: this.props.numRows,
+      numCols: this.props.numCols,
+      numMines: this.props.numMines,
+      algorithms: this.props.algorithms,
+    };
+
+    // set up and serialize the test environment
+    const state = initTestState(boardSettings).toJS();
+
+    worker.postMessage(
+      [state, this.state.numIterations, this.state.allowCheats]);
+
+    worker.onmessage = event => {
+      // deserialize the results
+      const results = Immutable.fromJS(event.data);
+      this.props.testEnd(results);
+    };
   }
 
 
@@ -34,16 +64,17 @@ export default class TestPanel extends Component {
       <div>
         <h1>Tests</h1>
         <div className={styles['container']}>
-          <button className={styles['button']} onClick={() => this.clickHandler()} disabled={!this.props.canTest}>
+          <button className={styles['button']} onClick={this.clickHandler} disabled={this.props.isTesting}>
             Run
           </button>
           <NumericInput id="numIterations"
             className={styles['selector']}
+            onChange={valueAsNumber => this.setState({ numIterations: valueAsNumber })}
             min={10}
             max={1000}
-            value={50}
+            value={this.state.numIterations}
             step={10}
-            strict
+            snap
           />
           <div>
             <input type="checkbox"
@@ -52,14 +83,6 @@ export default class TestPanel extends Component {
               onChange={() => this.setState({ allowCheats: !this.state.allowCheats })}
             />
             <label htmlFor="allowCheats">allow cheats</label>
-          </div>
-          <div>
-            <input type="checkbox"
-              id="stopOnError"
-              checked={this.state.stopOnError}
-              onChange={() => this.setState({ stopOnError: !this.state.stopOnError })}
-            />
-            <label htmlFor="stopOnError">stop on error</label>
           </div>
         </div>
       </div>

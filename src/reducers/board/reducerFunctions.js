@@ -1,10 +1,9 @@
 import Immutable from 'immutable';
 import HistoryLogItem from 'objects/HistoryLogItem';
-import { logDiagnostics as logBT } from 'algorithms/BT';
-import { logDiagnostics as logSTR2 } from 'algorithms/STR2';
-import { logDiagnostics as logmWC } from 'algorithms/mWC';
 import {
   BoardSizes,
+  HistoryLogStyles,
+  HistoryLogSymbols,
   Mines,
 } from 'enums';
 
@@ -286,7 +285,7 @@ export const initialize = () => {
  */
 export const loadFail = (state, error) => {
   const message = `Failed to load minefield: ${error}`;
-  const log = new HistoryLogItem(message, 'red', false);
+  const log = new HistoryLogItem(message, HistoryLogStyles.RED, false);
   return state.update('historyLog', h => h.push(log));
 };
 
@@ -295,10 +294,10 @@ export const logErrorReport = (state, response) => {
   let style;
   if (response.ok) {
     message = 'Successfully sent error report';
-    style = 'green';
+    style = HistoryLogStyles.GREEN;
   } else {
     message = `Failed to send error report: ${response}`;
-    style = 'red';
+    style = HistoryLogStyles.RED;
   }
   const log = new HistoryLogItem(message, style, false);
   return state.update('historyLog', h => h.push(log));
@@ -322,7 +321,7 @@ export const loop = (state, isLogged = true) => {
       oldState = undefined;
     }
   } else {
-    if (!isLogged) {
+    if (!isLogged && !oldState.getIn(['csp', 'count'])) {
       return oldState.setIn(['csp', 'count'], new Map());
     }
     return oldState;
@@ -340,10 +339,10 @@ export const loop = (state, isLogged = true) => {
     if (numFlagged + numRevealed === 1) {
       cellOrCells = 'cell';
     }
-    let message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[flag]`;
+    let message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[${HistoryLogSymbols.FLAG}]`;
     const log = new HistoryLogItem(
       message,
-      'log',
+      HistoryLogStyles.DEFAULT,
       true,
       getChangedCells(state.getIn(['minefield', 'cells']), newState.getIn(['minefield', 'cells']))
     );
@@ -355,14 +354,16 @@ export const loop = (state, isLogged = true) => {
           cellOrCells = 'cell';
         }
         const detail =
-          `${algorithm} solved ${count.numFlagged + count.numRevealed} ${cellOrCells}, ${count.numFlagged}[flag]`;
+          `${algorithm} solved ${count.numFlagged + count.numRevealed} ${cellOrCells}, ${count.numFlagged}`
+          + `[${HistoryLogSymbols.FLAG}]`;
         log.addDetail(detail);
       }
     });
     if (newState.get('isGameRunning')) {
       newState = newState.update('historyLog', h => h.pop().push(log));
       message = 'Finds 0 solvable cells';
-      newState = newState.update('historyLog', h => h.push(new HistoryLogItem(message, 'log', false)));
+      newState = newState.update('historyLog', h =>
+        h.push(new HistoryLogItem(message, HistoryLogStyles.DEFAULT, false)));
     } else {
       newState = newState.update('historyLog', h => h.push(log));
     }
@@ -386,151 +387,6 @@ export const loseGame = (state, row, col) => state.withMutations(s => {
   s.update('minefield', m => revealMines(m));
   s.set('isGameRunning', false);
 });
-
-/**
- * Handles the test action by running the game multiple times and recording how efficiently the active algorithms solved
- * each problem.
- * @param state state of the board
- * @param {number} numIterations number of times to run the game
- * @param {boolean} allowCheats true (default) if cheats are allowed, false if processing should be stopped when cheats
- * are needed to continue
- * @param {boolean} stopOnError true if processing should be stopped on error, false (default) if failure should be
- * recorded but skipped
- * @returns newState
- */
-export const test = (state, numIterations, allowCheats = true, stopOnError = false) => {
-  let newState = state;
-  const logs = [];
-  const startTime = performance.now();
-  let numRuns = 0;
-  let numFails = 0;
-  let totalCheats = 0;
-  for (let i = 0; i < numIterations; i++) {
-    numRuns++;
-    try {
-      // attempt to solve the puzzle
-      newState = cheat(newState);
-      newState = loop(newState, false);
-      let numCheats = 0;
-      if (allowCheats) {
-        while (newState.get('isGameRunning') && newState.getIn(['csp', 'isConsistent'])) {
-          newState = cheat(newState, false);
-          numCheats++;
-          newState = loop(newState, false);
-        }
-        totalCheats += numCheats;
-      }
-
-      // determine the results
-      let log;
-      let error = false;
-      let isRed = false;
-
-      if (newState.get('isGameRunning')) {
-        isRed = true;
-        numFails++;
-        // stopped due to inconsistencies
-        if (!newState.getIn(['csp', 'isConsistent'])) {
-          const message = newState.get('historyLog').last().message;
-          log = new HistoryLogItem(message, 'red', false);
-          error = true;
-        // could not solve without cheats
-        } else {
-          const numFlagged = newState.getIn(['minefield', 'numFlagged']);
-          const numRevealed = newState.getIn(['minefield', 'numRevealed']);
-          let cellOrCells = 'cells';
-          if (numFlagged + numRevealed === 1) {
-            cellOrCells = 'cell';
-          }
-          const message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[flag]`;
-          log = new HistoryLogItem(message, 'red', false);
-          log.addDetail('Cheats needed to advance further');
-        }
-      } else {
-        // solved the puzzle
-        if (checkWinCondition(newState.get('minefield'))) {
-          const message = 'Successfully solved the puzzle';
-          log = new HistoryLogItem(message, 'green', false);
-        // made an error while solving
-        } else {
-          const message = 'Error made during solving';
-          log = new HistoryLogItem(message, 'red', false);
-          numFails++;
-          error = true;
-          isRed = true;
-        }
-      }
-
-      newState = newState.update('historyLog', h => h.pop());
-      if (isRed || numIterations <= 100) {
-        newState.getIn(['csp', 'count']).forEach((counter, setKey) => {
-          let cellOrCells = 'cells';
-          if (counter.numFlagged + counter.numRevealed === 1) {
-            cellOrCells = 'cell';
-          }
-          log.addDetail(
-            `${setKey} solved ${counter.numFlagged + counter.numRevealed} ${cellOrCells}, ${counter.numFlagged}[flag]`
-          );
-        });
-        if (numCheats > 0) {
-          let cellOrCells = 'times';
-          if (numCheats === 1) {
-            cellOrCells = 'time';
-          }
-          log.addDetail(`Cheat used ${numCheats} ${cellOrCells}`);
-        }
-        logs.push(log);
-        if (error && stopOnError) {
-          break;
-        }
-      }
-    } catch (e) {
-      const message = 'Error thrown during solving';
-      const log = new HistoryLogItem(message, 'red', false);
-      log.addDetail(`${e.toString()}`);
-      numFails++;
-      logs.push(log);
-      if (stopOnError) {
-        throw e;
-      }
-    }
-    newState = newState.deleteIn(['csp', 'count']);
-    newState = reset(newState);
-  }
-
-  // log the results
-  const accuracy = (numRuns - numFails) / numRuns * 100;
-  const message = `Testing was ${Math.round(accuracy)}% successful`;
-  const log = new HistoryLogItem(message, 'log', false);
-  const executionTime = Math.round((performance.now() - startTime) / 10) / 100;
-  log.addDetail(`\nExecution Time: ${executionTime} seconds`, true);
-  if (allowCheats) {
-    const averageCheats = Math.round(totalCheats / numRuns * 100) / 100;
-    log.addDetail(`\nAverage cheats used: ${averageCheats}`, true);
-  }
-  logs.push(log);
-
-  // search logging
-  if (newState.getIn(['csp', 'algorithms', 'BT', 'isActive'])) {
-    const search = logBT(newState.get('csp'), numRuns);
-    logs.push(search);
-  }
-
-  // STR2 logging
-  if (newState.getIn(['csp', 'algorithms', 'STR2', 'isActive'])) {
-    const str2 = logSTR2(newState.get('csp'), numRuns);
-    logs.push(str2);
-  }
-
-  // mWC logging
-  if (newState.getIn(['csp', 'algorithms', 'mWC', 'isActive'])) {
-    const mWC = logmWC(newState.get('csp'), numRuns);
-    logs.push(mWC);
-  }
-
-  newState = newState.updateIn(['csp', 'diagnostics'], d => d.clear());
-  return newState.update('historyLog', h => h.push(...logs));
-};
 
 /**
  * Handles the toggle active action by changed the active status of the specified algorithm.
@@ -583,7 +439,7 @@ export const toggleFlag = (state, row, col) => {
       }
 
       // record the event in the history log and reprocess the csp
-      s.update('historyLog', h => h.pop().push(new HistoryLogItem(message, 'log', true)));
+      s.update('historyLog', h => h.pop().push(new HistoryLogItem(message, HistoryLogStyles.DEFAULT, true)));
       return processCSP(s);
     });
   }

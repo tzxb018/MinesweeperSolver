@@ -34,13 +34,6 @@ export const step = () => ({
   type: Actions.STEP,
 });
 
-export const test = (numIterations, allowCheats, stopOnError) => ({
-  type: Actions.TEST,
-  allowCheats,
-  numIterations,
-  stopOnError,
-});
-
 export const toggleActive = (algorithm, modifier) => ({
   type: Actions.TOGGLE_ACTIVE,
   algorithm,

@@ -1,15 +1,26 @@
 import { connect } from 'react-redux';
 
 import TestPanel from 'components/control_panel/test_panel/TestPanel';
-import { test } from 'actions/boardActions';
+import {
+  testEnd,
+  testStart,
+} from 'actions/asyncActions';
 
 const mapStateToProps = state => ({
-  canTest: !state.board.present.get('isGameRunning') && state.board.present.getIn(['minefield', 'numRevealed']) === 0,
+  algorithms: state.board.present.getIn(['csp', 'algorithms']),
+  isTesting: state.test,
+  numCols: state.board.present.getIn(['minefield', 'cells', 0]).size,
+  numMines: state.board.present.getIn(['minefield', 'numMines']),
+  numRows: state.board.present.getIn(['minefield', 'cells']).size,
 });
 
 const mapDispatchToProps = dispatch => ({
-  test: (numIterations, allowCheats, stopOnError) => {
-    dispatch(test(numIterations, allowCheats, stopOnError));
+  testEnd: newState => {
+    dispatch(testEnd(newState));
+  },
+
+  testStart: () => {
+    dispatch(testStart());
   },
 });
 

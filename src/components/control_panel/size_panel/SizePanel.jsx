@@ -48,9 +48,9 @@ export default class SizePanel extends Component {
   }
 
   colChangeHandler(newValue) {
-    const maxNumMines = Math.floor(this.state.rows * newValue * this.state.maxDensity);
+    const maxNumMines = Math.floor(this.state.rows * Math.round(newValue) * this.state.maxDensity);
     const newState = {
-      cols: newValue,
+      cols: Math.round(newValue),
       maxNumMines,
       numMines: (this.state.numMines > maxNumMines) ? maxNumMines : this.state.numMines,
     };
@@ -61,7 +61,7 @@ export default class SizePanel extends Component {
   }
 
   mineChangeHandler(newValue) {
-    const newState = { numMines: newValue };
+    const newState = { numMines: Math.round(newValue) };
     if (this.props.size === BoardSizes.CUSTOM) {
       this.customSizeHandler(newState);
     }
@@ -69,9 +69,9 @@ export default class SizePanel extends Component {
   }
 
   rowChangeHandler(newValue) {
-    const maxNumMines = Math.floor(newValue * this.state.cols * this.state.maxDensity);
+    const maxNumMines = Math.floor(Math.round(newValue) * this.state.cols * this.state.maxDensity);
     const newState = {
-      rows: newValue,
+      rows: Math.round(newValue),
       maxNumMines,
       numMines: (this.state.numMines > maxNumMines) ? maxNumMines : this.state.numMines,
     };
@@ -125,7 +125,7 @@ export default class SizePanel extends Component {
               max={40}
               value={this.state.rows}
               onChange={newValue => this.rowChangeHandler(newValue)}
-              strict
+              snap
             />
             rows
             <NumericInput id="cols"
@@ -134,7 +134,7 @@ export default class SizePanel extends Component {
               max={42}
               value={this.state.cols}
               onChange={newValue => this.colChangeHandler(newValue)}
-              strict
+              snap
             />
             cols
             <NumericInput id="numMines"
@@ -143,7 +143,7 @@ export default class SizePanel extends Component {
               max={(this.state.maxNumMines < 999) ? this.state.maxNumMines : 999}
               value={this.state.numMines}
               onChange={newValue => this.mineChangeHandler(newValue)}
-              strict
+              snap
             />
             # of mines
           </div>

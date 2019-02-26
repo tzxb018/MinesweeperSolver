@@ -1,4 +1,5 @@
 import React from 'react';
+import { HistoryLogSymbols } from 'enums';
 
 const flag = key => (
   <svg height="10" width="8" key={key}>
@@ -87,8 +88,8 @@ export default class HistoryLogItem {
   display(key) {
     let message = this._message;
     let i = 0;
-    if (message.includes('[flag]')) {
-      const newMessage = message.replace('flag]', '');
+    if (message.includes(HistoryLogSymbols.FLAG)) {
+      const newMessage = message.replace(`${HistoryLogSymbols.FLAG}]`, '');
       message = [newMessage, flag(i), ']'];
       i++;
     }
@@ -96,8 +97,8 @@ export default class HistoryLogItem {
     const details = this._details.slice();
     let offset = 0;
     details.slice().forEach((detail, index) => {
-      if (detail.includes('[flag]')) {
-        const newDetail = detail.replace('flag]', '');
+      if (detail.includes(HistoryLogSymbols.FLAG)) {
+        const newDetail = detail.replace(`${HistoryLogSymbols.FLAG}]`, '');
         details.splice(index + offset, 1, newDetail, flag(i), ']');
         offset += 2;
         i++;

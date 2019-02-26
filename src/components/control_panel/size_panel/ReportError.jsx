@@ -19,6 +19,9 @@ export default class ReportError extends Component {
     reportErrorTimeout: PropTypes.func.isRequired,
   }
 
+
+  /* event handlers */
+
   clickHandler = () => {
     this.props.reportErrorStart();
     sendReport(this.props.minefield)
@@ -26,6 +29,7 @@ export default class ReportError extends Component {
     .catch(error => this.props.reportErrorEnd(error));
     setTimeout(this.props.reportErrorTimeout, 15000);
   }
+
 
   render() {
     return (

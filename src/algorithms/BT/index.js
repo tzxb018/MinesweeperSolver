@@ -1,5 +1,6 @@
 import HistoryLogItem from 'objects/HistoryLogItem';
 import { numberWithCommas } from 'algorithms/utils';
+import { HistoryLogStyles } from 'enums';
 
 import backCheckSearch from './backCheck';
 import forwardCheckSearch from './forwardCheck';
@@ -90,7 +91,7 @@ export default (csp, componentIndex, isActive) => csp.withMutations(c => {
  * @returns {HistoryLogItem} new HistoryLogItem of the diagnostics
  */
 export const logDiagnostics = (csp, numRuns = 1) => {
-  const log = new HistoryLogItem('Search', 'log', false);
+  const log = new HistoryLogItem('Search', HistoryLogStyles.DEFAULT, false);
   csp.getIn(['algorithms', 'BT', 'subSets']).forEach((isActive, algorithm) => {
     if (isActive) {
       const diagnostics = csp.getIn(['diagnostics', algorithm]);

@@ -4,7 +4,10 @@ import {
   revealNeighbors,
 } from 'reducers/board/cellUtils';
 import processCSP from 'reducers/board/csp';
-import { BoardSizes } from 'enums';
+import {
+  BoardSizes,
+  HistoryLogStyles,
+} from 'enums';
 import HistoryLogItem from './HistoryLogItem';
 
 /**
@@ -122,7 +125,7 @@ export const loadXMLDocument = (state, xmlDoc, filename) => {
     }));
     neighborQueue.forEach(({ row, col }) => s.update('minefield', m => revealNeighbors(m, row, col)));
     const message = `Successfully loaded ${filename}`;
-    const log = new HistoryLogItem(message, 'green', 'false');
+    const log = new HistoryLogItem(message, HistoryLogStyles.GREEN, 'false');
     s.update('historyLog', h => h.push(log));
 
     return processCSP(s, true);

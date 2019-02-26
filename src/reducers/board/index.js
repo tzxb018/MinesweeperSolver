@@ -11,10 +11,10 @@ import {
   reset,
   revealCell,
   step,
-  test,
   toggleActive,
   toggleFlag,
 } from './reducerFunctions';
+import { postResults } from './testFunctions';
 
 const initialState = initialize();
 
@@ -36,7 +36,7 @@ export default (state = initialState, action) => {
     case Actions.REVEAL_CELL: return revealCell(state, action.row, action.col);
     case Actions.REPORT_ERROR_END: return logErrorReport(state, action.response);
     case Actions.STEP: return step(state);
-    case Actions.TEST: return test(state, action.numIterations, action.allowCheats, action.stopOnError);
+    case Actions.TEST_END: return postResults(state, action.newState);
     case Actions.TOGGLE_ACTIVE: return toggleActive(state, action.algorithm, action.modifier);
     case Actions.TOGGLE_FLAG: return toggleFlag(state, action.row, action.col);
     default: return state;

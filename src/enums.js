@@ -18,7 +18,8 @@ export const Actions = Object.freeze({
   START: Symbol('START'),
   STEP: Symbol('STEP'),
   STOP: Symbol('STOP'),
-  TEST: Symbol('TEST'),
+  TEST_END: Symbol('TEST_END'),
+  TEST_START: Symbol('TEST_START'),
   TOGGLE_ACTIVE: Symbol('TOGGLE_ACTIVE'),
   TOGGLE_FLAG: Symbol('TOGGLE_FLAG'),
   TOGGLE_PEEK: Symbol('TOGGLE_PEEK'),
@@ -26,9 +27,19 @@ export const Actions = Object.freeze({
 
 export const BoardSizes = Object.freeze({
   BEGINNER: Symbol('BEGINNER'),
-  CUSTOM: Symbol('CUSTOM'),
+  CUSTOM: 'CUSTOM',                       // cannot be a symbol so that web workers can properly serialize it
   EXPERT: Symbol('EXPERT'),
   INTERMEDIATE: Symbol('INTERMEDIATE'),
+});
+
+export const HistoryLogStyles = Object.freeze({
+  DEFAULT: 'log',
+  GREEN: 'green',
+  RED: 'red',
+});
+
+export const HistoryLogSymbols = Object.freeze({
+  FLAG: 'FLAG',
 });
 
 export const Mines = Object.freeze({

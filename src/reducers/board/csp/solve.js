@@ -1,6 +1,10 @@
 import Immutable from 'immutable';
 import HistoryLogItem from 'objects/HistoryLogItem';
-import { Mines } from 'enums';
+import {
+  HistoryLogStyles,
+  HistoryLogSymbols,
+  Mines,
+} from 'enums';
 
 import {
   getChangedCells,
@@ -163,9 +167,9 @@ export default (state, doLog = true) => state.withMutations(s => {
     if (numFlagged + numRevealed === 1) {
       cellOrCells = 'cell';
     }
-    const message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[flag]`;
+    const message = `Solved ${numFlagged + numRevealed} ${cellOrCells}, ${numFlagged}[${HistoryLogSymbols.FLAG}]`;
     const changedCells = getChangedCells(state.getIn(['minefield', 'cells']), s.getIn(['minefield', 'cells']));
-    const log = new HistoryLogItem(message, 'log', true, changedCells);
+    const log = new HistoryLogItem(message, HistoryLogStyles.DEFAULT, true, changedCells);
 
     solvedCount.forEach((count, algorithm) => {
       cellOrCells = 'cells';
@@ -173,7 +177,8 @@ export default (state, doLog = true) => state.withMutations(s => {
         cellOrCells = 'cell';
       }
       const detail =
-        `${algorithm} solved ${count.numFlagged + count.numRevealed} ${cellOrCells}, ${count.numFlagged}[flag]`;
+        `${algorithm} solved ${count.numFlagged + count.numRevealed} ${cellOrCells}, ${count.numFlagged}`
+        + `[${HistoryLogSymbols.FLAG}]`;
       log.addDetail(detail);
     });
     s.update('historyLog', h => h.push(log));

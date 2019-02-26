@@ -17,17 +17,24 @@ export default class Load extends Component {
     loadStart: PropTypes.func.isRequired,
   }
 
+
+  /* local state */
+
   state = {
     file: null,
     filename: '',
   };
+
+
+  /* event handlers */
 
   changeHandler = event => {
     if (event.target.value !== '') {
       event.persist();
       document.getElementById('loadMenu').style.display = 'none';
       this.props.loadStart();
-      loadFile(event.target.files[0]).then(response => {
+      loadFile(event.target.files[0])
+      .then(response => {
         document.getElementById('reload').style.display = 'block';
         this.props.loadEnd(response, event.target.files[0].name);
         this.setState({
@@ -56,7 +63,8 @@ export default class Load extends Component {
   mouseDownHandler = filename => {
     document.getElementById('loadMenu').style.display = 'none';
     this.props.loadStart();
-    loadProblem(filename).then(response => {
+    loadProblem(filename)
+    .then(response => {
       document.getElementById('reload').style.display = 'block';
       this.props.loadEnd(response, filename);
       this.setState({
@@ -75,6 +83,7 @@ export default class Load extends Component {
     this.props.loadStart();
     this.props.loadEnd(this.state.file, this.state.filename);
   }
+
 
   render() {
     return (

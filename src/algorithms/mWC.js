@@ -1,5 +1,6 @@
 import Constraint from 'objects/Constraint';
 import HistoryLogItem from 'objects/HistoryLogItem';
+import { HistoryLogStyles } from 'enums';
 
 import STR2 from './STR2';
 import {
@@ -287,7 +288,7 @@ export default (csp, componentIndex, size = 2) => {
  * @returns {HistoryLogItem} new HistoryLogItem of the diagnostics
  */
 export const logDiagnostics = (csp, numRuns = 1) => {
-  const log = new HistoryLogItem('m-Wise Consistency:', 'log', false);
+  const log = new HistoryLogItem('m-Wise Consistency:', HistoryLogStyles.DEFAULT, false);
   for (let m = 1; m <= csp.getIn(['algorithms', 'mWC', 'm']); m++) {
     if (csp.getIn(['diagnostics', `mWC-${m}`])) {
       log.addDetail(`\nmWC-${m}:`, true);

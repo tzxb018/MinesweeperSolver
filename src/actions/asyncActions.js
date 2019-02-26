@@ -27,3 +27,12 @@ export const loadFail = error => ({
   type: Actions.LOAD_FAIL,
   error,
 });
+
+export const testStart = () => ({
+  type: Actions.TEST_START,
+});
+
+export const testEnd = newState => ({
+  type: Actions.TEST_END,
+  newState,
+});

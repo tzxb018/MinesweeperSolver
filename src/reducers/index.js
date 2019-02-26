@@ -6,6 +6,7 @@ import isPeeking from './peek';
 import load from './load';
 import reportError from './reportError';
 import smile from './smile';
+import test from './test';
 import timer from './timer';
 
 const reducer = combineReducers({
@@ -15,6 +16,7 @@ const reducer = combineReducers({
   load,
   reportError,
   smile,
+  test,
   timer,
 });
 

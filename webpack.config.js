@@ -43,6 +43,9 @@ const frontConfig = {
   module: {
     rules: [
       {
+        test: /\.worker\.js$/,
+        use: { loader: 'worker-loader' },
+      }, {
         test: /\.jsx?$/,
         use: [
           {

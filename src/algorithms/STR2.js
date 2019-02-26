@@ -4,6 +4,7 @@ import {
   intersect,
   numberWithCommas,
 } from 'algorithms/utils';
+import { HistoryLogStyles } from 'enums';
 
 /**
  * Maps all variables to the list of their constraints.
@@ -138,7 +139,7 @@ export default (csp, componentIndex) => csp.withMutations(c => {
  * @returns {HistoryLogItem} new HistoryLogItem of the diagnostics
  */
 export const logDiagnostics = (csp, numRuns = 1) => {
-  const log = new HistoryLogItem('STR2:', 'log', false);
+  const log = new HistoryLogItem('STR2:', HistoryLogStyles.DEFAULT, false);
   const diagnostics = csp.getIn(['diagnostics', 'STR2']);
   Object.keys(diagnostics).forEach(key => {
     const average = diagnostics[key] / numRuns;

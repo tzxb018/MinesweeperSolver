@@ -3,6 +3,7 @@ import mWC from 'algorithms/mWC';
 import STR2 from 'algorithms/STR2';
 import { intersect } from 'algorithms/utils';
 import HistoryLogItem from 'objects/HistoryLogItem';
+import { HistoryLogStyles } from 'enums';
 
 import generateCSP from './generateCSP';
 import reduceComponents from './reduceComponents';
@@ -42,7 +43,7 @@ const checkConsistency = state => state.withMutations(s => {
       cellOrCells = 'inconsistency';
     }
     const message = `Processing stopped due to ${inconsistentCount} ${cellOrCells}`;
-    log = new HistoryLogItem(message, 'red', true);
+    log = new HistoryLogItem(message, HistoryLogStyles.RED, true);
   } else {
     let count = 0;
     const details = [];
@@ -60,7 +61,7 @@ const checkConsistency = state => state.withMutations(s => {
       cellOrCells = 'cell';
     }
     const message = `Finds ${count} solvable ${cellOrCells}`;
-    log = new HistoryLogItem(message, 'log', false);
+    log = new HistoryLogItem(message, HistoryLogStyles.DEFAULT, false);
     details.forEach(detail => log.addDetail(detail));
   }
   s.update('historyLog', h => h.push(log));
