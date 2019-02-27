@@ -1,4 +1,4 @@
-import { reviseEdge as revisePair } from 'algorithms/mWC';
+import { reviseEdge as revisePair } from 'algorithms/utils';
 
 /**
  * Enforces unary consistency on all constraints. Constraints with a scope of only one variable are tested against all

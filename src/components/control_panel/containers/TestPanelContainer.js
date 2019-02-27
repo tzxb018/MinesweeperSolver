@@ -8,7 +8,7 @@ import {
 
 const mapStateToProps = state => ({
   algorithms: state.board.present.getIn(['csp', 'algorithms']),
-  isTesting: state.test,
+  isTesting: state.isTesting,
   numCols: state.board.present.getIn(['minefield', 'cells', 0]).size,
   numMines: state.board.present.getIn(['minefield', 'numMines']),
   numRows: state.board.present.getIn(['minefield', 'cells']).size,

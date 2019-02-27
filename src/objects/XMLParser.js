@@ -3,7 +3,7 @@ import {
   placeNumbers,
   revealNeighbors,
 } from 'reducers/board/cellUtils';
-import processCSP from 'reducers/board/csp';
+import processCSP from 'csp';
 import {
   BoardSizes,
   HistoryLogStyles,

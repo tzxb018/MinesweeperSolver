@@ -6,7 +6,7 @@ import {
   revealCell,
   toggleFlag,
 } from 'actions/boardActions';
-import { changeSmile } from 'actions/smileActions';
+import { changeSmile } from 'actions/miscActions';
 
 const mapStateToProps = (state, ownProps) => ({
   content: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'content']),

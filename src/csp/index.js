@@ -1,13 +1,24 @@
 import BT from 'algorithms/BT/index';
 import mWC from 'algorithms/mWC';
 import STR2 from 'algorithms/STR2';
-import { intersect } from 'algorithms/utils';
 import HistoryLogItem from 'objects/HistoryLogItem';
 import { HistoryLogStyles } from 'enums';
+import { getDomains } from 'algorithms/utils';
 
 import generateCSP from './generateCSP';
 import reduceComponents from './reduceComponents';
 import { parseSolvable } from './solve';
+
+/* Algorithms mapped to their corresponding display colors */
+const algorithmColors = new Map([
+  ['Unary', 1],
+  ['BT', 2],
+  ['STR2', 3],
+  ['mWC-1', 3],
+  ['mWC-2', 4],
+  ['mWC-3', 5],
+  ['mWC-4', 6],
+]);
 
 /**
  * Checks csp model for any inconsistencies. Any unsatisfied constraints are highlighted red on the board and solving is
@@ -64,6 +75,7 @@ const checkConsistency = state => state.withMutations(s => {
     log = new HistoryLogItem(message, HistoryLogStyles.DEFAULT, false);
     details.forEach(detail => log.addDetail(detail));
   }
+
   s.update('historyLog', h => h.push(log));
 });
 
@@ -74,17 +86,6 @@ const checkConsistency = state => state.withMutations(s => {
  * @returns {object[][]} updated version of cells
  */
 const colorSolvable = (cells, csp) => cells.withMutations(c => {
-  // defined colors
-  const colors = new Map([
-    ['Unary', 1],
-    ['BT', 2],
-    ['STR2', 3],
-    ['mWC-1', 3],
-    ['mWC-2', 4],
-    ['mWC-3', 5],
-    ['mWC-4', 6],
-  ]);
-
   // clear previous coloring
   csp.get('components').forEach(component => {
     component.variables.forEach(variable => {
@@ -93,9 +94,9 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
     });
   });
 
-  // color each solvable set
+  // color each solvable set of cells
   csp.get('solvable').forEach((solvable, algorithm) => {
-    const color = colors.get(algorithm);
+    const color = algorithmColors.get(algorithm);
     solvable.forEach(cell => {
       c.setIn([cell.row, cell.col, 'color'], color);
       c.setIn([cell.row, cell.col, 'solution'], cell.value);
@@ -105,27 +106,27 @@ const colorSolvable = (cells, csp) => cells.withMutations(c => {
 });
 
 /**
- * Gets the basic viable domains of each variable.
- * @param {Constraint[]} constraints array of Constraints
- * @returns {Map<number, Set<boolean>>} map containing the allowed domain set for each variable
+ * Filters current minefield components against the old components to find which ones have changed and need to be
+ * reevaluated.
+ * @param {object[]} oldComponents previous list of unique minefield components
+ * @param {object[]} components current list of unique minefield components
+ * @returns {number[]} list of current component indices that need to be reevaluated
  */
-export const getDomains = constraints => {
-  const domains = new Map();
-  constraints.forEach(constraint => {
-    const newDomains = constraint.supportedDomains();
-    if (newDomains) {
-      newDomains.forEach((values, key) => {
-        if (!domains.has(key)) {
-          domains.set(key, new Set([...values]));
-        } else {
-          domains.set(key, intersect(domains.get(key), values));
-        }
-      });
-    } else {
-      constraint.scope.forEach(key => domains.set(key, new Set()));
+const filterComponents = (oldComponents, components) => {
+  const activeComponents = [];
+  if (oldComponents) {
+    components.forEach((component, i) => {
+      const changed = !oldComponents.some(oldComponent => oldComponent.id === component.id);
+      if (changed) {
+        activeComponents.push(i);
+      }
+    });
+  } else {
+    for (let i = 0; i < components.length; i++) {
+      activeComponents.push(i);
     }
-  });
-  return domains;
+  }
+  return activeComponents;
 };
 
 /**
@@ -145,18 +146,13 @@ export default (state, forceReevaluation = false) => state.withMutations(s => {
   s.update('csp', c => reduceComponents(c));
 
   // filter out any components that did not change
-  const activeComponents = [];
-  if (state.get('csp').has('components') && !forceReevaluation) {
-    s.getIn(['csp', 'components']).forEach((component, i) => {
-      const changed = !state.getIn(['csp', 'components']).some(oldComponent => oldComponent.id === component.id);
-      if (changed) {
-        activeComponents.push(i);
-      }
-    });
-  } else {
+  let activeComponents = [];
+  if (forceReevaluation) {
     for (let i = 0; i < s.getIn(['csp', 'components']).length; i++) {
       activeComponents.push(i);
     }
+  } else {
+    activeComponents = filterComponents(state.getIn(['csp', 'components']), s.getIn(['csp', 'components']));
   }
 
   // get the variable domains

@@ -8,7 +8,7 @@ import {
 } from 'actions/asyncActions';
 
 const mapStateToProps = state => ({
-  isLoading: state.load,
+  isLoading: state.isLoading,
 });
 
 const mapDispatchToProps = dispatch => ({

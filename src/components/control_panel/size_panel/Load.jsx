@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import {
   loadFile,
   loadProblem,
-} from 'reducers/load';
+} from 'reducers/async';
 
 import styles from './style';
 

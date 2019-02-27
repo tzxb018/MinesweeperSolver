@@ -7,7 +7,7 @@ import {
 } from 'actions/asyncActions';
 
 const mapStateToProps = state => ({
-  canSendReport: state.reportError,
+  canSendReport: state.canReportError,
   minefield: state.board.present.get('minefield'),
 });
 

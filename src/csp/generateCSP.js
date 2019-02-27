@@ -1,5 +1,5 @@
 import Constraint from 'objects/Constraint';
-import { isOnFringe } from '../cellUtils';
+import { isOnFringe } from 'reducers/board/cellUtils';
 
 /**
  * Creates a variable for each fringe cell.

@@ -6,9 +6,9 @@ import {
   HistoryLogSymbols,
   Mines,
 } from 'enums';
+import processCSP from 'csp/index';
+import solveCSP from 'csp/solve';
 
-import processCSP from './csp/index';
-import solveCSP from './csp/solve';
 import {
   checkWinCondition,
   flagMines,

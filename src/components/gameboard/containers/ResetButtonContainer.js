@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 
 import ResetButton from 'components/gameboard/control_header/ResetButton';
 import { reset } from 'actions/boardActions';
-import { changeSmile } from 'actions/smileActions';
+import { changeSmile } from 'actions/miscActions';
 
 const mapStateToProps = state => ({
   isGameRunning: state.board.present.get('isGameRunning'),

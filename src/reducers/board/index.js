@@ -1,3 +1,5 @@
+import undoable from 'redux-undo';
+
 import { loadXMLDocument } from 'objects/XMLParser';
 import { Actions } from 'enums';
 import {
@@ -24,7 +26,7 @@ const initialState = initialize();
  * @param {{type: string, ...}} action Redux action thrown
  * @returns {Immutable.Map<string, any>} updated state
  */
-export default (state = initialState, action) => {
+const board = (state = initialState, action) => {
   switch (action.type) {
     case Actions.CHANGE_SIZE: return changeSize(state, action.newSize);
     case Actions.CHEAT: return cheat(state, action.isRandom);
@@ -42,3 +44,8 @@ export default (state = initialState, action) => {
     default: return state;
   }
 };
+
+export default undoable(board, {
+  clearHistoryType: ['CHANGE_SIZE', 'RESET'],
+  neverSkipReducer: true,
+});

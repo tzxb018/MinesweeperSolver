@@ -9,11 +9,11 @@ import {
 import {
   getChangedCells,
   revealNeighbors,
-} from '../cellUtils';
+} from 'reducers/board/cellUtils';
 import {
   algorithms,
   loseGame,
-} from '../reducerFunctions';
+} from 'reducers/board/reducerFunctions';
 
 /**
  * Filters solvable, removing duplicates and throwing an error if a contradiction is found. A contradiction is any
@@ -182,6 +182,7 @@ export default (state, doLog = true) => state.withMutations(s => {
       log.addDetail(detail);
     });
     s.update('historyLog', h => h.push(log));
+
   // else accumulate the results
   } else {
     solvedCount.forEach((count, algorithm) => {

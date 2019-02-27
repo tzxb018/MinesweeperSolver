@@ -1,23 +1,25 @@
 import { combineReducers } from 'redux';
 
-import board from './board/undoableBoard';
-import cellHighlight from './cellHighlight';
-import isPeeking from './peek';
-import load from './load';
-import reportError from './reportError';
-import smile from './smile';
-import test from './test';
-import timer from './timer';
-
-const reducer = combineReducers({
-  board,
-  cellHighlight,
+import board from './board/';
+import {
+  canReportError,
+  isLoading,
+  isTesting,
+} from './async';
+import {
   isPeeking,
-  load,
-  reportError,
   smile,
-  test,
+  timer,
+} from './misc';
+import cellHighlight from './cellHighlight';
+
+export default combineReducers({
+  board,
+  canReportError,
+  cellHighlight,
+  isLoading,
+  isPeeking,
+  isTesting,
+  smile,
   timer,
 });
-
-export default reducer;

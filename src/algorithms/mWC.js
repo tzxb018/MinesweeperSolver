@@ -6,6 +6,7 @@ import STR2 from './STR2';
 import {
   intersect,
   numberWithCommas,
+  reviseEdge,
 } from './utils';
 
 /**
@@ -96,48 +97,6 @@ const findPairs = (edgeMap, edges, m) => {
     });
     return pair;
   });
-};
-
-/**
- * Revises the constraints of the given edge by enforcing pairwise consistency. Pairwise consistency means every tuple
- * has a supporting tuple in the other constraint of the edge.
- * @param {Constraint[]} edge list of constraints that form the edge
- * @param {number[]} edge.scope list of variables common to the pair
- * @param {Object} [diagnostics] execution metrics object
- * @param {number} diagnostics.tuplesKilled number of tuples killed
- * @returns {Constraint[]} list of Constraints that were revised, undefined if one of the constraints of the edge is
- * dead
- */
-export const reviseEdge = (edge, diagnostics) => {
-  let isConsistent = true;
-  // regionalize each constraint and find the common regions
-  const regionMaps = edge.map(constraint => constraint.regionalize(edge.scope));
-  const commonRegions = [...regionMaps[0].keys()].filter(domain =>
-    regionMaps.every(regionMap => regionMap.has(domain)));
-
-  // revise each constraint's tuples based on the common regions
-  const revisedConstraints = [];
-  regionMaps.forEach((regionMap, index) => {
-    let revised = false;
-    regionMap.forEach((tuples, domain) => {
-      if (!commonRegions.includes(domain)) {
-        tuples.forEach(id => edge[index].kill(id));
-        if (diagnostics) {
-          diagnostics.tuplesKilled += tuples.length;
-        }
-        revised = true;
-      }
-    });
-    if (revised) {
-      if (!edge[index].isConsistent) {
-        isConsistent = false;
-      } else {
-        revisedConstraints.push(edge[index]);
-      }
-    }
-  });
-
-  return isConsistent ? revisedConstraints : undefined;
 };
 
 /**

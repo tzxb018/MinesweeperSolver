@@ -1,6 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Mines } from 'enums';
+import {
+  Mines,
+  Smiles,
+} from 'enums';
 
 import styles from './style';
 
@@ -165,14 +168,14 @@ export default class Cell extends Component {
     if (this.props.content === -1) {
       this.props.loseGame(this.props.row, this.props.col);
     } else {
-      this.props.changeSmile('SMILE');
+      this.props.changeSmile(Smiles.SMILE);
       this.props.revealCell(this.props.row, this.props.col);
     }
   }
 
   mouseDownHandler = e => {
     if (e.nativeEvent.which === 1) {
-      this.props.changeSmile('SCARED');
+      this.props.changeSmile(Smiles.SCARED);
     }
   }
 

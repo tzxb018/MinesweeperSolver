@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { Smiles } from 'enums';
 
 import PeekToggle from './containers/PeekToggleContainer';
 import styles from './style';
@@ -18,7 +19,7 @@ export default class StepLoop extends Component {
   /* event handlers */
 
   clickHandler = loop => {
-    this.props.changeSmile('SMILE');
+    this.props.changeSmile(Smiles.SMILE);
     if (loop) {
       this.props.loop();
     } else {
@@ -27,7 +28,7 @@ export default class StepLoop extends Component {
   }
 
   mouseDownHandler = () => {
-    this.props.changeSmile('SCARED');
+    this.props.changeSmile(Smiles.SCARED);
   }
 
 

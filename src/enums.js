@@ -47,3 +47,11 @@ export const Mines = Object.freeze({
   MINE_EXPLODED: -2,
   MINE: -1,
 });
+
+export const Smiles = Object.freeze({
+  LOST: Symbol('LOST'),
+  PRESSED: Symbol('PRESSED'),
+  SCARED: Symbol('SCARED'),
+  SMILE: Symbol('SMILE'),
+  WON: Symbol('WON'),
+});

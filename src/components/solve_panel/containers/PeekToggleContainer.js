@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 
 import PeekToggle from 'components/solve_panel/PeekToggle';
-import { togglePeek } from 'actions/peekActions';
+import { togglePeek } from 'actions/miscActions';
 
 const mapStateToProps = state => ({
   isPeeking: state.isPeeking,

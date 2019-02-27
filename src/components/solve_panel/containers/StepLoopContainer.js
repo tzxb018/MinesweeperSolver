@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 
 import StepLoop from 'components/solve_panel/StepLoop';
 import { loop, step } from 'actions/boardActions';
-import { changeSmile } from 'actions/smileActions';
+import { changeSmile } from 'actions/miscActions';
 
 const mapStateToProps = state => ({
   canStep: state.board.present.get('isGameRunning') && state.board.present.getIn(['csp', 'isConsistent'])

@@ -5,7 +5,7 @@ import {
   increment,
   start,
   stop,
-} from 'actions/timerActions';
+} from 'actions/miscActions';
 
 const mapStateToProps = state => ({
   counter: state.timer.get('counter'),

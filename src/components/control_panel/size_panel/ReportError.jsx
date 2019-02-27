@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Immutable from 'immutable';
 import PropTypes from 'prop-types';
-import { sendReport } from 'reducers/reportError';
+import { sendReport } from 'reducers/async';
 
 import styles from './style';
 
