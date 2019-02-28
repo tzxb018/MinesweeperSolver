@@ -25,6 +25,20 @@ export const Actions = Object.freeze({
   TOGGLE_PEEK: Symbol('TOGGLE_PEEK'),
 });
 
+export const Algorithms = Object.freeze({
+  BC: 'BC',
+  BT: 'BT',
+  FC: 'FC',
+  MAC: 'MAC',
+  mWC: 'mWC',
+  mWC1: 'mWC-1',
+  mWC2: 'mWC-2',
+  mWC3: 'mWC-3',
+  mWC4: 'mWC-4',
+  STR2: 'STR2',
+  Unary: 'Unary',
+});
+
 export const BoardSizes = Object.freeze({
   BEGINNER: Symbol('BEGINNER'),
   CUSTOM: 'CUSTOM',                       // cannot be a symbol so that web workers can properly serialize it

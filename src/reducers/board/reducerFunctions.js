@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
 import HistoryLogItem from 'objects/HistoryLogItem';
 import {
+  Algorithms,
   BoardSizes,
   HistoryLogStyles,
   HistoryLogSymbols,
@@ -18,7 +19,8 @@ import {
   revealNeighbors,
 } from './cellUtils';
 
-export const algorithms = ['Unary', 'BT', 'STR2', 'mWC-1', 'mWC-2', 'mWC-3', 'mWC-4'];
+export const algorithms = [Algorithms.Unary, Algorithms.BT, Algorithms.STR2, Algorithms.mWC1, Algorithms.mWC2,
+  Algorithms.mWC3, Algorithms.mWC4];
 
 /**
  * Handles the reset action by reverting the cells, csp model, and undo history to their starting states.
@@ -247,18 +249,18 @@ export const initialize = () => {
   // create the csp model
   const csp = Immutable.Map({
     algorithms: Immutable.Map({
-      BT: Immutable.Map({
+      [Algorithms.BT]: Immutable.Map({
         subSets: Immutable.Map({
-          BC: true,
-          FC: true,
-          'FC-STR': true,
+          [Algorithms.BC]: true,
+          [Algorithms.FC]: true,
+          [Algorithms.MAC]: true,
         }),
         isActive: false,
       }),
-      STR2: Immutable.Map({
+      [Algorithms.STR2]: Immutable.Map({
         isActive: false,
       }),
-      mWC: Immutable.Map({
+      [Algorithms.mWC]: Immutable.Map({
         isActive: true,
         m: 2,
       }),
@@ -289,6 +291,12 @@ export const loadFail = (state, error) => {
   return state.update('historyLog', h => h.push(log));
 };
 
+/**
+ * Logs the server response to the attempt to send an error report.
+ * @param state state of the board
+ * @param {string} response server response to the sent error report
+ * @returns newState
+ */
 export const logErrorReport = (state, response) => {
   let message;
   let style;
@@ -398,8 +406,8 @@ export const loseGame = (state, row, col) => state.withMutations(s => {
 export const toggleActive = (state, algorithm, modifier) => state.withMutations(s => {
   if (modifier) {
     switch (algorithm) {
-      case 'BT': s.updateIn(['csp', 'algorithms', 'BT', 'subSets', modifier], a => !a); break;
-      case 'mWC': s.setIn(['csp', 'algorithms', 'mWC', 'm'], modifier); break;
+      case Algorithms.BT: s.updateIn(['csp', 'algorithms', Algorithms.BT, 'subSets', modifier], a => !a); break;
+      case Algorithms.mWC: s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier); break;
       default:
     }
   } else {

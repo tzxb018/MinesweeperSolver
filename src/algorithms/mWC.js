@@ -1,6 +1,9 @@
 import Constraint from 'objects/Constraint';
 import HistoryLogItem from 'objects/HistoryLogItem';
-import { HistoryLogStyles } from 'enums';
+import {
+  Algorithms,
+  HistoryLogStyles,
+} from 'enums';
 
 import STR2 from './STR2';
 import {
@@ -146,42 +149,44 @@ export default (csp, componentIndex, size = 2) => {
   let newCSP = csp;
 
   // run GAC as mWC-1 if it has not already been done
-  if (!csp.getIn(['algorithms', 'STR2', 'isActive'])) {
+  if (!csp.getIn(['algorithms', Algorithms.STR2, 'isActive'])) {
     newCSP = STR2(csp, componentIndex).withMutations(c => {
-      if (!c.getIn(['diagnostics', 'mWC-1'])) {
+      if (!c.getIn(['diagnostics', Algorithms.mWC1])) {
         const diagnostics = {
           time: 0,
           revisions: 0,
           tuplesKilled: 0,
         };
-        c.setIn(['diagnostics', 'mWC-1'], diagnostics);
+        c.setIn(['diagnostics', Algorithms.mWC1], diagnostics);
       }
-      Object.entries(c.getIn(['diagnostics', 'STR2'])).forEach(([key, value]) => {
-        c.getIn(['diagnostics', 'mWC-1'])[key] += value;
+      Object.entries(c.getIn(['diagnostics', Algorithms.STR2])).forEach(([key, value]) => {
+        c.getIn(['diagnostics', Algorithms.mWC1])[key] += value;
       });
-      c.deleteIn(['diagnostics', 'STR2']);
-      if (c.getIn(['solvable', 'STR2'])) {
-        c.setIn(['solvable', 'mWC-1'], c.getIn(['solvable', 'STR2']));
-        c.deleteIn(['solvable', 'STR2']);
+      c.deleteIn(['diagnostics', Algorithms.STR2]);
+      if (c.getIn(['solvable', Algorithms.STR2])) {
+        c.setIn(['solvable', Algorithms.mWC1], c.getIn(['solvable', Algorithms.STR2]));
+        c.deleteIn(['solvable', Algorithms.STR2]);
       }
     });
   }
 
   // run PWC for each additional level of m
+  const names = [Algorithms.mWC2, Algorithms.mWC3, Algorithms.mWC4];
   return newCSP.withMutations(c => {
     const mWC = [[], [], []];
     // get all the edges
     const edges = findEdges(c.get('components')[componentIndex].constraints);
     for (let m = 2; m <= size; m++) {
-      if (!c.getIn(['diagnostics', `mWC-${m}`])) {
+      const name = names[m - 2];
+      if (!c.getIn(['diagnostics', name])) {
         const diagnostics = {
           time: 0,
           revisions: 0,
           tuplesKilled: 0,
         };
-        c.setIn(['diagnostics', `mWC-${m}`], diagnostics);
+        c.setIn(['diagnostics', name], diagnostics);
       }
-      const diagnostics = c.getIn(['diagnostics', `mWC-${m}`]);
+      const diagnostics = c.getIn(['diagnostics', name]);
       const PWC = [];
       const startTime = performance.now();
 
@@ -230,11 +235,12 @@ export default (csp, componentIndex, size = 2) => {
     }
     mWC.forEach((cells, index) => {
       const m = index + 2;
+      const name = names[m - 2];
       if (cells.length > 0) {
-        if (!c.getIn(['solvable', `mWC-${m}`])) {
-          c.setIn(['solvable', `mWC-${m}`], []);
+        if (!c.getIn(['solvable', name])) {
+          c.setIn(['solvable', name], []);
         }
-        c.updateIn(['solvable', `mWC-${m}`], x => x.concat(cells));
+        c.updateIn(['solvable', name], x => x.concat(cells));
       }
     });
   });
@@ -247,11 +253,13 @@ export default (csp, componentIndex, size = 2) => {
  * @returns {HistoryLogItem} new HistoryLogItem of the diagnostics
  */
 export const logDiagnostics = (csp, numRuns = 1) => {
+  const names = [Algorithms.mWC1, Algorithms.mWC2, Algorithms.mWC3, Algorithms.mWC4];
   const log = new HistoryLogItem('m-Wise Consistency:', HistoryLogStyles.DEFAULT, false);
-  for (let m = 1; m <= csp.getIn(['algorithms', 'mWC', 'm']); m++) {
-    if (csp.getIn(['diagnostics', `mWC-${m}`])) {
-      log.addDetail(`\nmWC-${m}:`, true);
-      const diagnostics = csp.getIn(['diagnostics', `mWC-${m}`]);
+  for (let m = 1; m <= csp.getIn(['algorithms', Algorithms.mWC, 'm']); m++) {
+    const name = names[m - 1];
+    if (csp.getIn(['diagnostics', name])) {
+      log.addDetail(`\n${name}:`, true);
+      const diagnostics = csp.getIn(['diagnostics', name]);
       Object.keys(diagnostics).forEach(key => {
         const average = diagnostics[key] / numRuns;
         let detail;

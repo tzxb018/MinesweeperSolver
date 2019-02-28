@@ -4,7 +4,10 @@ import {
   intersect,
   numberWithCommas,
 } from 'algorithms/utils';
-import { HistoryLogStyles } from 'enums';
+import {
+  Algorithms,
+  HistoryLogStyles,
+} from 'enums';
 
 /**
  * Maps all variables to the list of their constraints.
@@ -61,15 +64,15 @@ export const revise = (constraint, domains, diagnostics, reduced = undefined) =>
  * @returns {Immutable.Map} csp with GAC and any solvable cells identified
  */
 export default (csp, componentIndex) => csp.withMutations(c => {
-  if (!c.getIn(['diagnostics', 'STR2'])) {
+  if (!c.getIn(['diagnostics', Algorithms.STR2])) {
     const diagnostics = {
       time: 0,
       revisions: 0,
       tuplesKilled: 0,
     };
-    c.setIn(['diagnostics', 'STR2'], diagnostics);
+    c.setIn(['diagnostics', Algorithms.STR2], diagnostics);
   }
-  const diagnostics = c.getIn(['diagnostics', 'STR2']);
+  const diagnostics = c.getIn(['diagnostics', Algorithms.STR2]);
   const STR = [];
   const domains = c.get('domains');
   const startTime = performance.now();
@@ -125,10 +128,10 @@ export default (csp, componentIndex) => csp.withMutations(c => {
 
   // add all STR cells to the list of solvable cells
   if (STR.length > 0) {
-    if (!c.getIn(['solvable', 'STR2'])) {
-      c.setIn(['solvable', 'STR2'], []);
+    if (!c.getIn(['solvable', Algorithms.STR2])) {
+      c.setIn(['solvable', Algorithms.STR2], []);
     }
-    c.updateIn(['solvable', 'STR2'], x => x.concat(STR));
+    c.updateIn(['solvable', Algorithms.STR2], x => x.concat(STR));
   }
 });
 
@@ -139,8 +142,8 @@ export default (csp, componentIndex) => csp.withMutations(c => {
  * @returns {HistoryLogItem} new HistoryLogItem of the diagnostics
  */
 export const logDiagnostics = (csp, numRuns = 1) => {
-  const log = new HistoryLogItem('STR2:', HistoryLogStyles.DEFAULT, false);
-  const diagnostics = csp.getIn(['diagnostics', 'STR2']);
+  const log = new HistoryLogItem(`${Algorithms.STR2}:`, HistoryLogStyles.DEFAULT, false);
+  const diagnostics = csp.getIn(['diagnostics', Algorithms.STR2]);
   Object.keys(diagnostics).forEach(key => {
     const average = diagnostics[key] / numRuns;
     let detail;

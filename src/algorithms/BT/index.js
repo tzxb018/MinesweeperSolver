@@ -1,17 +1,20 @@
 import HistoryLogItem from 'objects/HistoryLogItem';
 import { numberWithCommas } from 'algorithms/utils';
-import { HistoryLogStyles } from 'enums';
+import {
+  Algorithms,
+  HistoryLogStyles,
+} from 'enums';
 
 import backCheckSearch from './backCheck';
 import forwardCheckSearch from './forwardCheck';
 import forwardCheckSTRSearch from './forwardCheckSTR';
 
 const algorithms = new Map([
-  ['BC', (domains, constraints, assignmentOrder, diagnostics) =>
+  [Algorithms.BC, (domains, constraints, assignmentOrder, diagnostics) =>
   backCheckSearch(domains, constraints, assignmentOrder, diagnostics)],
-  ['FC', (domains, constraints, assignmentOrder, diagnostics) =>
+  [Algorithms.FC, (domains, constraints, assignmentOrder, diagnostics) =>
   forwardCheckSearch(domains, constraints, assignmentOrder, diagnostics)],
-  ['FC-STR', (domains, constraints, assignmentOrder, diagnostics) =>
+  [Algorithms.MAC, (domains, constraints, assignmentOrder, diagnostics) =>
   forwardCheckSTRSearch(domains, constraints, assignmentOrder, diagnostics)],
 ]);
 
@@ -74,12 +77,20 @@ export default (csp, componentIndex, isActive) => csp.withMutations(c => {
     }
   });
 
-  const solvableSet = [...solvable.values()][0];
-  if (solvableSet.length > 0) {
-    if (!c.getIn(['solvable', 'BT'])) {
-      c.setIn(['solvable', 'BT'], []);
+  let solvableSet = [...solvable.values()];
+  const hasSolvable = solvableSet.some(set => {
+    if (set.length > 0) {
+      solvableSet = set;
+      return true;
     }
-    c.updateIn(['solvable', 'BT'], x => x.concat(solvableSet));
+    return false;
+  });
+
+  if (hasSolvable) {
+    if (!c.getIn(['solvable', Algorithms.BT])) {
+      c.setIn(['solvable', Algorithms.BT], []);
+    }
+    c.updateIn(['solvable', Algorithms.BT], x => x.concat(solvableSet));
     solvableSet.forEach(cell => c.get('domains').set(cell.key, new Set([cell.value])));
   }
 });
@@ -92,7 +103,7 @@ export default (csp, componentIndex, isActive) => csp.withMutations(c => {
  */
 export const logDiagnostics = (csp, numRuns = 1) => {
   const log = new HistoryLogItem('Search', HistoryLogStyles.DEFAULT, false);
-  csp.getIn(['algorithms', 'BT', 'subSets']).forEach((isActive, algorithm) => {
+  csp.getIn(['algorithms', Algorithms.BT, 'subSets']).forEach((isActive, algorithm) => {
     if (isActive) {
       const diagnostics = csp.getIn(['diagnostics', algorithm]);
       log.addDetail(`\n${algorithm}:`, true);

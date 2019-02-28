@@ -2,7 +2,10 @@ import BT from 'algorithms/BT/index';
 import mWC from 'algorithms/mWC';
 import STR2 from 'algorithms/STR2';
 import HistoryLogItem from 'objects/HistoryLogItem';
-import { HistoryLogStyles } from 'enums';
+import {
+  Algorithms,
+  HistoryLogStyles,
+} from 'enums';
 import { getDomains } from 'algorithms/utils';
 
 import generateCSP from './generateCSP';
@@ -11,13 +14,13 @@ import { parseSolvable } from './solve';
 
 /* Algorithms mapped to their corresponding display colors */
 const algorithmColors = new Map([
-  ['Unary', 1],
-  ['BT', 2],
-  ['STR2', 3],
-  ['mWC-1', 3],
-  ['mWC-2', 4],
-  ['mWC-3', 5],
-  ['mWC-4', 6],
+  [Algorithms.Unary, 1],
+  [Algorithms.BT, 2],
+  [Algorithms.STR2, 3],
+  [Algorithms.mWC1, 3],
+  [Algorithms.mWC2, 4],
+  [Algorithms.mWC3, 5],
+  [Algorithms.mWC4, 6],
 ]);
 
 /**
@@ -161,35 +164,35 @@ export default (state, forceReevaluation = false) => state.withMutations(s => {
   s.setIn(['csp', 'domains'], getDomains(constraints));
 
   // reduce the domains with BTS
-  if (s.getIn(['csp', 'algorithms', 'BT', 'isActive'])
-  && (s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'BC']) || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC'])
-  || s.getIn(['csp', 'algorithms', 'BT', 'subSets', 'FC-STR']))) {
+  if (s.getIn(['csp', 'algorithms', Algorithms.BT, 'isActive'])
+  && (s.getIn(['csp', 'algorithms', Algorithms.BT, 'subSets', Algorithms.BC])
+  || s.getIn(['csp', 'algorithms', Algorithms.BT, 'subSets', Algorithms.FC])
+  || s.getIn(['csp', 'algorithms', Algorithms.BT, 'subSets', Algorithms.MAC]))) {
     activeComponents.forEach(componentIndex => {
-      s.update('csp', c => BT(c, componentIndex, c.getIn(['algorithms', 'BT', 'subSets'])));
+      s.update('csp', c => BT(c, componentIndex, c.getIn(['algorithms', Algorithms.BT, 'subSets'])));
     });
   } else {
-    s.deleteIn(['csp', 'solvable', 'BT']);
+    s.deleteIn(['csp', 'solvable', Algorithms.BT]);
   }
 
   // reduce the constraints with STR
-  if (s.getIn(['csp', 'algorithms', 'STR2', 'isActive'])) {
-    s.deleteIn(['csp', 'solvable', 'mWC-1']);
+  if (s.getIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'])) {
+    s.deleteIn(['csp', 'solvable', Algorithms.mWC1]);
     activeComponents.forEach(componentIndex => {
       s.update('csp', c => STR2(c, componentIndex));
     });
   } else {
-    s.deleteIn(['csp', 'solvable', 'STR2']);
+    s.deleteIn(['csp', 'solvable', Algorithms.STR2]);
   }
 
   // reduce the contstraints with PWC
-  if (s.getIn(['csp', 'algorithms', 'mWC', 'isActive'])) {
+  if (s.getIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'])) {
     activeComponents.forEach(componentIndex => {
-      s.update('csp', c => mWC(c, componentIndex, c.getIn(['algorithms', 'mWC', 'm'])));
+      s.update('csp', c => mWC(c, componentIndex, c.getIn(['algorithms', Algorithms.mWC, 'm'])));
     });
   } else {
-    for (let i = 1; i <= 4; i++) {
-      s.deleteIn(['csp', 'solvable', `mWC-${i}`]);
-    }
+    const names = [Algorithms.mWC1, Algorithms.mWC2, Algorithms.mWC3, Algorithms.mWC4];
+    names.forEach(name => { s.deleteIn(['csp', 'solvable', name]); });
   }
 
   // parse the solvable cells
