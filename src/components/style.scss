@@ -5,6 +5,8 @@ button {
   border-radius: 5px;
   font-size: 12pt;
   height: 30px;
+  max-width: fit-content;
+  min-height: 30px;
   min-width: 60px;
 }
 
@@ -18,17 +20,16 @@ h1 {
 :local {
   .container {
     display: flex;
+    height: 97vh;
   }
 
   .gap {
     min-width: 10px;
     min-height: 10px;
-    flex-grow: 1;
-  }
 
-  .static_gap {
-    min-width: 10px;
-    min-height: 10px;
-    flex-grow: 0;
+    &_grow {
+      @extend .gap;
+      flex-grow: 1;
+    }
   }
 }

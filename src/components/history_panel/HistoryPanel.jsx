@@ -12,6 +12,7 @@ export default class HistoryPanel extends Component {
         <h1>History Log</h1>
         <div className={styles['log_container']}>
           <UndoRedo />
+          <div className={styles['gap']} />
           <HistoryLog />
         </div>
       </div>

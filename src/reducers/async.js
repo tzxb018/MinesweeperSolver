@@ -92,17 +92,24 @@ export const loadProblem = async filename => {
 /**
  * Handles the sendReport action by posting the current state to the server for emailing to the administrator.
  * @param minefield state of the minefield
+ * @param {string} description description of the issue
+ * @param {string} cells list of cells that are affected by the issue
  * @returns Promise with ok status if the email was successfully sent
  */
-export const sendReport = async minefield => {
+export const sendReport = async (minefield, description, cells) => {
   const url = 'http://localhost:8000/report';
   const xmlDoc = createXMLDocument(minefield);
+  const body = {
+    cells,
+    description,
+    xmlDoc: new XMLSerializer().serializeToString(xmlDoc),
+  };
 
   return fetch(url, {
     method: 'POST',
-    body: new XMLSerializer().serializeToString(xmlDoc),
+    body: JSON.stringify(body),
     headers: {
-      'Content-Type': 'text/xml',
+      'Content-Type': 'application/json',
     },
   });
 };

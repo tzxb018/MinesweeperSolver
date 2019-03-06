@@ -11,12 +11,14 @@ http.createServer((req, res) => {
     })
     .on('end', () => {
       body = Buffer.concat(body);
+      body = JSON.parse(body);
       const attachment = {
         filename: 'instance.xml',
-        content: body,
+        content: body.xmlDoc,
         contentType: 'text/xml',
       };
-      const report = new IssueReport('TEST1', body.toString(), attachment);
+      const emailBody = `Description of the issue:\n${body.description}\n\nAffected cells:\n${body.cells}`;
+      const report = new IssueReport('TEST1', emailBody, attachment);
       report.sendReport();
       res.writeHead(200, {
         'Access-Control-Allow-Origin': '*',

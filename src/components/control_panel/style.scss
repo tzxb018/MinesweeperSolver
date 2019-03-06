@@ -1,12 +1,67 @@
+@import 'colors';
+
 :local {
+  .column_1 {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+  }
+
+  .column_2 {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+  }
+
   .control_container {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
   }
+
+  .error_form {
+    background-color: $unl_red;
+    border-radius: 5px;
+    bottom: 2%;
+    color: $unl_light_cream;
+    display: none;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    padding: 10px;
+    position: absolute;
+    left: 122px;
+    z-index: 2;
+  }
   
   .gap {
+    display: inline-block;
     min-width: 10px;
     min-height: 10px;
+    
+    &_grow {
+      @extend .gap;
+      flex-grow: 1;
+    }
+  }
+
+  h1 {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    justify-self: start;
+    text-align: left;
+  }
+
+  .report_button {
+    flex-grow: 0;
+  }
+
+  .submit_button {
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+    justify-self: end;
+  }
+
+  textarea {
+    height: 100px;
+    resize: none;
+    width: 400px;
   }
 }

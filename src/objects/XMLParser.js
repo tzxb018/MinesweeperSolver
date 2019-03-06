@@ -35,6 +35,12 @@ export const createXMLDocument = minefield => {
         bomb.setAttribute('x', x);
         bomb.setAttribute('y', y);
         bombs.appendChild(bomb);
+        if (cell.get('isFlagged')) {
+          const square = document.createElement('square');
+          square.setAttribute('x', x);
+          square.setAttribute('y', y);
+          knownSquares.appendChild(square);
+        }
       } else if (!cell.get('isHidden')) {
         const square = document.createElement('square');
         square.setAttribute('x', x);
@@ -110,15 +116,16 @@ export const loadXMLDocument = (state, xmlDoc, filename) => {
       for (let i = 0; i < knownSquares.length; i++) {
         const row = parseInt(knownSquares[i].getAttribute('y'), 10);
         const col = parseInt(knownSquares[i].getAttribute('x'), 10);
-        if (!mines.some(mine => mine.row === row && mine.col === col)) {
-          if (m.getIn(['cells', row, col, 'content']) === 0) {
-            neighborQueue.push({
-              row,
-              col,
-            });
-          } else if (m.getIn(['cells', row, col, 'content']) !== -1) {
-            m.setIn(['cells', row, col, 'isHidden'], false);
-          }
+        if (m.getIn(['cells', row, col, 'content']) === 0) {
+          neighborQueue.push({
+            row,
+            col,
+          });
+        } else if (m.getIn(['cells', row, col, 'content']) === -1) {
+          m.setIn(['cells', row, col, 'isFlagged'], true);
+          m.update('numFlagged', n => n + 1);
+        } else {
+          m.setIn(['cells', row, col, 'isHidden'], false);
         }
       }
       m.set('numRevealed', knownSquares.length);

@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import ReportError from 'components/control_panel/size_panel/ReportError';
+import ReportError from 'components/control_panel/ReportError';
 import {
   reportErrorStart,
   reportErrorEnd,
