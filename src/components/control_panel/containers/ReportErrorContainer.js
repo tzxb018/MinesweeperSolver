@@ -4,10 +4,12 @@ import {
   reportErrorStart,
   reportErrorEnd,
   reportErrorTimeout,
+  reportErrorToggle,
 } from 'actions/asyncActions';
 
 const mapStateToProps = state => ({
-  canSendReport: state.canReportError,
+  canSendReport: state.reportError.get('canReportError'),
+  isReportingError: state.reportError.get('isReportingError'),
   minefield: state.board.present.get('minefield'),
 });
 
@@ -22,6 +24,10 @@ const mapDispatchToProps = dispatch => ({
 
   reportErrorTimeout: () => {
     dispatch(reportErrorTimeout());
+  },
+
+  reportErrorToggle: () => {
+    dispatch(reportErrorToggle());
   },
 });
 

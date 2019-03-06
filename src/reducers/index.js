@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 
 import board from './board/';
 import {
-  canReportError,
+  reportError,
   isLoading,
   isTesting,
 } from './async';
@@ -15,11 +15,11 @@ import cellHighlight from './cellHighlight';
 
 export default combineReducers({
   board,
-  canReportError,
   cellHighlight,
   isLoading,
   isPeeking,
   isTesting,
+  reportError,
   smile,
   timer,
 });

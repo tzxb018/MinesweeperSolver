@@ -9,6 +9,7 @@ export default class ReportError extends Component {
   static propTypes = {
     // state props
     canSendReport: PropTypes.bool.isRequired,
+    isReportingError: PropTypes.bool.isRequired,
     minefield: PropTypes.oneOfType([
       PropTypes.instanceOf(Immutable.Map),
       PropTypes.instanceOf(Map),
@@ -17,6 +18,7 @@ export default class ReportError extends Component {
     reportErrorStart: PropTypes.func.isRequired,
     reportErrorEnd: PropTypes.func.isRequired,
     reportErrorTimeout: PropTypes.func.isRequired,
+    reportErrorToggle: PropTypes.func.isRequired,
   }
 
   /* local state */
@@ -28,26 +30,18 @@ export default class ReportError extends Component {
 
   /* event handlers */
 
-  cancelClickHandler = () => {
-    document.getElementById('errorReportForm').style.display = 'none';
-  }
-
-  reportClickHandler = () => {
-    if (document.getElementById('errorReportForm').style.display === 'none'
-    || document.getElementById('errorReportForm').style.display === '') {
-      document.getElementById('errorReportForm').style.display = 'grid';
-    } else {
-      document.getElementById('errorReportForm').style.display = 'none';
-    }
+  toggleReportWindow = () => {
+    this.props.reportErrorToggle();
   }
 
   submitClickHandler = () => {
-    this.setState({ cells: '', description: '' });
+    this.props.reportErrorToggle();
     document.getElementById('errorReportForm').style.display = 'none';
     this.props.reportErrorStart();
     sendReport(this.props.minefield, this.state.description, this.state.cells)
     .then(res => this.props.reportErrorEnd(res))
     .catch(error => this.props.reportErrorEnd(error));
+    this.setState({ cells: '', description: '' });
     setTimeout(this.props.reportErrorTimeout, 15000);
   }
 
@@ -65,11 +59,14 @@ export default class ReportError extends Component {
       <div>
         <button className={styles['report_button']}
           disabled={!this.props.canSendReport}
-          onClick={this.reportClickHandler}
+          onClick={this.toggleReportWindow}
         >
           Report Error
         </button>
-        <div id="errorReportForm" className={styles['error_form']}>
+        <div id="errorReportForm"
+          className={styles['error_form']}
+          style={{ display: this.props.isReportingError ? 'grid' : 'none' }}
+        >
           <h1>Error Report Form</h1>
           <div className={styles['column_1']}>
             <label htmlFor="description">Describe the issue:</label><br />
@@ -78,7 +75,7 @@ export default class ReportError extends Component {
           <div className={styles['submit_button']}>
             <button onClick={this.submitClickHandler}>Submit</button>
             <div className={styles['gap']} />
-            <button onClick={this.cancelClickHandler}>Cancel</button>
+            <button onClick={this.toggleReportWindow}>Cancel</button>
           </div>
           <div className={styles['column_2']}>
             <label htmlFor="cellSelection">Identify the affected cells:</label><br />

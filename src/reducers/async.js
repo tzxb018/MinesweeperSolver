@@ -1,18 +1,23 @@
 import 'babel-polyfill';
+import Immutable from 'immutable';
 import { Actions } from 'enums';
 import { createXMLDocument } from 'objects/XMLParser';
 
-const initialCanReportErrorState = true;
+const initialReportErrorState = new Immutable.Map({
+  canReportError: true,
+  isReportingError: false,
+});
 /**
  * Reducer for the error report feature
  * @param state can report error state
  * @param action redux action
  * @returns upated state
  */
-export const canReportError = (state = initialCanReportErrorState, action) => {
+export const reportError = (state = initialReportErrorState, action) => {
   switch (action.type) {
-    case Actions.REPORT_ERROR_TIMEOUT: return true;
-    case Actions.REPORT_ERROR_START: return false;
+    case Actions.REPORT_ERROR_START: return state.set('canReportError', false);
+    case Actions.REPORT_ERROR_TIMEOUT: return state.set('canReportError', true);
+    case Actions.REPORT_ERROR_TOGGLE: return state.update('isReportingError', a => !a);
     default: return state;
   }
 };

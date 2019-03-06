@@ -13,6 +13,10 @@ export const reportErrorTimeout = () => ({
   type: Actions.REPORT_ERROR_TIMEOUT,
 });
 
+export const reportErrorToggle = () => ({
+  type: Actions.REPORT_ERROR_TOGGLE,
+});
+
 export const loadStart = () => ({
   type: Actions.LOAD_START,
 });
