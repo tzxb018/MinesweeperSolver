@@ -22,7 +22,7 @@ export default class Minefield extends Component {
       display: 'grid',
       gridTemplateColumns: `repeat(${this.props.numCols}, 16px)`,
       gridTemplateRows: `repeat(${this.props.numRows}, 16px)`,
-      zIndex: 1,
+      zIndex: this.props.isReportingError ? 2 : 1,
     };
     const formattedCells = [];
     for (let i = 0; i < this.props.numRows; i++) {
@@ -44,7 +44,7 @@ export default class Minefield extends Component {
       display: 'grid',
       gridTemplateColumns: `repeat(${this.props.numCols}, 16px) 10px 16px`,
       gridTemplateRows: `repeat(${this.props.numRows}, 16px) 10px 16px`,
-      zIndex: 1,
+      zIndex: 2,
     };
     const rowColNumbers = [];
     // cell covers

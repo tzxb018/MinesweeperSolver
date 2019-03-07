@@ -6,6 +6,7 @@ import {
   revealCell,
   toggleFlag,
 } from 'actions/boardActions';
+import { highlight } from 'actions/cellHighlightActions';
 import { changeSmile } from 'actions/miscActions';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -17,12 +18,17 @@ const mapStateToProps = (state, ownProps) => ({
   isHidden: state.board.present.getIn(['minefield', 'cells', ownProps.row, ownProps.col, 'isHidden']),
   isHighlighted: state.cellHighlight.getIn([ownProps.row, ownProps.col]),
   isPeeking: state.isPeeking,
+  isReportingError: state.reportError.get('isReportingError'),
   ...ownProps,
 });
 
 const mapDispatchToProps = dispatch => ({
   changeSmile: newSmile => {
     dispatch(changeSmile(newSmile));
+  },
+
+  highlight: cells => {
+    dispatch(highlight(cells));
   },
 
   loseGame: (row, col) => {

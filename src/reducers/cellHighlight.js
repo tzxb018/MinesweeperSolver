@@ -24,7 +24,7 @@ const initialState = (numRows, numCols) => Immutable.List().withMutations(c => {
  * @returns {Immutable.List<Immutable.List<boolean>>} new state
  */
 const highlight = (state, cells) =>
-  state.withMutations(s => cells.forEach(cell => s.setIn([cell.row, cell.col], true)));
+  state.withMutations(s => cells.forEach(cell => s.updateIn([cell.row, cell.col], a => !a)));
 
 /**
  * Handles the clear action
@@ -80,6 +80,7 @@ export default (state = initialState(16, 16), action) => {
     case Actions.CLEAR: return clear(state);
     case Actions.HIGHLIGHT: return highlight(state, action.cells);
     case Actions.LOAD_END: return loadXMLDocument(action.xmlDoc);
+    case Actions.REPORT_ERROR_TOGGLE: return action.newValue ? state : clear(state);
     default: return state;
   }
 };

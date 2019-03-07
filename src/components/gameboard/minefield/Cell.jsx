@@ -21,8 +21,10 @@ export default class Cell extends Component {
     isHidden: PropTypes.bool.isRequired,
     isHighlighted: PropTypes.bool.isRequired,
     isPeeking: PropTypes.bool.isRequired,
+    isReportingError: PropTypes.bool.isRequired,
     // dispatch props
     changeSmile: PropTypes.func.isRequired,
+    highlight: PropTypes.func.isRequired,
     loseGame: PropTypes.func.isRequired,
     revealCell: PropTypes.func.isRequired,
     toggleFlag: PropTypes.func.isRequired,
@@ -165,7 +167,9 @@ export default class Cell extends Component {
   /* event handlers */
 
   clickHandler = () => {
-    if (this.props.content === -1) {
+    if (this.props.isReportingError) {
+      this.props.highlight([{ row: this.props.row, col: this.props.col }]);
+    } else if (this.props.content === -1) {
       this.props.loseGame(this.props.row, this.props.col);
     } else {
       this.props.changeSmile(Smiles.SMILE);
@@ -174,13 +178,13 @@ export default class Cell extends Component {
   }
 
   mouseDownHandler = e => {
-    if (e.nativeEvent.which === 1) {
+    if (e.nativeEvent.which === 1 && !this.props.isReportingError) {
       this.props.changeSmile(Smiles.SCARED);
     }
   }
 
   rightClickHandler = e => {
-    if (this.props.isGameRunning) {
+    if (this.props.isGameRunning && !this.props.isReportingError) {
       e.preventDefault();
       this.props.toggleFlag(this.props.row, this.props.col);
     }
@@ -188,9 +192,10 @@ export default class Cell extends Component {
 
 
   render() {
+    const hasClickHandler = (this.props.isHidden && !this.props.isFlagged) || this.props.isReportingError;
     return (
       <div className={styles['tooltip']}
-        onClick={this.props.isHidden && !this.props.isFlagged ? this.clickHandler : null}
+        onClick={hasClickHandler ? this.clickHandler : null}
         onContextMenu={this.props.isHidden ? this.rightClickHandler : null}
         onMouseDown={this.props.isHidden && !this.props.isFlagged ? this.mouseDownHandler : null}
       >

@@ -13,8 +13,9 @@ export const reportErrorTimeout = () => ({
   type: Actions.REPORT_ERROR_TIMEOUT,
 });
 
-export const reportErrorToggle = () => ({
+export const reportErrorToggle = newValue => ({
   type: Actions.REPORT_ERROR_TOGGLE,
+  newValue,
 });
 
 export const loadStart = () => ({
