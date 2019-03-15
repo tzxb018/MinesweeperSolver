@@ -133,4 +133,34 @@ const backConfig = {
   },
 };
 
-module.exports = [frontConfig, backConfig];
+const testGeneratorConfig = {
+  entry: {
+    app: ['./src/tests/generateTestCases.js'],
+  },
+  externals: [NodeExternals()],
+  output: {
+    path: `${__dirname}/src/tests`,
+    filename: 'testGenerator.node.js',
+  },
+  resolve: {
+    modules: ['src/', 'node_modules/'],
+    extensions: ['.js', '.jsx'],
+  },
+  target: 'node',
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: babelOptions,
+          },
+        ],
+        exclude: /node_modules/,
+      },
+    ],
+  },
+};
+
+module.exports = [frontConfig, backConfig, testGeneratorConfig];

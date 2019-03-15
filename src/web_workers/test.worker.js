@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 import HistoryLogItem from 'objects/HistoryLogItem';
+import { loadXMLString } from 'objects/XMLParser';
 import { logDiagnostics as logBT } from 'algorithms/BT';
 import { logDiagnostics as logmWC } from 'algorithms/mWC';
 import { logDiagnostics as logSTR2 } from 'algorithms/STR2';
@@ -17,16 +18,23 @@ import {
 /**
  * Handles the test action by running the game multiple times and recording how efficiently the active algorithms solved
  * each problem.
- * @param {object} startingState board state to run the tests with
- * @param {number} numIterations number of times to run the game
- * @param {boolean} allowCheats true if cheats are allowed, false if processing should be stopped when cheats are needed
- * to continue
+ * @param {object} event object passed as the message
+ * @param {array} event.data array containing the data of the message
+ * @param {object} event.data[0] board state to run the tests with
+ * @param {number} event.data[1] number of times to run the game
+ * @param {boolean} event.data[2] true if cheats are allowed, false if processing should be stopped when cheats are
+ * needed to continue
+ * @param {array} event.data[3] list of premade test instances in xml format, if undefined then randomly generated
+ * instances will be used
  */
 const onmessage = event => {
   // set up the test environment
   let state = Immutable.fromJS(event.data[0]);
   const numIterations = event.data[1];
   const allowCheats = event.data[2];
+  const instances = event.data[3];
+  const useRandomInstances = instances === undefined;
+
   const logs = [];
   const startTime = performance.now();
   let numRuns = 0;
@@ -37,7 +45,11 @@ const onmessage = event => {
     numRuns++;
     try {
       // attempt to solve the puzzle
-      state = cheat(state);
+      if (useRandomInstances) {
+        state = cheat(state);
+      } else {
+        state = loadXMLString(state, instances[i % instances.length]);
+      }
       state = loop(state, false);
       let numCheats = 0;
       if (allowCheats) {
@@ -110,6 +122,7 @@ const onmessage = event => {
       const message = 'Error thrown during solving';
       const log = new HistoryLogItem(message, HistoryLogStyles.RED, false);
       log.addDetail(`${e.toString()}`);
+      console.log(e);
       numFails++;
       logs.push(log);
       postMessage(state.update('historyLog', h => h.push(...logs)).toJS());

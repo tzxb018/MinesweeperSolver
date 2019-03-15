@@ -2,11 +2,10 @@
 
 ## To do list
 * write a real README
-* set up email API for issue reporting
 * implement using the number of mines available when a problem reaches steady state (certainty first, then option for probabalistic)
 * improve history log to not just be text based
 * testing and bug fixes
-* make in-house testing suite progress bar and a separate tab
+* make in-house testing suite a separate tab of history log for results
 * check cross-platform compatability (edge, firefox, mobile)
 * deploy
 * add tooltips with option to hide them
@@ -14,4 +13,5 @@
 
 * record current count of components
 * put the number selector for mWC inside the mWC button both after "mWC" and instead of the "m"
-* remove stop on error from tests
+
+* solve single step

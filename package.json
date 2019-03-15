@@ -31,13 +31,13 @@
   },
   "main": "src/index.jsx",
   "scripts": {
+    "clean": "rd /s /q dist && md dist",
+    "cleanTests": "rd /s /q src\\tests\\cases && md src\\tests\\cases",
     "start": "node dist/bundle-back.node.js",
-    "lint:js": "eslint source/ webpack*.*.js --cache",
-    "pretest": "npm run lint:js",
     "build": "webpack --config webpack.config.js",
     "watch": "webpack-dev-server --content-base ./ --hot",
-    "clean": "rm -r dist/",
-    "rebuild": "npm run build && npm run start"
+    "rebuild": "npm run clean && npm run build && npm run start",
+    "generateTests": "npm run cleanTests && node src/tests/testGenerator.node.js"
   },
   "repository": {
     "type": "git",

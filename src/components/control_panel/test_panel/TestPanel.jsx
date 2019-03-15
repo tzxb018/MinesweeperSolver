@@ -31,6 +31,7 @@ export default class TestPanel extends Component {
   state = {
     allowCheats: true,
     numIterations: 50,
+    useRandomInstances: false,
   }
 
 
@@ -48,8 +49,20 @@ export default class TestPanel extends Component {
     // set up and serialize the test environment
     const state = initTestState(boardSettings).toJS();
 
-    worker.postMessage(
-      [state, this.state.numIterations, this.state.allowCheats]);
+    if (this.state.useRandomInstances) {
+      worker.postMessage(
+        [state, this.state.numIterations, this.state.allowCheats]);
+    } else {
+      const url = `http://localhost:8000/test-instances${this.state.numIterations}`;
+      fetch(url, {
+        method: 'GET',
+      })
+      .then(res => res.text())
+      .then(response => {
+        worker.postMessage(
+          [state, this.state.numIterations, this.state.allowCheats, JSON.parse(response)]);
+      });
+    }
 
     worker.onmessage = event => {
       // deserialize the results

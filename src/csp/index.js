@@ -163,7 +163,7 @@ export default (state, forceReevaluation = false) => state.withMutations(s => {
   s.getIn(['csp', 'components']).forEach(component => constraints.push(...component.constraints));
   s.setIn(['csp', 'domains'], getDomains(constraints));
 
-  // reduce the domains with BTS
+  // solve the csp with BTS
   if (s.getIn(['csp', 'algorithms', Algorithms.BT, 'isActive'])
   && (s.getIn(['csp', 'algorithms', Algorithms.BT, 'subSets', Algorithms.BC])
   || s.getIn(['csp', 'algorithms', Algorithms.BT, 'subSets', Algorithms.FC])
@@ -175,7 +175,7 @@ export default (state, forceReevaluation = false) => state.withMutations(s => {
     s.deleteIn(['csp', 'solvable', Algorithms.BT]);
   }
 
-  // reduce the constraints with STR
+  // reduce the domains and tighten the constraints with STR
   if (s.getIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'])) {
     s.deleteIn(['csp', 'solvable', Algorithms.mWC1]);
     activeComponents.forEach(componentIndex => {
@@ -185,7 +185,7 @@ export default (state, forceReevaluation = false) => state.withMutations(s => {
     s.deleteIn(['csp', 'solvable', Algorithms.STR2]);
   }
 
-  // reduce the contstraints with PWC
+  // tighten the contstraints with PWC
   if (s.getIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'])) {
     activeComponents.forEach(componentIndex => {
       s.update('csp', c => mWC(c, componentIndex, c.getIn(['algorithms', Algorithms.mWC, 'm'])));
