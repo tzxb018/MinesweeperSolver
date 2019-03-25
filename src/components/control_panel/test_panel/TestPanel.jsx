@@ -96,6 +96,13 @@ export default class TestPanel extends Component {
               onChange={() => this.setState({ allowCheats: !this.state.allowCheats })}
             />
             <label htmlFor="allowCheats">allow cheats</label>
+            <br />
+            <input type="checkbox"
+              id="useRandomInstances"
+              checked={this.state.useRandomInstances}
+              onChange={() => this.setState({ useRandomInstances: !this.state.useRandomInstances })}
+            />
+            <label htmlFor="useRandomInstances">use random instances</label>
           </div>
         </div>
       </div>
