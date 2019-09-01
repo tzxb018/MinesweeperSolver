@@ -79,18 +79,18 @@ export default class AlgorithmToggle extends Component {
               onClick={() => this.changeHandler(Algorithms.mWC)}
             >
               mWC
-              <NumericInput id="m"
-                className={styles['selector']}
-                min={2}
-                max={4}
-                value={this.props.m}
-                step={1}
-                strict
-                onChange={
-                  valueAsNumber => this.changeHandler(Algorithms.mWC, valueAsNumber)}
-                onClick={event => event.stopPropagation()}
-              />
             </button>
+            <NumericInput id="m"
+              className={styles['selector']}
+              min={2}
+              max={4}
+              value={this.props.m}
+              step={1}
+              strict
+              onChange={
+                valueAsNumber => this.changeHandler(Algorithms.mWC, valueAsNumber)}
+              onClick={event => event.stopPropagation()}
+            />
           </div>
         </div>
       </div>

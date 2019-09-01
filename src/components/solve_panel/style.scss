@@ -35,6 +35,7 @@
   .mWC {
     @extend .button;
     background-color: $unl_wheat;
+    max-width: 60%;
   }
 
   .panel_container {
