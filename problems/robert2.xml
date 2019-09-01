@@ -1,0 +1,13 @@
+<field>
+  <dimensions x="9" y="9" />
+  <bombs>
+    <bomb x="7" y="0" />
+  </bombs>
+  <knownsquares>
+    <square x="0" y="0" />
+    <square x="6" y="0" />
+    <square x="6" y="1" />
+    <square x="7" y="1" />
+    <square x="8" y="1" />
+  </knownsquares>
+</field>

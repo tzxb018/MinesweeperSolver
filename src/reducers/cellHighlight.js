@@ -1,4 +1,5 @@
 import Immutable from 'immutable';
+import { Actions } from 'enums';
 
 /**
  * Handles the initialize board action.
@@ -23,7 +24,7 @@ const initialState = (numRows, numCols) => Immutable.List().withMutations(c => {
  * @returns {Immutable.List<Immutable.List<boolean>>} new state
  */
 const highlight = (state, cells) =>
-  state.withMutations(s => cells.forEach(cell => s.setIn([cell.row, cell.col], true)));
+  state.withMutations(s => cells.forEach(cell => s.updateIn([cell.row, cell.col], a => !a)));
 
 /**
  * Handles the clear action
@@ -44,6 +45,30 @@ const clear = state => state.withMutations(s => s.forEach((row, rowIndex) => {
 const changeSize = newSize => initialState(newSize.rows, newSize.cols);
 
 /**
+ * Handles the load end action
+ * @param {Document} xmlDoc xml DOM representing a minefield
+ * @returns {Immutable.List<Immutable.List<boolean>>} new state
+ */
+const loadXMLDocument = xmlDoc => {
+  let rows;
+  let cols;
+  const minSize = xmlDoc.getElementsByTagName('dimensions')[0];
+  rows = minSize.getAttribute('y');
+  cols = minSize.getAttribute('x');
+  if (rows <= 9 && cols <= 9) {
+    rows = 9;
+    cols = 9;
+  } else if (rows <= 16 && cols <= 16) {
+    rows = 16;
+    cols = 16;
+  } else if (rows <= 16 && cols <= 30) {
+    rows = 16;
+    cols = 30;
+  }
+  return initialState(rows, cols);
+};
+
+/**
  * Reducer for the cell highlight
  * @param state state of the cell highlight
  * @param action redux action
@@ -51,9 +76,11 @@ const changeSize = newSize => initialState(newSize.rows, newSize.cols);
  */
 export default (state = initialState(16, 16), action) => {
   switch (action.type) {
-  case 'CHANGE_SIZE': return changeSize(action.newSize);
-  case 'CLEAR': return clear(state);
-  case 'HIGHLIGHT': return highlight(state, action.cells);
-  default: return state;
+    case Actions.CHANGE_SIZE: return changeSize(action.newSize);
+    case Actions.CLEAR: return clear(state);
+    case Actions.HIGHLIGHT: return highlight(state, action.cells);
+    case Actions.LOAD_END: return loadXMLDocument(action.xmlDoc);
+    case Actions.REPORT_ERROR_TOGGLE: return action.newValue ? state : clear(state);
+    default: return state;
   }
 };

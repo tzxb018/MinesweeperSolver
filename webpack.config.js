@@ -1,4 +1,5 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const NodeExternals = require('webpack-node-externals');
 // const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const babelOptions = {
@@ -7,23 +8,44 @@ const babelOptions = {
   retainLines: true,
 };
 
-module.exports = {
+const frontConfig = {
+  devtool: 'source-map',
+
   entry: {
     bundle: './src/index.jsx',
   },
+
+  node: {
+    fs: 'empty',
+    global: true,
+  },
+
   output: {
     path: `${__dirname}/dist`,
-    filename: '[name].js',
+    filename: 'bundle.js',
     publicPath: '/dist/',
   },
-  devtool: 'source-map',
+
+  plugins: [
+    new ExtractTextPlugin('styles.css'),
+    // new UglifyJSPlugin({
+    //   sourceMap: true,
+    // }),
+  ],
+
   resolve: {
     modules: ['src/', 'node_modules/'],
     extensions: ['.js', '.jsx', '/index.js', '/index.jsx', '.json', '.scss', '/index.scss', '.css'],
   },
+
+  target: 'web',
+
   module: {
     rules: [
       {
+        test: /\.worker\.js$/,
+        use: { loader: 'worker-loader' },
+      }, {
         test: /\.jsx?$/,
         use: [
           {
@@ -79,14 +101,66 @@ module.exports = {
       },
     ],
   },
+};
 
-  plugins: [
-    new ExtractTextPlugin('styles.css'),
-    // new UglifyJSPlugin({
-    //   sourceMap: true,
-    // }),
-  ],
-  node: {
-    global: true,
+const backConfig = {
+  entry: {
+    app: ['./src/back.js'],
+  },
+  externals: [NodeExternals()],
+  output: {
+    path: `${__dirname}/dist`,
+    filename: 'bundle-back.node.js',
+  },
+  resolve: {
+    modules: ['src/', 'node_modules/'],
+    extensions: ['.js', '.jsx', '/index.js', '/index.jsx', '.json', '.scss', '/index.scss', '.css'],
+  },
+  target: 'node',
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: babelOptions,
+          },
+        ],
+        exclude: /node_modules/,
+      },
+    ],
   },
 };
+
+const testGeneratorConfig = {
+  entry: {
+    app: ['./src/tests/generateTestCases.js'],
+  },
+  externals: [NodeExternals()],
+  output: {
+    path: `${__dirname}/src/tests`,
+    filename: 'testGenerator.node.js',
+  },
+  resolve: {
+    modules: ['src/', 'node_modules/'],
+    extensions: ['.js', '.jsx'],
+  },
+  target: 'node',
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: babelOptions,
+          },
+        ],
+        exclude: /node_modules/,
+      },
+    ],
+  },
+};
+
+module.exports = [frontConfig, backConfig, testGeneratorConfig];

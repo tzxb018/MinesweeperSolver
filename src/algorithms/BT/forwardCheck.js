@@ -1,4 +1,4 @@
-import Constraint from 'Constraint';
+import Constraint from 'objects/Constraint';
 
 import { intersect } from '../utils';
 

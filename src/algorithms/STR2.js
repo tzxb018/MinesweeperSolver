@@ -1,5 +1,13 @@
-import Constraint from 'Constraint';
-import { intersect } from './utils';
+import Constraint from 'objects/Constraint';
+import HistoryLogItem from 'objects/HistoryLogItem';
+import {
+  intersect,
+  numberWithCommas,
+} from 'algorithms/utils';
+import {
+  Algorithms,
+  HistoryLogStyles,
+} from 'enums';
 
 /**
  * Maps all variables to the list of their constraints.
@@ -52,77 +60,100 @@ export const revise = (constraint, domains, diagnostics, reduced = undefined) =>
  * generalized arc consistency (GAC) across all constraint tables. Any variables with a domain of only one value are
  * added to the list of solvable cells.
  * @param {Immutable.Map} csp csp model of the minefield
+ * @param {number} componentIndex index of component to operate on
  * @returns {Immutable.Map} csp with GAC and any solvable cells identified
  */
-export default csp => csp.withMutations(c => {
-  if (!c.getIn(['diagnostics', 'STR2'])) {
+export default (csp, componentIndex) => csp.withMutations(c => {
+  if (!c.getIn(['diagnostics', Algorithms.STR2])) {
     const diagnostics = {
       time: 0,
       revisions: 0,
       tuplesKilled: 0,
     };
-    c.setIn(['diagnostics', 'STR2'], diagnostics);
+    c.setIn(['diagnostics', Algorithms.STR2], diagnostics);
   }
-  const diagnostics = c.getIn(['diagnostics', 'STR2']);
+  const diagnostics = c.getIn(['diagnostics', Algorithms.STR2]);
   const STR = [];
   const domains = c.get('domains');
   const startTime = performance.now();
 
-  c.get('components').forEach(component => {
-    const constraintMap = mapVarsToConstraints(component.constraints);
-    const queue = [];
-    component.constraints.forEach(element => queue.push(element));
+  const constraintMap = mapVarsToConstraints(c.get('components')[componentIndex].constraints);
+  const queue = [];
+  c.get('components')[componentIndex].constraints.forEach(element => queue.push(element));
 
-    try {
-      // continually check constraints until no more changes can be made
-      while (queue.length > 0) {
-        // revise the next constraint in the queue
-        diagnostics.revisions++;
-        const constraint = queue.shift();
-        const newDomains = revise(constraint, domains, diagnostics);
-        if (!newDomains) {
-          throw constraint.scope;
-        }
-
-        newDomains.forEach((values, key) => {
-          // if the new domain set is different, intersect the new and old domain sets
-          if (domains.get(key).size !== values.size) {
-            domains.set(key, intersect(domains.get(key), values));
-            // add any constraints affected by this variable back to the queue
-            constraintMap.get(key).forEach(element => {
-              if (element !== constraint && !queue.includes(element)) {
-                queue.push(element);
-              }
-            });
-          }
-          // if the domain is inconsistent, break
-          if (domains.get(key).size === 0) {
-            throw new Array(key);
-          }
-        });
+  try {
+    // continually check constraints until no more changes can be made
+    while (queue.length > 0) {
+      // revise the next constraint in the queue
+      diagnostics.revisions++;
+      const constraint = queue.shift();
+      const newDomains = revise(constraint, domains, diagnostics);
+      if (!newDomains) {
+        throw constraint.scope;
       }
-    } catch (error) {
-      error.forEach(key => {
-        constraintMap.get(key).forEach(constraint => constraint.killAll());
+
+      newDomains.forEach((values, key) => {
+        // if the new domain set is different, intersect the new and old domain sets
+        if (domains.get(key).size !== values.size) {
+          domains.set(key, intersect(domains.get(key), values));
+          // add any constraints affected by this variable back to the queue
+          constraintMap.get(key).forEach(element => {
+            if (element !== constraint && !queue.includes(element)) {
+              queue.push(element);
+            }
+          });
+        }
+        // if the domain is inconsistent, break
+        if (domains.get(key).size === 0) {
+          throw new Array(key);
+        }
       });
     }
-
-    // solve any variables with a domain of only one value
-    domains.forEach((values, key) => {
-      if (values.size === 1) {
-        STR.push({
-          key,
-          value: [...values][0],
-        });
-      }
+  } catch (error) {
+    error.forEach(key => {
+      constraintMap.get(key).forEach(constraint => constraint.killAll());
     });
+  }
+
+  // solve any variables with a domain of only one value
+  domains.forEach((values, key) => {
+    if (values.size === 1) {
+      STR.push({
+        key,
+        value: [...values][0],
+      });
+    }
   });
   diagnostics.time += performance.now() - startTime;
 
   // add all STR cells to the list of solvable cells
   if (STR.length > 0) {
-    c.setIn(['solvable', 'STR2'], STR);
-  } else {
-    c.deleteIn(['solvable', 'STR2']);
+    if (!c.getIn(['solvable', Algorithms.STR2])) {
+      c.setIn(['solvable', Algorithms.STR2], []);
+    }
+    c.updateIn(['solvable', Algorithms.STR2], x => x.concat(STR));
   }
 });
+
+/**
+ * Creates a formatted HistoryLogItem object to represent the diagnostics of the STR2 iteration.
+ * @param {Immutable.Map} csp constraint model of the board
+ * @param {number} [numRuns=1] number of iterations recorded in the diagnostics
+ * @returns {HistoryLogItem} new HistoryLogItem of the diagnostics
+ */
+export const logDiagnostics = (csp, numRuns = 1) => {
+  const log = new HistoryLogItem(`${Algorithms.STR2}:`, HistoryLogStyles.DEFAULT, false);
+  const diagnostics = csp.getIn(['diagnostics', Algorithms.STR2]);
+  Object.keys(diagnostics).forEach(key => {
+    const average = diagnostics[key] / numRuns;
+    let detail;
+    switch (key) {
+      case 'time': detail = `CPU time\t\t\t\t${Math.round(average * 100) / 100} ms`; break;
+      case 'revisions': detail = `# constraints checked\t\t${Math.round(average)}`; break;
+      case 'tuplesKilled': detail = `# tuples killed\t\t\t\t${numberWithCommas(Math.round(average))}`; break;
+      default: detail = `${key}\t\t\t\t${Math.round(average)}`;
+    }
+    log.addDetail(detail);
+  });
+  return log;
+};

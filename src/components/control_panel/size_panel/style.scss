@@ -1,0 +1,106 @@
+@import 'colors';
+
+:local {
+  .container {
+    border-radius: 5px;
+    color: $unl_light_cream;
+    background-color: $unl_red;
+    padding: 10px;
+    position: relative;
+  }
+
+  .selector {
+    background-color: $unl_light_cream;
+    width: 57px;
+  }
+
+  .gap {
+    height: 5px;
+  }
+
+  .customSelectors {
+    position: relative;
+    left: 16px;
+    margin-right: 16px;
+    display: grid;
+    grid-template-rows: auto auto auto;
+    grid-template-columns: 57px auto;
+    grid-column-gap: 5px;
+  }
+
+  input {
+    max-width: 175px;
+  }
+
+  .load-buttons {
+    display: flex;
+    margin-bottom: 10px;
+  }
+
+  .menu {
+    background-color: white;
+    border-color: gray;
+    border-radius: 2px;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 3px 3px 5px #888888;
+    color: black;
+    display: none;
+    left: 70px;
+    padding-bottom: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 3px;
+    position: absolute;
+    top: 10px;
+    z-index: 1;
+  }
+
+  .menu-item {
+    height: 20px;
+
+    &:hover {
+      background-color: lightgray;
+      cursor: pointer;
+    }
+  }
+
+  .reload {
+    display: none;
+    margin-left: 10px;
+    max-width: 100px;
+    width: auto;
+
+    span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tooltip {
+      background-color: white;
+      border-color: gray;
+      border-radius: 2px;
+      border-style: solid;
+      border-width: 1px;
+      box-shadow: 3px 3px 5px #888888;
+      color: gray;
+      max-width: none;
+      opacity: 0;
+      padding-bottom: 3px;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 3px;
+      position: absolute;
+      transition: opacity 0.25s linear 0.75s;
+      visibility: hidden;
+      z-index: 1;
+    }
+
+    &:hover .tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}

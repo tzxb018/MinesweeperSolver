@@ -1,13 +1,9 @@
 import React, { Component } from 'react';
 
-import Board from 'containers/BoardContainer';
-import CheatButton from 'containers/CheatButtonContainer';
-import ColorCodedKey from 'containers/ColorCodedKeyContainer';
-import HistoryLog from 'containers/HistoryLogContainer';
-import SizeSelector from 'containers/SizeSelectorContainer';
-import StepLoop from 'containers/StepLoop';
-import TestButton from 'containers/TestButtonContainer';
-import UndoRedo from 'containers/UndoRedoContainer';
+import ControlPanel from './control_panel/ControlPanel';
+import HistoryPanel from './history_panel/HistoryPanel';
+import Gameboard from './gameboard/containers/GameboardContainer';
+import SolvePanel from './solve_panel/SolvePanel';
 
 import styles from './style';
 
@@ -15,33 +11,13 @@ export default class App extends Component {
   render() {
     return (
       <div className={styles['container']}>
-        <div className={styles['control_container']}>
-          <SizeSelector />
-          <div className={styles['static_gap']} />
-          <CheatButton />
-          <div className={styles['static_gap']} />
-          <TestButton />
-        </div>
+        <ControlPanel />
+        <div className={styles['gap_grow']} />
+        <Gameboard />
+        <div className={styles['gap_grow']} />
+        <SolvePanel />
         <div className={styles['gap']} />
-        <Board />
-        <div className={styles['gap']} />
-        <div className={styles['solve_container']}>
-          <ColorCodedKey />
-          <div className={styles['static_gap']} />
-          <StepLoop />
-        </div>
-        <div className={styles['static_gap']} />
-        <div className={styles['stretch_container']}>
-          <div style={{
-            fontWeight: 'bold',
-            textAlign: 'center',
-          }}
-          >History Log</div>
-          <div className={styles['log_container']}>
-            <UndoRedo />
-            <HistoryLog />
-          </div>
-        </div>
+        <HistoryPanel />
       </div>
     );
   }
