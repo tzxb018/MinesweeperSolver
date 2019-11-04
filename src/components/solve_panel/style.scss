@@ -32,10 +32,22 @@
     min-width: 10px;
   }
 
+  .mWCHolder
+  {
+    display: inline-flex;
+  }
+
   .mWC {
     @extend .button;
     // background-color: $unl_wheat;
     max-width: 60%;
+  }
+
+  .selector {
+    background-color: $unl_light_cream;
+    margin-left: 10px;
+    width: 40px;
+    height: 100%;
   }
 
   .panel_container {
@@ -51,11 +63,6 @@
     grid-template-rows: auto auto;
   }
 
-  .selector {
-    // background-color: $unl_light_cream;
-    margin-left: 10px;
-    width: 40px;
-  }
 
   .solve {
     // @extend .container;

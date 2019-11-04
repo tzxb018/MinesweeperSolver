@@ -76,7 +76,7 @@ export default class AlgorithmToggle extends Component {
             STR2
             </button>
             <div style={{ height: '10px' }} />
-            <div>
+            <div className={styles['mWCHolder']}>
               <button className={styles['mWC']}
                 style={{ borderStyle: this.props.mWC ? 'inset' : 'outset' }}
                 onClick={() => this.changeHandler(Algorithms.mWC)}
