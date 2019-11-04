@@ -11,7 +11,7 @@ button {
 }
 
 h1 {
-  font-size: 1.15em;
+  font-size: 1.25em;
   font-weight: bold;
   margin: 0px;
   text-align: center;
@@ -19,8 +19,14 @@ h1 {
 
 :local {
   .container {
-    display: flex;
+    display: flex; 
+    flex-direction: column;
     height: 97vh;
+  }
+
+  .row
+  {
+    display: inline-flex;
   }
 
   .gap {
