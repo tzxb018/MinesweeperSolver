@@ -27,9 +27,9 @@ export default class CheatButton extends Component {
 
   render() {
     return (
-      <div>
+      <div className={styles['container']}>
         <h1>Cheats</h1>
-        <div className={styles['container']}>
+        <div className={styles['holder']}>
           <button className={styles['button']} onClick={this.clickHandler} disabled={!this.props.canCheat}>
             Cheat
           </button>

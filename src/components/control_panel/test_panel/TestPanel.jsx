@@ -74,9 +74,9 @@ export default class TestPanel extends Component {
 
   render() {
     return (
-      <div>
+      <div className={styles['container']}>
         <h1>Tests</h1>
-        <div className={styles['container']}>
+        <div className={styles['padding']}>
           <button className={styles['button']} onClick={this.clickHandler} disabled={this.props.isTesting}>
             Run
           </button>

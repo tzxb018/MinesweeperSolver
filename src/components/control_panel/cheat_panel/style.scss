@@ -2,13 +2,19 @@
 
 :local {
   .container {
-    color: $unl_light_cream;
-    background-color: $unl_red;
-    border-radius: 5px;
-    padding: 10px;
+    // color: $unl_light_cream;
+    // background-color: $unl_red;
+    // border-radius: 5px;
+    // padding: 10px;
+    border: black 3pt solid; 
+    height: 150px; 
   }
 
   .button {
     margin-bottom: 10px;
+  }
+
+  .holder {
+    padding: 10px; 
   }
 }
