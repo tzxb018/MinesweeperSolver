@@ -34,9 +34,9 @@ export default class StepLoop extends Component {
 
   render() {
     return (
-      <div>
+      <div className={styles['solve']}>
         <h1>Solve</h1>
-        <div className={styles['solve']}>
+        <div>
           <PeekToggle />
           <div className={styles['flex_container']}>
             <button onClick={() => this.clickHandler(false)}

@@ -15,10 +15,10 @@
   }
 
   .container {
-    background-color: $unl_dark_blue;
-    color: $unl_light_cream;
-    border-radius: 5px;
-    padding: 10px;
+    // background-color: $unl_dark_blue;
+    // color: $unl_light_cream;
+    // border-radius: 5px;
+    padding: 0px 10px;
   }
 
   .flex_container {
@@ -34,7 +34,7 @@
 
   .mWC {
     @extend .button;
-    background-color: $unl_wheat;
+    // background-color: $unl_wheat;
     max-width: 60%;
   }
 
@@ -46,28 +46,37 @@
 
   .search {
     @extend .container;
-    background-color: $unl_dark_gray;
+    // background-color: $unl_dark_gray;
     display: grid;
     grid-template-rows: auto auto;
   }
 
   .selector {
-    background-color: $unl_light_cream;
+    // background-color: $unl_light_cream;
     margin-left: 10px;
     width: 40px;
   }
 
   .solve {
     @extend .container;
-    background-color: $unl_red;
+    border: solid black 3pt; 
+    height: 150px; 
+    // background-color: $unl_red;
   }
 
   .STR2 {
     @extend .button;
-    background-color: $unl_dark_green;
+    // background-color: $unl_dark_green;
   }
 
   .holders{
-    flex-direction: row;
+    display: inline-flex;
+  }
+
+  .border
+  {
+    border: solid black 3pt; 
+    height: 150px; 
+    padding: 0px 10px;
   }
 }

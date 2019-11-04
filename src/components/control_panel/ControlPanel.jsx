@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 
 import CheatPanel from './containers/CheatPanelContainer';
 import ModalBackground from './containers/ModalBackgroundContainer';
-import ReportError from './containers/ReportErrorContainer';
 import SizePanel from './containers/SizePanelContainer';
 import TestPanel from './containers/TestPanelContainer';
 
@@ -19,7 +18,6 @@ export default class ControlPanel extends Component {
         <TestPanel />
         <div className={styles['gap_grow']} />
         <ModalBackground />
-        <ReportError />
       </div>
     );
   }
