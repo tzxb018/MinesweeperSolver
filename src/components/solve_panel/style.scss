@@ -18,7 +18,7 @@
     // background-color: $unl_dark_blue;
     // color: $unl_light_cream;
     // border-radius: 5px;
-    padding: 0px 10px;
+    padding: 10px;
   }
 
   .flex_container {
@@ -58,8 +58,9 @@
   }
 
   .solve {
-    @extend .container;
+    // @extend .container;
     border: solid black 3pt; 
+    // border-right: 0pt;
     height: 150px; 
     // background-color: $unl_red;
   }
@@ -76,6 +77,7 @@
   .border
   {
     border: solid black 3pt; 
+    border-right: 0pt; 
     height: 150px; 
     padding: 0px 10px;
   }

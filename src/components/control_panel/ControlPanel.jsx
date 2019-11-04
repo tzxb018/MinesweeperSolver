@@ -12,11 +12,11 @@ export default class ControlPanel extends Component {
     return (
       <div className={styles['control_container']}>
         <SizePanel />
-        <div className={styles['gap']} />
+        {/* <div className={styles['gap']} /> */}
         <CheatPanel />
-        <div className={styles['gap']} />
+        {/* <div className={styles['gap']} /> */}
         <TestPanel />
-        <div className={styles['gap_grow']} />
+        {/* <div className={styles['gap_grow']} /> */}
         <ModalBackground />
       </div>
     );

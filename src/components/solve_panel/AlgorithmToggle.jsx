@@ -65,7 +65,7 @@ export default class AlgorithmToggle extends Component {
           </div>
           <div style={{ height: '10px' }} />
         </div>
-        <div className={styles['gap']} />
+        {/* <div className={styles['gap']} /> */}
         <div className={styles['border']}>
           <h1>Consistency</h1>
           <div className={styles['container']}>
