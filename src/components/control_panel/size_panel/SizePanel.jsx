@@ -14,14 +14,6 @@ export default class SizePanel extends Component {
     changeSize: PropTypes.func.isRequired,
   }
 
-  /* static display components */
-
-  static sizes = {
-    BEGINNER: { size: BoardSizes.BEGINNER, rows: 9, cols: 9, numMines: 10 },
-    INTERMEDIATE: { size: BoardSizes.INTERMEDIATE, rows: 16, cols: 16, numMines: 40 },
-    EXPERT: { size: BoardSizes.EXPERT, rows: 16, cols: 30, numMines: 99 },
-  }
-
 
   /* local state */
 
@@ -31,6 +23,14 @@ export default class SizePanel extends Component {
     numMines: 99,
     maxDensity: 0.8,
     maxNumMines: 16 * 30 - 9,
+  }
+
+    /* static display components */
+
+  static sizes = {
+    BEGINNER: { size: BoardSizes.BEGINNER, rows: 9, cols: 9, numMines: 10 },
+    INTERMEDIATE: { size: BoardSizes.INTERMEDIATE, rows: 16, cols: 16, numMines: 40 },
+    EXPERT: { size: BoardSizes.EXPERT, rows: 16, cols: 30, numMines: 99 },
   }
 
 
@@ -83,67 +83,72 @@ export default class SizePanel extends Component {
 
   render() {
     return (
-      <div>
+      <div className={styles['entire']}>
         <h1>Board Size</h1>
-        <div className={styles['container']}>
-          <Load />
-          <div className="radio">
-            <input type="radio"
-              checked={this.props.size === BoardSizes.BEGINNER}
-              onChange={() => this.props.changeSize(SizePanel.sizes.BEGINNER)}
-            />
-            beginner
+        <div className={styles['whole']}>
+          <div className={styles['container']}>
+            <div className="radio">
+              <input type="radio"
+                checked={this.props.size === BoardSizes.BEGINNER}
+                onChange={() => this.props.changeSize(SizePanel.sizes.BEGINNER)}
+              />
+              beginner
+            </div>
+            <div className="radio">
+              <input type="radio"
+                checked={this.props.size === BoardSizes.INTERMEDIATE}
+                onChange={() => this.props.changeSize(SizePanel.sizes.INTERMEDIATE)}
+              />
+              intermediate
+            </div>
+            <div className="radio">
+              <input type="radio"
+                checked={this.props.size === BoardSizes.EXPERT}
+                onChange={() => this.props.changeSize(SizePanel.sizes.EXPERT)}
+              />
+              expert
+            </div>
+            <div className={styles['gap']} />
+            <Load />
           </div>
-          <div className="radio">
-            <input type="radio"
-              checked={this.props.size === BoardSizes.INTERMEDIATE}
-              onChange={() => this.props.changeSize(SizePanel.sizes.INTERMEDIATE)}
-            />
-            intermediate
-          </div>
-          <div className="radio">
-            <input type="radio"
-              checked={this.props.size === BoardSizes.EXPERT}
-              onChange={() => this.props.changeSize(SizePanel.sizes.EXPERT)}
-            />
-            expert
-          </div>
-          <div className={styles['gap']} />
-          <div className="radio">
-            <input type="radio"
-              checked={this.props.size === BoardSizes.CUSTOM}
-              onChange={() => this.customSizeHandler({})}
-            />
-            custom
-          </div>
-          <div className={styles['customSelectors']}>
-            <NumericInput id="rows"
-              className={styles['selector']}
-              min={9}
-              max={40}
-              value={this.state.rows}
-              onChange={newValue => this.rowChangeHandler(newValue)}
-              snap
-            />
-            rows
-            <NumericInput id="cols"
-              className={styles['selector']}
-              min={9}
-              max={42}
-              value={this.state.cols}
-              onChange={newValue => this.colChangeHandler(newValue)}
-              snap
-            />
-            cols
-            <NumericInput id="numMines"
-              className={styles['selector']}
-              min={10}
-              max={(this.state.maxNumMines < 999) ? this.state.maxNumMines : 999}
-              value={this.state.numMines}
-              onChange={newValue => this.mineChangeHandler(newValue)}
-              snap
-            />
-            # of mines
+          <div className={styles['container']}>
+            <div className="radio">
+              <input type="radio"
+                checked={this.props.size === BoardSizes.CUSTOM}
+                onChange={() => this.customSizeHandler({})}
+              />
+              custom
+            </div>
+            <div className={styles['gap']} />
+            <div className={styles['customSelectors']}>
+              <NumericInput id="rows"
+                className={styles['selector']}
+                min={9}
+                max={40}
+                value={this.state.rows}
+                onChange={newValue => this.rowChangeHandler(newValue)}
+                snap
+              />
+              rows
+              <NumericInput id="cols"
+                className={styles['selector']}
+                min={9}
+                max={42}
+                value={this.state.cols}
+                onChange={newValue => this.colChangeHandler(newValue)}
+                snap
+              />
+              cols
+              <NumericInput id="numMines"
+                className={styles['selector']}
+                min={10}
+                max={(this.state.maxNumMines < 999) ? this.state.maxNumMines : 999}
+                value={this.state.numMines}
+                onChange={newValue => this.mineChangeHandler(newValue)}
+                snap
+              />
+              # of mines
+            </div>
           </div>
         </div>
       </div>

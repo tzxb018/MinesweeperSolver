@@ -29,7 +29,7 @@ export default class AlgorithmToggle extends Component {
 
   render() {
     return (
-      <div>
+      <div className={styles['holders']}>
         <h1>Backbone Search</h1>
         <div className={styles['search']}>
           <button className={styles['button']}

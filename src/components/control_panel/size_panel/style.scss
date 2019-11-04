@@ -1,12 +1,24 @@
 @import 'colors';
 
 :local {
+
+  .entire
+  {
+    border: black 3pt solid; 
+    height: 150px; 
+  }
+  .whole
+  {
+    display: inline-flex;
+  }
+
   .container {
     border-radius: 5px;
-    color: $unl_light_cream;
-    background-color: $unl_red;
+    // color: $unl_light_cream;
+    // background-color: $unl_red;
     padding: 10px;
     position: relative;
+    height: 120px; 
   }
 
   .selector {

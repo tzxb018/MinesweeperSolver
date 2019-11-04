@@ -41,7 +41,7 @@
   .panel_container {
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .search {
@@ -65,5 +65,9 @@
   .STR2 {
     @extend .button;
     background-color: $unl_dark_green;
+  }
+
+  .holders{
+    flex-direction: row;
   }
 }

@@ -12,10 +12,9 @@ export default class App extends Component {
     return (
       <div className={styles['container']}>
         <ControlPanel />
+        <SolvePanel />
         <div className={styles['gap_grow']} />
         <Gameboard />
-        <div className={styles['gap_grow']} />
-        <SolvePanel />
         <div className={styles['gap']} />
         <HistoryPanel />
       </div>
