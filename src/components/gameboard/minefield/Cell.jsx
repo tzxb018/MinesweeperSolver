@@ -46,20 +46,20 @@ export default class Cell extends Component {
   ];
 
   static flag = [
-    <polygon key="flag" points="9,3 8,3 4,5 4,6 8,8 9,8" style={{ fill: 'red' }} />,
-    <polygon key="pole" points="9,8 8,8 8,10 4,11 4,13 12,13 12,11 9,10" style={{ fill: 'black' }} />,
+    <polygon key="flag" points="10.5,4.5 9.5,4.5 5.5,6.5 5.5,7.5 9.5,9.5 10.5,9.5" style={{ fill: 'red' }} />,
+    <polygon key="pole" points="10.5,9.5 9.5,9.5 9.5,11.5 5.5,12.5 5.5,14.5 13.5,14.5 13.5,12.5 10.5,11.5" style={{ fill: 'black' }} />,
   ];
 
-  static highlight = <rect height="16" width="16" key="highlight" className={styles['cellHighlight']} />;
+  static highlight = <rect height="20" width="20" key="highlight" className={styles['cellHighlight']} />;
 
   static mine = [
-    <circle key="mine" cx="8.5" cy="8.5" r="4.5" style={{ fill: 'black' }} />,
+    <circle key="mine" cx="10" cy="10" r="4.5" style={{ fill: 'black' }} />,
     <path key="spikes"
-      d="M4 4 L5 4 L5 5 L4 5 M8 2 L9 2 L9 4 L8 4 M12 4 L13 4 L13 5 L12 5 M13 8 L15 8 L15 9 L13 9 M12 12 L13 12 L13 13
-        L12 13 M8 13 L9 13 L9 15 L8 15 M4 12 L5 12 L5 13 L4 13 M2 8 L4 8 L4 9 L2 9Z"
+      d="M5.5 5.5 L6.5 5.5 L6.5 6.5 L5.5 6.5 M9.5 3.5 L10.5 3.5 L10.5 5.5 L9.5 5.5 M13.5 5.5 L14.5 5.5 L14.5 6.5 L13.5 6.5 M14.5 9.5 L16.5 9.5 L16.5 10.5 L14.5 10.5 M13.5 13.5 L14.5 13.5 L14.5 14.5
+        L13.5 14.5 M9.5 14.5 L10.5 14.5 L10.5 16.5 L9.5 16.5 M5.5 13.5 L6.5 13.5 L6.5 14.5 L5.5 14.5 M3.5 9.5 L5.5 9.5 L5.5 10.5 L3.5 10.5Z"
       fill="black"
     />,
-    <polygon key="shine" points="6,6 8,6 8,8 6,8" style={{ fill: 'white' }} />,
+    <polygon key="shine" points="7.5,7.5 9.5,7.5 9.5,9.5 7.5,9.5" style={{ fill: 'white' }} />,
   ];
 
 
@@ -67,31 +67,31 @@ export default class Cell extends Component {
 
   numbers = [
     null,
-    <polygon key="1" points="8,3 10,3 10,11 12,11 12,13 5,13 5,11 7,11 7,7 5,7 5,6" style={{ fill: 'blue' }} />,
+    <polygon key="1" points="9.5,4.5 11.5,4.5 11.5,12.5 13.5,12.5 13.5,14.5 6.5,14.5 6.5,12.5 8.5,12.5 8.5,8.5 6.5,8.5 6.5,7.5" style={{ fill: 'blue' }} />,
     <polygon key="2"
-      points="3,6 3,4 4,3 12,3 13,4 13,8 7,10 7,11 13,11 13,13 3,13 3,10 10,7 10,5 6,5 6,6"
+      points="5,7 5,6 6,5 14,5 15,6 15,10 9,12 9,13 15,13 15,15 5,15 5,12 12,9 12,7 8,7 8,8"
       style={{ fill: 'rgb(0, 128, 0)' }}
     />,
     <polygon key="3"
-      points="3,3 12,3 13,4 13,7 12,8 13,9 13,12 12,13 3,13 3,11 10,11 10,9 6,9 6,7 10,7 10,5 3,5"
+      points="5,5 14,5 15,6 15,9 14,10 15,11 15,14 14,15 5,15 5,13 12,13 12,11 8,11 8,8 12,9 12,7 5,7"
       style={this.props.cspColor === -1 ? { fill: 'rgb(192, 192, 192)' } : { fill: 'red' }}
     />,
     <polygon key="4"
-      points="3,7 5,3 8,3 7,7 9,7 9,3 12,3 12,7 13,7 13,9 12,9 12,13 9,13 9,9 3,9"
+      points="5,9 7,5 10,5 9,9 11,9 11,5 14,5 14,9 15,9 15,11 14,11 14,15 11,15 11,11 5,11"
       style={{ fill: 'rgb(0, 0, 128)' }}
     />,
     <polygon key="5"
-      points="3,3 13,3 13,5 6,5 6,7 12,7 13,8 13,12 12,13 3,13 3,11 10,11 10,9 3,9"
+      points="5,5 15,5 15,7 8,7 9,9 14,9 15,10 15,14 14,15 5,15 5,13 12,13 12,11 5,11"
       style={{ fill: 'rgb(128, 0, 0)' }}
     />,
     <polygon key="6"
-      points="3,4 4,3 12,3 12,5 6,5 6,7 12,7 13,8 13,12 12,13 4,13 3,12 6,9 6,11 10,11 10,9 6,9 3,12"
+      points="5,6 6,5 14,5 14,7 8,7 8,9 14,9 15,10 15,14 14,15 6,15 5,14 8,11 8,13 12,13 12,11 8,11 5,14"
       style={{ fill: 'rgb(0, 128, 128)' }}
     />,
-    <polygon key="7" points="3,3 13,3 13,5 10,13 7,13 10,5 3,5" style={{ fill: 'black' }} />,
+    <polygon key="7" points="5,5 15,5 15,7 12,15 9,15 12,7 5,7" style={{ fill: 'black' }} />,
     <polygon key="8"
-      points="4,3 12,3 13,4 13,7 12,8 13,9 13,12 12,13 4,13 3,12 3,9 4,8 3,7 3,4 6,9 6,11 10,11 10,9 6,9 3,4 6,5 6,7
-      10,7 10,5 6,5 3,4"
+      points="6,5 14,5 15,6 15,9 14,10 15,11 15,14 14,15 6,15 5,14 5,11 6,10 5,9 5,6 8,11 8,13 12,13 12,11 8,11 5,6 8,7 8,9
+      12,9 12,7 8,7 5,6"
       style={{ fill: 'rgb(128, 128, 128)' }}
     />,
   ];
@@ -117,10 +117,10 @@ export default class Cell extends Component {
 
   hiddenCell = () => {
     const graphic = [
-      <polygon key="topLeftBorder" points="0,0 16,0 0,16" style={{ fill: 'white' }} />,
-      <polygon key="bottomRightBorder" points="16,16 0,16 16,0" style={{ fill: 'rgb(128, 128, 128)' }} />,
+      <polygon key="topLeftBorder" points="0,0 20,0 0,20" style={{ fill: 'white' }} />,
+      <polygon key="bottomRightBorder" points="20,20 0,20 20,0" style={{ fill: 'rgb(128, 128, 128)' }} />,
       <polygon key="hiddenCellFill"
-        points="2,2, 2,14, 14,14 14,2"
+        points="2,2, 2,18, 18,18 18,2"
         style={{ fill: this.props.isPeeking && !this.props.isFlagged ?
           Cell.colors[this.props.cspColor] : 'rgb(192, 192, 192)' }}
       />,
@@ -133,9 +133,9 @@ export default class Cell extends Component {
 
   revealedCell = () => {
     const graphic = [
-      <polygon key="revealedBorder" points="0,0 16,0 16,16 0,16" style={{ fill: 'rgb(128, 128, 128)' }} />,
+      <polygon key="revealedBorder" points="0,0 20,0 20,20 0,20" style={{ fill: 'rgb(128, 128, 128)' }} />,
       <polygon key="revealedBackground"
-        points="1,1 16,1 16,16 1,16"
+        points="1,1 20,1 20,20 1,20"
         style={this.props.content === Mines.MINE_EXPLODED || (this.props.isPeeking && this.props.cspColor === -1)
           ? { fill: 'red' } : { fill: 'rgb(192, 192, 192)' }}
       />,
@@ -148,15 +148,15 @@ export default class Cell extends Component {
 
   tooltip = () => {
     const graphic = [
-      <polygon key="border" points="0,0 16,0 16,16 0,16" style={{ fill: 'rgb(128, 128, 128' }} />,
-      <polygon key="background" points="1,1 16,1 16,16 1,16" style={{ fill: 'rgb(192, 192, 192)' }} />,
+      <polygon key="border" points="0,0 20,0 20,20 0,20" style={{ fill: 'rgb(128, 128, 128' }} />,
+      <polygon key="background" points="1,1 20,1 20,20 1,20" style={{ fill: 'rgb(192, 192, 192)' }} />,
     ];
     if (this.props.cspSolution) {
       graphic.push(...Cell.mine);
     }
     return (
       <span key="tooltip" className={styles['tooltiptext']}>
-        <svg height="16" width="16">
+        <svg height="20" width="20">
           {graphic}
         </svg>
       </span>
@@ -199,7 +199,7 @@ export default class Cell extends Component {
         onContextMenu={this.props.isHidden ? this.rightClickHandler : null}
         onMouseDown={this.props.isHidden && !this.props.isFlagged ? this.mouseDownHandler : null}
       >
-        <svg height="16" width="16">
+        <svg height="20" width="20">
           {this.props.isHidden ? this.hiddenCell() : this.revealedCell()}
           {this.props.isHighlighted ? Cell.highlight : null}
         </svg>
