@@ -47,7 +47,10 @@ export default class Cell extends Component {
 
   static flag = [
     <polygon key="flag" points="10.5,4.5 9.5,4.5 5.5,6.5 5.5,7.5 9.5,9.5 10.5,9.5" style={{ fill: 'red' }} />,
-    <polygon key="pole" points="10.5,9.5 9.5,9.5 9.5,11.5 5.5,12.5 5.5,14.5 13.5,14.5 13.5,12.5 10.5,11.5" style={{ fill: 'black' }} />,
+    <polygon key="pole"
+      points="10.5,9.5 9.5,9.5 9.5,11.5 5.5,12.5 5.5,14.5 13.5,14.5 13.5,12.5 10.5,11.5"
+      style={{ fill: 'black' }}
+    />,
   ];
 
   static highlight = <rect height="20" width="20" key="highlight" className={styles['cellHighlight']} />;
@@ -55,8 +58,10 @@ export default class Cell extends Component {
   static mine = [
     <circle key="mine" cx="10" cy="10" r="4.5" style={{ fill: 'black' }} />,
     <path key="spikes"
-      d="M5.5 5.5 L6.5 5.5 L6.5 6.5 L5.5 6.5 M9.5 3.5 L10.5 3.5 L10.5 5.5 L9.5 5.5 M13.5 5.5 L14.5 5.5 L14.5 6.5 L13.5 6.5 M14.5 9.5 L16.5 9.5 L16.5 10.5 L14.5 10.5 M13.5 13.5 L14.5 13.5 L14.5 14.5
-        L13.5 14.5 M9.5 14.5 L10.5 14.5 L10.5 16.5 L9.5 16.5 M5.5 13.5 L6.5 13.5 L6.5 14.5 L5.5 14.5 M3.5 9.5 L5.5 9.5 L5.5 10.5 L3.5 10.5Z"
+      d="M5.5 5.5 L6.5 5.5 L6.5 6.5 L5.5 6.5 M9.5 3.5 L10.5 3.5 L10.5 5.5 L9.5 5.5 M13.5 5.5
+      L14.5 5.5 L14.5 6.5 L13.5 6.5 M14.5 9.5 L16.5 9.5 L16.5 10.5 L14.5 10.5 M13.5 13.5 L14.5 13.5 L14.5 14.5
+        L13.5 14.5 M9.5 14.5 L10.5 14.5 L10.5 16.5 L9.5 16.5 M5.5 13.5 L6.5 13.5 L6.5 14.5 L5.5 14.5 M3.5 9.5
+        L5.5 9.5 L5.5 10.5 L3.5 10.5Z"
       fill="black"
     />,
     <polygon key="shine" points="7.5,7.5 9.5,7.5 9.5,9.5 7.5,9.5" style={{ fill: 'white' }} />,
@@ -67,7 +72,11 @@ export default class Cell extends Component {
 
   numbers = [
     null,
-    <polygon key="1" points="9.5,4.5 11.5,4.5 11.5,12.5 13.5,12.5 13.5,14.5 6.5,14.5 6.5,12.5 8.5,12.5 8.5,8.5 6.5,8.5 6.5,7.5" style={{ fill: 'blue' }} />,
+    <polygon key="1"
+      points="9.5,4.5 11.5,4.5 11.5,12.5 13.5,12.5 13.5,14.5 6.5,14.5 6.5,12.5
+    8.5,12.5 8.5,8.5 6.5,8.5 6.5,7.5"
+      style={{ fill: 'blue' }}
+    />,
     <polygon key="2"
       points="5,7 5,6 6,5 14,5 15,6 15,10 9,12 9,13 15,13 15,15 5,15 5,12 12,9 12,7 8,7 8,8"
       style={{ fill: 'rgb(0, 128, 0)' }}
@@ -90,7 +99,8 @@ export default class Cell extends Component {
     />,
     <polygon key="7" points="5,5 15,5 15,7 12,15 9,15 12,7 5,7" style={{ fill: 'black' }} />,
     <polygon key="8"
-      points="6,5 14,5 15,6 15,9 14,10 15,11 15,14 14,15 6,15 5,14 5,11 6,10 5,9 5,6 8,11 8,13 12,13 12,11 8,11 5,6 8,7 8,9
+      points="6,5 14,5 15,6 15,9 14,10 15,11 15,14 14,15 6,15 5,14 5,11 6,10 5,9 5,6 8,11 8,13 12,13 12,11
+      8,11 5,6 8,7 8,9
       12,9 12,7 8,7 5,6"
       style={{ fill: 'rgb(128, 128, 128)' }}
     />,

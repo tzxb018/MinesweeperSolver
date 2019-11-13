@@ -31,7 +31,7 @@ export default class AlgorithmToggle extends Component {
     return (
       <div className={styles['holders']}>
         <div className={styles['border']}>
-          <h1>Backbone Search</h1>
+          <h1>Backbone</h1>
           <div className={styles['search']}>
             <button className={styles['button']}
               style={{ borderStyle: this.props.BT ? 'inset' : 'outset' }}
