@@ -16,6 +16,20 @@ export default class ResetButton extends Component {
     reset: PropTypes.func.isRequired,
   };
 
+  /* lifecycle handlers */
+
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.isGameRunning && this.props.isGameRunning) {
+      if (nextProps.isGameWon) {
+        this.props.changeSmile(Smiles.WON);
+      } else if (nextProps.isGameStarted) {
+        this.props.changeSmile(Smiles.LOST);
+      }
+    } else if (nextProps.isGameRunning && !this.props.isGameRunning) {
+      this.props.changeSmile(Smiles.SMILE);
+    }
+  }
+
 
   /* static display components */
 
@@ -70,21 +84,6 @@ export default class ResetButton extends Component {
       <path key="shades" d="M9 10 Q9 14, 11 14 T13 10Z M14 10 Q14 14, 16 14 T18 10Z" fill="black" />,
     ]],
   ]);
-
-
-  /* lifecycle handlers */
-
-  componentWillReceiveProps(nextProps) {
-    if (!nextProps.isGameRunning && this.props.isGameRunning) {
-      if (nextProps.isGameWon) {
-        this.props.changeSmile(Smiles.WON);
-      } else if (nextProps.isGameStarted) {
-        this.props.changeSmile(Smiles.LOST);
-      }
-    } else if (nextProps.isGameRunning && !this.props.isGameRunning) {
-      this.props.changeSmile(Smiles.SMILE);
-    }
-  }
 
 
   /* event handlers */

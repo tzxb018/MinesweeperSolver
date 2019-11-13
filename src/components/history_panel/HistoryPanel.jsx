@@ -9,9 +9,12 @@ export default class HistoryPanel extends Component {
   render() {
     return (
       <div className={styles['stretch_container']}>
-        <h1>History Log</h1>
+
         <div className={styles['log_container']}>
-          <UndoRedo />
+          <div className={styles['header']}>
+            <h1>History Log</h1>
+            <UndoRedo />
+          </div>
           <div className={styles['gap']} />
           <HistoryLog />
         </div>

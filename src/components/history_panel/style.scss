@@ -33,12 +33,23 @@
 
   .log_container {
     padding: 10px;
-    background-color:black;
+    // background-color: black;
+    border: 3pt black solid; 
     border-radius: 5px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     max-height: 510px;
+  }
+
+  .header h1{
+    float: left;
+  }
+
+  .header
+  {
+    display: inline-block;
+    width: 100%;
   }
 
   .green {
@@ -69,6 +80,14 @@
 
   .undo_redo {
     display: flex;
-    justify-content: center;
+    // justify-content: right;
+    float: right;
+  }
+
+  .last
+  {
+    float: 'left';
+    clear: 'both';
+    height: 30px; 
   }
 }
