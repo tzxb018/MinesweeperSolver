@@ -90,26 +90,30 @@ export default class SizePanel extends Component {
             <div className="radio">
               <input type="radio"
                 checked={this.props.size === BoardSizes.BEGINNER}
-                onChange={() => this.props.changeSize(SizePanel.sizes.BEGINNER)}
+                // onChange={() => this.props.changeSize(SizePanel.sizes.BEGINNER)}
               />
               beginner
             </div>
             <div className="radio">
               <input type="radio"
                 checked={this.props.size === BoardSizes.INTERMEDIATE}
-                onChange={() => this.props.changeSize(SizePanel.sizes.INTERMEDIATE)}
+                // onChange={() => this.props.changeSize(SizePanel.sizes.INTERMEDIATE)}
               />
               intermediate
             </div>
             <div className="radio">
               <input type="radio"
                 checked={this.props.size === BoardSizes.EXPERT}
-                onChange={() => this.props.changeSize(SizePanel.sizes.EXPERT)}
+                // onChange={() => this.props.changeSize(SizePanel.sizes.EXPERT)}
               />
               expert
             </div>
             <div className={styles['gap']} />
-            <Load />
+            <div className={styles['row_container']}>
+              <button>Create</button>
+              <Load />
+            </div>
+
           </div>
           <div className={styles['container']}>
             <div className="radio">

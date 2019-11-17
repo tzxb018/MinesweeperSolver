@@ -78,6 +78,12 @@
     }
   }
 
+  .row_container
+  {
+    // flex-direction: row;
+    display: inline-flex;
+  }
+
   .reload {
     display: none;
     margin-left: 10px;
