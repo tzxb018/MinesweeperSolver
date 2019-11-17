@@ -30,6 +30,7 @@ export default class AlgorithmToggle extends Component {
   render() {
     return (
       <div className={styles['holders']}>
+
         <div className={styles['border']}>
           <h1>Backbone</h1>
           <div className={styles['search']}>
@@ -65,6 +66,43 @@ export default class AlgorithmToggle extends Component {
           </div>
           <div style={{ height: '10px' }} />
         </div>
+        <div className={styles['border']}>
+          <h1>Legend</h1>
+          <div className={styles['table_container']}>
+            <table>
+              <tr>
+                <td>
+                  <div className={styles['unary']} />
+                </td>
+                <td>Unary</td>
+              </tr>
+              <tr>
+                <td>
+                  <div className={styles['gac']} />
+                </td>
+                <td>GAC</td>
+              </tr>
+              <tr>
+                <td>
+                  <div className={styles['two_wc']} />
+                </td>
+                <td>2wC</td>
+              </tr>
+              <tr>
+                <td>
+                  <div className={styles['three_wc']} />
+                </td>
+                <td>3wC</td>
+              </tr>
+              <tr>
+                <td>
+                  <div className={styles['backbone']} />
+                </td>
+                <td>Backbone</td>
+              </tr>
+            </table>
+          </div>
+        </div>
         {/* <div className={styles['gap']} /> */}
         <div className={styles['border']}>
           <h1>Consistency</h1>
@@ -96,6 +134,7 @@ export default class AlgorithmToggle extends Component {
               />
             </div>
           </div>
+
         </div>
       </div>
     );

@@ -20,6 +20,7 @@ export default class App extends Component {
           <HistoryPanel />
           <div className={styles['gap']} />
           <Gameboard />
+          <div className={styles['gap']} />
         </div>
 
         {/* <div className={styles['gap_grow']} /> */}
