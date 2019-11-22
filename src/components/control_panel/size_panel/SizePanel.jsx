@@ -6,7 +6,9 @@ import { BoardSizes } from 'enums';
 
 import styles from './style';
 
+
 export default class SizePanel extends Component {
+
   static propTypes = {
     // state props
     size: PropTypes.symbol.isRequired,
@@ -14,24 +16,25 @@ export default class SizePanel extends Component {
     changeSize: PropTypes.func.isRequired,
   }
 
-
-  /* local state */
-
-  state = {
-    rows: 16,
-    cols: 30,
-    numMines: 99,
-    maxDensity: 0.8,
-    maxNumMines: 16 * 30 - 9,
+  constructor(props) {
+    super(props);
+    this.state = {
+      rows: 16,
+      cols: 30,
+      numMines: 99,
+      maxDensity: 0.8,
+      maxNumMines: 16 * 30 - 9,
+      board_size: 2,
+    };
   }
-
-    /* static display components */
 
   static sizes = {
     BEGINNER: { size: BoardSizes.BEGINNER, rows: 9, cols: 9, numMines: 10 },
     INTERMEDIATE: { size: BoardSizes.INTERMEDIATE, rows: 16, cols: 16, numMines: 40 },
     EXPERT: { size: BoardSizes.EXPERT, rows: 16, cols: 30, numMines: 99 },
-  }
+  };
+
+  /* static display components */
 
 
   /* event handlers */
@@ -80,6 +83,19 @@ export default class SizePanel extends Component {
     this.setState(newState);
   }
 
+  handleChange(newSize) {
+    this.setState({ board_size: newSize });
+  }
+
+  handleSubmit() {
+    if (this.state.board_size === BoardSizes.BEGINNER) {
+      this.props.changeSize(SizePanel.sizes.BEGINNER);
+    } else if (this.state.board_size === BoardSizes.INTERMEDIATE) {
+      this.props.changeSize(SizePanel.sizes.INTERMEDIATE);
+    } else if (this.state.board_size === BoardSizes.EXPERT) {
+      this.props.changeSize(SizePanel.sizes.EXPERT);
+    }
+  }
 
   render() {
     return (
@@ -89,30 +105,34 @@ export default class SizePanel extends Component {
           <div className={styles['container']}>
             <div className="radio">
               <input type="radio"
-                checked={this.props.size === BoardSizes.BEGINNER}
+                checked={this.state.board_size === BoardSizes.BEGINNER}
                 // onChange={() => this.props.changeSize(SizePanel.sizes.BEGINNER)}
+                onChange={() => { this.handleChange(BoardSizes.BEGINNER); }}
               />
               beginner
             </div>
             <div className="radio">
               <input type="radio"
-                checked={this.props.size === BoardSizes.INTERMEDIATE}
+                checked={this.state.board_size === BoardSizes.INTERMEDIATE}
                 // onChange={() => this.props.changeSize(SizePanel.sizes.INTERMEDIATE)}
+                onChange={() => { this.handleChange(BoardSizes.INTERMEDIATE); }}
               />
               intermediate
             </div>
             <div className="radio">
               <input type="radio"
-                checked={this.props.size === BoardSizes.EXPERT}
+                checked={this.state.board_size === BoardSizes.EXPERT}
                 // onChange={() => this.props.changeSize(SizePanel.sizes.EXPERT)}
+                onChange={() => { this.handleChange(BoardSizes.EXPERT); }}
               />
               expert
             </div>
             <div className={styles['gap']} />
             <div className={styles['row_container']}>
-              <button>Create</button>
+              <button type="submit" onClick={() => { this.handleSubmit(); }}>Create</button>
               <Load />
             </div>
+
 
           </div>
           <div className={styles['container']}>
