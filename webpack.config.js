@@ -15,6 +15,14 @@ const frontConfig = {
     bundle: './src/index.jsx',
   },
 
+  devServer: {
+    watchContentBase: true,
+
+    watchOptions: {
+      poll: true,
+    },
+  },
+
   node: {
     fs: 'empty',
     global: true,
