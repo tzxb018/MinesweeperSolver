@@ -94,6 +94,8 @@ export default class SizePanel extends Component {
       this.props.changeSize(SizePanel.sizes.INTERMEDIATE);
     } else if (this.state.board_size === BoardSizes.EXPERT) {
       this.props.changeSize(SizePanel.sizes.EXPERT);
+    } else {
+      this.customSizeHandler({});
     }
   }
 
@@ -106,7 +108,6 @@ export default class SizePanel extends Component {
             <div className="radio">
               <input type="radio"
                 checked={this.state.board_size === BoardSizes.BEGINNER}
-                // onChange={() => this.props.changeSize(SizePanel.sizes.BEGINNER)}
                 onChange={() => { this.handleChange(BoardSizes.BEGINNER); }}
               />
               beginner
@@ -114,7 +115,6 @@ export default class SizePanel extends Component {
             <div className="radio">
               <input type="radio"
                 checked={this.state.board_size === BoardSizes.INTERMEDIATE}
-                // onChange={() => this.props.changeSize(SizePanel.sizes.INTERMEDIATE)}
                 onChange={() => { this.handleChange(BoardSizes.INTERMEDIATE); }}
               />
               intermediate
@@ -122,7 +122,6 @@ export default class SizePanel extends Component {
             <div className="radio">
               <input type="radio"
                 checked={this.state.board_size === BoardSizes.EXPERT}
-                // onChange={() => this.props.changeSize(SizePanel.sizes.EXPERT)}
                 onChange={() => { this.handleChange(BoardSizes.EXPERT); }}
               />
               expert
@@ -139,7 +138,9 @@ export default class SizePanel extends Component {
             <div className="radio">
               <input type="radio"
                 checked={this.props.size === BoardSizes.CUSTOM}
-                onChange={() => this.customSizeHandler({})}
+                onChange={() => { this.handleChange(BoardSizes.CUSTOM); }}
+
+                // onChange={() => this.customSizeHandler({})}
               />
               custom
             </div>
