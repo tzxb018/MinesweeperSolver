@@ -6,7 +6,8 @@
   {
     border: black 3pt solid; 
     border-right: 0pt;
-    height: 150px; 
+    height: 180px; 
+    padding: 5px; 
   }
   .whole
   {
@@ -20,6 +21,12 @@
     padding: 10px;
     position: relative;
     height: 120px; 
+    display: inline-block;
+    justify-content:space-around;
+  }
+
+  .container button{
+    width: 100%; 
   }
 
   .selector {
@@ -33,8 +40,8 @@
 
   .customSelectors {
     position: relative;
-    left: 16px;
-    margin-right: 16px;
+    // left: 16px;
+    // margin-right: 16px;
     display: grid;
     grid-template-rows: auto auto auto;
     grid-template-columns: 57px auto;

@@ -85,6 +85,7 @@ export default class SizePanel extends Component {
 
   handleChange(newSize) {
     this.setState({ board_size: newSize });
+    console.log(this.state.board_size);
   }
 
   handleSubmit() {
@@ -105,44 +106,22 @@ export default class SizePanel extends Component {
         <h1>Board Size</h1>
         <div className={styles['whole']}>
           <div className={styles['container']}>
-            <div className="radio">
-              <input type="radio"
-                checked={this.state.board_size === BoardSizes.BEGINNER}
-                onChange={() => { this.handleChange(BoardSizes.BEGINNER); }}
-              />
-              beginner
-            </div>
-            <div className="radio">
-              <input type="radio"
-                checked={this.state.board_size === BoardSizes.INTERMEDIATE}
-                onChange={() => { this.handleChange(BoardSizes.INTERMEDIATE); }}
-              />
-              intermediate
-            </div>
-            <div className="radio">
-              <input type="radio"
-                checked={this.state.board_size === BoardSizes.EXPERT}
-                onChange={() => { this.handleChange(BoardSizes.EXPERT); }}
-              />
-              expert
-            </div>
             <div className={styles['gap']} />
-            <div className={styles['row_container']}>
-              <button type="submit" onClick={() => { this.handleSubmit(); }}>Create</button>
-              <Load />
-            </div>
-
-
+            <button type="submit" onClick={() => this.props.changeSize(SizePanel.sizes.BEGINNER)}>
+              Beginner</button>
+            <div className={styles['gap']} />
+            <button type="submit" onClick={() => this.props.changeSize(SizePanel.sizes.INTERMEDIATE)}>
+              Intermediate</button>
+            <div className={styles['gap']} />
+            <button type="submit" onClick={() => this.props.changeSize(SizePanel.sizes.EXPERT)}>
+              Expert</button>
+            <div className={styles['gap']} />
+            <Load />
           </div>
           <div className={styles['container']}>
-            <div className="radio">
-              <input type="radio"
-                checked={this.props.size === BoardSizes.CUSTOM}
-                onChange={() => { this.handleChange(BoardSizes.CUSTOM); }}
-
-                // onChange={() => this.customSizeHandler({})}
-              />
-              custom
+            <div className="button">
+              <button type="submit" onClick={() => this.customSizeHandler({})}>
+                Custom</button>
             </div>
             <div className={styles['gap']} />
             <div className={styles['customSelectors']}>
