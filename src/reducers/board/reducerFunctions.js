@@ -404,26 +404,31 @@ export const loseGame = (state, row, col) => state.withMutations(s => {
  * @returns newState
  */
 export const toggleActive = (state, algorithm, modifier) => state.withMutations(s => {
-  console.log(state);
+  console.log('toggle active', algorithm);
   if (algorithm === Algorithms.Unary) {
-    s.updateIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
-    s.updateIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], false);
-    s.updateIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
+    console.log('selected unary');
+    s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
+    s.setIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], false);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
   } else if (algorithm === Algorithms.GAC) {
-    s.updateIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
-    s.updateIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
-    s.updateIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
+    console.log('selected gac');
+    s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
+    s.setIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
   } else if (algorithm === Algorithms.mWC) {
-    s.updateIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
-    s.updateIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
-    s.updateIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
+    console.log('selected mwc');
+    s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
+    s.setIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
     s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier);
   } else if (algorithm === Algorithms.BT) {
-    s.updateIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], true);
-    s.updateIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
-    s.updateIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
+    console.log('selected bt');
+    s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
     s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], 4);
   }
+  console.log(s);
   // if (modifier) {
   //   switch (algorithm) {
   //     case Algorithms.BT: s.updateIn(['csp', 'algorithms', Algorithms.BT, 'subSets', modifier], a => !a); break;

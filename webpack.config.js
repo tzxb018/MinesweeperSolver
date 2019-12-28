@@ -171,4 +171,5 @@ const testGeneratorConfig = {
   },
 };
 
+
 module.exports = [frontConfig, backConfig, testGeneratorConfig];

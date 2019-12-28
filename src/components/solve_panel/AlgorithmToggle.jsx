@@ -1,20 +1,19 @@
 import PropTypes from 'prop-types';
 // import NumericInput from 'react-numeric-input';
 import React, { Component } from 'react';
-// import { Algorithms } from 'enums';
+import { Algorithms } from 'enums';
 // import Select from 'react-select';
-
 
 import styles from './style';
 
-const options = [
-  { value: 'Unary', label: 'Unary' },
-  { value: 'GAC', label: 'GAC' },
-  { value: '2wC', label: '2wC' },
-  { value: '3wC', label: '3wC' },
-  { value: '4wC', label: '4wC' },
-  { value: 'BT', label: 'Backbone' },
-];
+// const options = [
+//   { value: 'Unary', label: 'Unary' },
+//   { value: 'GAC', label: 'GAC' },
+//   { value: '2wC', label: '2wC' },
+//   { value: '3wC', label: '3wC' },
+//   { value: '4wC', label: '4wC' },
+//   { value: 'BT', label: 'Backbone' },
+// ];
 
 export default class AlgorithmToggle extends Component {
 
@@ -31,14 +30,32 @@ export default class AlgorithmToggle extends Component {
     toggleActive: PropTypes.func.isRequired,
   }
 
+  constructor(props) {
+    super(props);
+    this.state = { value: 'coconut' };
 
-  state = {
-    selectedOption: null,
-  };
-  handleChange = selectedOption => {
-    this.setState({ selectedOption });
-    console.log('Option selected:', selectedOption);
-  };
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({ value: event.target.value });
+    console.log(event.target.value);
+    const algo = event.target.value;
+
+    if (algo === 'Unary') {
+      this.props.toggleActive(Algorithms.Unary);
+    } else if (algo === 'GAC') {
+      this.props.toggleActive(Algorithms.STR2);
+    } else if (algo === '2wC') {
+      this.props.toggleActive(Algorithms.mWC, 2);
+    } else if (algo === '3wC') {
+      this.props.toggleActive(Algorithms.mWC, 3);
+    } else if (algo === '4wC') {
+      this.props.toggleActive(Algorithms.mWC, 4);
+    } else if (algo === 'Backbone') {
+      this.props.toggleActive(Algorithms.BT);
+    }
+  }
 
   /* event handlers */
 
@@ -47,7 +64,7 @@ export default class AlgorithmToggle extends Component {
   }
 
   render() {
-    const { selectedOption } = this.state;
+    // const { selectedOption } = this.state;
     return (
       <div className={styles['holders']}>
 
@@ -139,31 +156,14 @@ export default class AlgorithmToggle extends Component {
                 onChange={this.handleChange}
                 options={options}
               /> */}
-              <select
-                value={selectedOption}
-                onChange={this.handleChange}
-                options={options}
-              />
-              {/* <select>
-                <option
-                  onChange={() => this.changeHandler(Algorithms.Unary)}
-                >Unary</option>
-                <option
-                  onChange={() => this.changeHandler(Algorithms.STR2)}
-                >GAC</option>
-                <option
-                  onChange={() => this.changeHandler(Algorithms.mWC, 2)}
-                >2wC</option>
-                <option
-                  onChange={() => this.changeHandler(Algorithms.mWC, 3)}
-                >3wC</option>
-                <option
-                  onChange={() => this.changeHandler(Algorithms.mWC, 4)}
-                >4wC</option>
-                <option
-                  onChange={() => this.changeHandler(Algorithms.BT, Algorithms.MAC)}
-                >Backbone</option>
-              </select> */}
+              <select value={this.state.value} onChange={this.handleChange}>
+                <option value="Unary">Unary</option>
+                <option value="GAC">GAC</option>
+                <option value="2wC">2wC</option>
+                <option value="3wC">3wC</option>
+                <option value="4wC">4wC</option>
+                <option value="Backbone">Backbone</option>
+              </select>
             </div>
             {/* <button className={styles['STR2']}
               style={{ borderStyle: this.props.STR2 ? 'inset' : 'outset' }}
