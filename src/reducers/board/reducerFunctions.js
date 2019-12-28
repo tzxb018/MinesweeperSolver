@@ -404,15 +404,35 @@ export const loseGame = (state, row, col) => state.withMutations(s => {
  * @returns newState
  */
 export const toggleActive = (state, algorithm, modifier) => state.withMutations(s => {
-  if (modifier) {
-    switch (algorithm) {
-      case Algorithms.BT: s.updateIn(['csp', 'algorithms', Algorithms.BT, 'subSets', modifier], a => !a); break;
-      case Algorithms.mWC: s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier); break;
-      default:
-    }
-  } else {
-    s.updateIn(['csp', 'algorithms', algorithm, 'isActive'], a => !a);
+  console.log(state);
+  if (algorithm === Algorithms.Unary) {
+    s.updateIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
+    s.updateIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], false);
+    s.updateIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
+  } else if (algorithm === Algorithms.GAC) {
+    s.updateIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
+    s.updateIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
+    s.updateIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
+  } else if (algorithm === Algorithms.mWC) {
+    s.updateIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
+    s.updateIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
+    s.updateIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier);
+  } else if (algorithm === Algorithms.BT) {
+    s.updateIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], true);
+    s.updateIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
+    s.updateIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], 4);
   }
+  // if (modifier) {
+  //   switch (algorithm) {
+  //     case Algorithms.BT: s.updateIn(['csp', 'algorithms', Algorithms.BT, 'subSets', modifier], a => !a); break;
+  //     case Algorithms.mWC: s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier); break;
+  //     default:
+  //   }
+  // } else {
+  //   s.updateIn(['csp', 'algorithms', algorithm, 'isActive'], a => !a);
+  // }
   if (s.get('isGameRunning')) {
     s.update('historyLog', h => h.pop());
     return processCSP(s, true);

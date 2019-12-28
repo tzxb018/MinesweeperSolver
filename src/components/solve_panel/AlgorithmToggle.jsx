@@ -1,24 +1,44 @@
 import PropTypes from 'prop-types';
-import NumericInput from 'react-numeric-input';
+// import NumericInput from 'react-numeric-input';
 import React, { Component } from 'react';
-import { Algorithms } from 'enums';
+// import { Algorithms } from 'enums';
+// import Select from 'react-select';
+
 
 import styles from './style';
 
+const options = [
+  { value: 'Unary', label: 'Unary' },
+  { value: 'GAC', label: 'GAC' },
+  { value: '2wC', label: '2wC' },
+  { value: '3wC', label: '3wC' },
+  { value: '4wC', label: '4wC' },
+  { value: 'BT', label: 'Backbone' },
+];
+
 export default class AlgorithmToggle extends Component {
+
   static propTypes = {
     // state props
-    BC: PropTypes.bool.isRequired,
-    BT: PropTypes.bool.isRequired,
-    FC: PropTypes.bool.isRequired,
-    MAC: PropTypes.bool.isRequired,
-    m: PropTypes.number.isRequired,
-    mWC: PropTypes.bool.isRequired,
-    STR2: PropTypes.bool.isRequired,
+    // BC: PropTypes.bool.isRequired,
+    // BT: PropTypes.bool.isRequired,
+    // FC: PropTypes.bool.isRequired,
+    // MAC: PropTypes.bool.isRequired,
+    // m: PropTypes.number.isRequired,
+    // mWC: PropTypes.bool.isRequired,
+    // STR2: PropTypes.bool.isRequired,
     // dispatch props
     toggleActive: PropTypes.func.isRequired,
   }
 
+
+  state = {
+    selectedOption: null,
+  };
+  handleChange = selectedOption => {
+    this.setState({ selectedOption });
+    console.log('Option selected:', selectedOption);
+  };
 
   /* event handlers */
 
@@ -26,12 +46,12 @@ export default class AlgorithmToggle extends Component {
     this.props.toggleActive(id, modifier);
   }
 
-
   render() {
+    const { selectedOption } = this.state;
     return (
       <div className={styles['holders']}>
 
-        <div className={styles['border']}>
+        {/* <div className={styles['border']}>
           <h1>Backbone</h1>
           <div className={styles['search']}>
             <button className={styles['button']}
@@ -65,7 +85,7 @@ export default class AlgorithmToggle extends Component {
             </div>
           </div>
           <div style={{ height: '10px' }} />
-        </div>
+        </div> */}
         <div className={styles['border']}>
           <h1>Legend</h1>
           <div className={styles['table_container']}>
@@ -74,25 +94,31 @@ export default class AlgorithmToggle extends Component {
                 <td>
                   <div className={styles['unary']} />
                 </td>
-                <td>Unary</td>
+                <td>Unary Constraint</td>
               </tr>
               <tr>
                 <td>
                   <div className={styles['gac']} />
                 </td>
-                <td>GAC</td>
+                <td>GAC (STR2)</td>
               </tr>
               <tr>
                 <td>
                   <div className={styles['two_wc']} />
                 </td>
-                <td>2wC</td>
+                <td>2wiseConsistency (2wC)</td>
               </tr>
               <tr>
                 <td>
                   <div className={styles['three_wc']} />
                 </td>
-                <td>3wC</td>
+                <td>3wiseConsistency (3wC)</td>
+              </tr>
+              <tr>
+                <td>
+                  <div className={styles['four_wc']} />
+                </td>
+                <td>4wiseConsistency (4wC)</td>
               </tr>
               <tr>
                 <td>
@@ -107,14 +133,46 @@ export default class AlgorithmToggle extends Component {
         <div className={styles['border']}>
           <h1>Consistency</h1>
           <div className={styles['container']}>
-            <button className={styles['STR2']}
+            <div>
+              {/* <Select
+                value={selectedOption}
+                onChange={this.handleChange}
+                options={options}
+              /> */}
+              <select
+                value={selectedOption}
+                onChange={this.handleChange}
+                options={options}
+              />
+              {/* <select>
+                <option
+                  onChange={() => this.changeHandler(Algorithms.Unary)}
+                >Unary</option>
+                <option
+                  onChange={() => this.changeHandler(Algorithms.STR2)}
+                >GAC</option>
+                <option
+                  onChange={() => this.changeHandler(Algorithms.mWC, 2)}
+                >2wC</option>
+                <option
+                  onChange={() => this.changeHandler(Algorithms.mWC, 3)}
+                >3wC</option>
+                <option
+                  onChange={() => this.changeHandler(Algorithms.mWC, 4)}
+                >4wC</option>
+                <option
+                  onChange={() => this.changeHandler(Algorithms.BT, Algorithms.MAC)}
+                >Backbone</option>
+              </select> */}
+            </div>
+            {/* <button className={styles['STR2']}
               style={{ borderStyle: this.props.STR2 ? 'inset' : 'outset' }}
               onClick={() => this.changeHandler(Algorithms.STR2)}
             >
             STR2
-            </button>
-            <div style={{ height: '10px' }} />
-            <div className={styles['mWCHolder']}>
+            </button> */}
+            {/* <div style={{ height: '10px' }} /> */}
+            {/* <div className={styles['mWCHolder']}>
               <button className={styles['mWC']}
                 style={{ borderStyle: this.props.mWC ? 'inset' : 'outset' }}
                 onClick={() => this.changeHandler(Algorithms.mWC)}
@@ -132,7 +190,7 @@ export default class AlgorithmToggle extends Component {
                 valueAsNumber => this.changeHandler(Algorithms.mWC, valueAsNumber)}
                 onClick={event => event.stopPropagation()}
               />
-            </div>
+            </div> */}
           </div>
 
         </div>

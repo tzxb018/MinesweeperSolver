@@ -69,7 +69,8 @@
     // @extend .container;
     border: solid black 3pt; 
     // border-right: 0pt;
-    height: 150px; 
+    height: 180px; 
+    padding: 5px;
     // background-color: $unl_red;
   }
 
@@ -86,8 +87,9 @@
   {
     border: solid black 3pt; 
     border-right: 0pt; 
-    height: 150px; 
-    padding: 0px 10px;
+    height: 180px; 
+    padding: 5px;
+    font-size: 13pt; 
   }
 
   .unary {
@@ -105,13 +107,19 @@
   .two_wc{
     height: 12px;
     width: 12px;
-    background-color: #ffd74f;
+    background-color:#ffd750;
   }
 
   .three_wc{
     height: 12px;
     width: 12px;
     background-color: #a5228d;
+  }
+
+  .four_wc{
+    height: 12px;
+    width: 12px;
+    background-color: #f58a1f;
   }
 
   .backbone{

@@ -28,7 +28,7 @@ export const Actions = Object.freeze({
 
 export const Algorithms = Object.freeze({
   BC: 'BC',
-  BT: 'BT',
+  BT: 'Backbone',
   FC: 'FC',
   MAC: 'MAC',
   mWC: 'mWC',
@@ -36,7 +36,7 @@ export const Algorithms = Object.freeze({
   mWC2: '2wC',
   mWC3: '3wC',
   mWC4: '4wC',
-  STR2: 'STR2',
+  STR2: 'GAC',
   Unary: 'Unary',
 });
 
