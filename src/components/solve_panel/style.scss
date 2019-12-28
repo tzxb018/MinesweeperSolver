@@ -24,13 +24,13 @@
 
   .flex_container {
     margin-top: 5px;
-    display: flex;
+    display: inline-block;
     justify-content: space-between;
   }
 
   .gap {
-    min-height: 10px;
-    min-width: 10px;
+    min-height: 5px;
+    min-width: 5px;
   }
 
   .mWCHolder
