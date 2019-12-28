@@ -106,7 +106,6 @@ export default class SizePanel extends Component {
         <h1>Board Size</h1>
         <div className={styles['whole']}>
           <div className={styles['container']}>
-            <div className={styles['gap']} />
             <button type="submit" onClick={() => this.props.changeSize(SizePanel.sizes.BEGINNER)}>
               Beginner</button>
             <div className={styles['gap']} />

@@ -101,7 +101,7 @@ Object.defineProperty(exports, "__esModule", { value: true });var Actions = expo
 
 var Algorithms = exports.Algorithms = Object.freeze({
   BC: 'BC',
-  BT: 'BT',
+  BT: 'Backbone',
   FC: 'FC',
   MAC: 'MAC',
   mWC: 'mWC',
@@ -109,7 +109,7 @@ var Algorithms = exports.Algorithms = Object.freeze({
   mWC2: '2wC',
   mWC3: '3wC',
   mWC4: '4wC',
-  STR2: 'STR2',
+  STR2: 'GAC',
   Unary: 'Unary' });
 
 
@@ -1954,7 +1954,7 @@ var initialize = exports.initialize = function initialize() {var _Immutable$Map,
       isActive: false })), _defineProperty(_Immutable$Map2,
 
     _enums.Algorithms.mWC, _immutable2.default.Map({
-      isActive: true,
+      isActive: false,
       m: 2 })), _Immutable$Map2)),
 
 
@@ -2097,15 +2097,40 @@ var loseGame = exports.loseGame = function loseGame(state, row, col) {return sta
          * @returns newState
          */
 var toggleActive = exports.toggleActive = function toggleActive(state, algorithm, modifier) {return state.withMutations(function (s) {
-    if (modifier) {
-      switch (algorithm) {
-        case _enums.Algorithms.BT:s.updateIn(['csp', 'algorithms', _enums.Algorithms.BT, 'subSets', modifier], function (a) {return !a;});break;
-        case _enums.Algorithms.mWC:s.setIn(['csp', 'algorithms', _enums.Algorithms.mWC, 'm'], modifier);break;
-        default:}
-
-    } else {
-      s.updateIn(['csp', 'algorithms', algorithm, 'isActive'], function (a) {return !a;});
+    console.log('toggle active', algorithm);
+    if (algorithm === _enums.Algorithms.Unary) {
+      console.log('selected unary');
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.BT, 'isActive'], false);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.STR2, 'isActive'], false);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.mWC, 'isActive'], false);
+    } else if (algorithm === _enums.Algorithms.STR2) {
+      console.log('selected gac');
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.BT, 'isActive'], false);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.STR2, 'isActive'], true);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.mWC, 'isActive'], false);
+    } else if (algorithm === _enums.Algorithms.mWC) {
+      console.log('selected mwc');
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.BT, 'isActive'], false);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.STR2, 'isActive'], true);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.mWC, 'isActive'], true);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.mWC, 'm'], modifier);
+    } else if (algorithm === _enums.Algorithms.BT) {
+      console.log('selected bt');
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.BT, 'isActive'], true);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.STR2, 'isActive'], true);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.mWC, 'isActive'], true);
+      s.setIn(['csp', 'algorithms', _enums.Algorithms.mWC, 'm'], 4);
     }
+    console.log(s);
+    // if (modifier) {
+    //   switch (algorithm) {
+    //     case Algorithms.BT: s.updateIn(['csp', 'algorithms', Algorithms.BT, 'subSets', modifier], a => !a); break;
+    //     case Algorithms.mWC: s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier); break;
+    //     default:
+    //   }
+    // } else {
+    //   s.updateIn(['csp', 'algorithms', algorithm, 'isActive'], a => !a);
+    // }
     if (s.get('isGameRunning')) {
       s.update('historyLog', function (h) {return h.pop();});
       return (0, _index2.default)(s, true);
@@ -3390,10 +3415,8 @@ function (state) {var forceReevaluation = arguments.length > 1 && arguments[1] !
     s.setIn(['csp', 'domains'], (0, _utils.getDomains)(constraints));
 
     // solve the csp with BTS
-    if (s.getIn(['csp', 'algorithms', _enums.Algorithms.BT, 'isActive']) && (
-    s.getIn(['csp', 'algorithms', _enums.Algorithms.BT, 'subSets', _enums.Algorithms.BC]) ||
-    s.getIn(['csp', 'algorithms', _enums.Algorithms.BT, 'subSets', _enums.Algorithms.FC]) ||
-    s.getIn(['csp', 'algorithms', _enums.Algorithms.BT, 'subSets', _enums.Algorithms.MAC]))) {
+    if (s.getIn(['csp', 'algorithms', _enums.Algorithms.BT, 'isActive']) &&
+    s.getIn(['csp', 'algorithms', _enums.Algorithms.BT, 'subSets', _enums.Algorithms.MAC])) {
       activeComponents.forEach(function (componentIndex) {
         s.update('csp', function (c) {return (0, _index2.default)(c, componentIndex, c.getIn(['algorithms', _enums.Algorithms.BT, 'subSets']));});
       });

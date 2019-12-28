@@ -88,7 +88,7 @@
     border: solid black 3pt; 
     border-right: 0pt; 
     height: 180px; 
-    padding: 5px;
+    padding: 5px 10px;
     font-size: 13pt; 
   }
 
@@ -130,6 +130,11 @@
 
   .table_container
   {
-    padding: 10px 0px; 
+    padding: 5px 0px; 
+  }
+
+  select {
+    font-size: 13pt; 
+    font-family: 'Times New Roman', Times, serif;
   }
 }
