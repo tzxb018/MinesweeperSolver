@@ -2,18 +2,7 @@ import PropTypes from 'prop-types';
 // import NumericInput from 'react-numeric-input';
 import React, { Component } from 'react';
 import { Algorithms } from 'enums';
-// import Select from 'react-select';
-
 import styles from './style';
-
-// const options = [
-//   { value: 'Unary', label: 'Unary' },
-//   { value: 'GAC', label: 'GAC' },
-//   { value: '2wC', label: '2wC' },
-//   { value: '3wC', label: '3wC' },
-//   { value: '4wC', label: '4wC' },
-//   { value: 'BT', label: 'Backbone' },
-// ];
 
 export default class AlgorithmToggle extends Component {
 
@@ -32,16 +21,19 @@ export default class AlgorithmToggle extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { value: 'coconut' };
+    this.state = { value: 'Unary' };
 
     this.handleChange = this.handleChange.bind(this);
   }
+
+  /* event handlers */
 
   handleChange(event) {
     this.setState({ value: event.target.value });
     console.log(event.target.value);
     const algo = event.target.value;
 
+    // updates the algorithms that are being used
     if (algo === 'Unary') {
       this.props.toggleActive(Algorithms.Unary);
     } else if (algo === 'GAC') {
@@ -57,14 +49,7 @@ export default class AlgorithmToggle extends Component {
     }
   }
 
-  /* event handlers */
-
-  changeHandler = (id, modifier) => {
-    this.props.toggleActive(id, modifier);
-  }
-
   render() {
-    // const { selectedOption } = this.state;
     return (
       <div className={styles['holders']}>
 
@@ -151,11 +136,6 @@ export default class AlgorithmToggle extends Component {
           <h1>Consistency</h1>
           <div className={styles['container']}>
             <div>
-              {/* <Select
-                value={selectedOption}
-                onChange={this.handleChange}
-                options={options}
-              /> */}
               <select value={this.state.value} onChange={this.handleChange}>
                 <option value="Unary">Unary</option>
                 <option value="GAC">GAC</option>

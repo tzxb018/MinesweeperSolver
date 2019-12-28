@@ -261,7 +261,7 @@ export const initialize = () => {
         isActive: false,
       }),
       [Algorithms.mWC]: Immutable.Map({
-        isActive: true,
+        isActive: false,
         m: 2,
       }),
     }),
@@ -408,23 +408,23 @@ export const toggleActive = (state, algorithm, modifier) => state.withMutations(
   if (algorithm === Algorithms.Unary) {
     console.log('selected unary');
     s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
-    s.setIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], false);
+    s.setIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'], false);
     s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
-  } else if (algorithm === Algorithms.GAC) {
+  } else if (algorithm === Algorithms.STR2) {
     console.log('selected gac');
     s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
-    s.setIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'], true);
     s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
   } else if (algorithm === Algorithms.mWC) {
     console.log('selected mwc');
     s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
-    s.setIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'], true);
     s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
     s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier);
   } else if (algorithm === Algorithms.BT) {
     console.log('selected bt');
     s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], true);
-    s.setIn(['csp', 'algorithms', Algorithms.GAC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'], true);
     s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
     s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], 4);
   }
