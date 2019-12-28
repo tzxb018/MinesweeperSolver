@@ -8,14 +8,31 @@
     // padding: 10px;
     border: black 3pt solid; 
     border-right: 0pt;
-    height: 150px; 
+    height: 180px; 
+    padding: 5px; 
   }
 
   .button {
     margin-bottom: 10px;
   }
 
+  .container {
+    // color: $unl_light_cream;
+    // background-color: $unl_red;
+    position: relative;
+    display: inline-block;
+    justify-content:space-around;
+  }
+
+  .container button{
+    width: 100%; 
+  }
+
   .holder {
     padding: 10px; 
+  }
+
+  .gap {
+    height: 5px;
   }
 }
