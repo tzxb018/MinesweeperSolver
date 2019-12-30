@@ -51,45 +51,9 @@ export default class AlgorithmToggle extends Component {
 
   render() {
     return (
-      <div className={styles['holders']}>
-
-        {/* <div className={styles['border']}>
-          <h1>Backbone</h1>
-          <div className={styles['search']}>
-            <button className={styles['button']}
-              style={{ borderStyle: this.props.BT ? 'inset' : 'outset' }}
-              onClick={() => this.changeHandler(Algorithms.BT)}
-            >
-              BT
-            </button>
-            <div className={styles['bottom']}>
-              <div>
-                <input type="checkbox"
-                  id="BC"
-                  checked={this.props.BC}
-                  onChange={() => this.changeHandler(Algorithms.BT, Algorithms.BC)}
-                />BC
-              </div>
-              <div>
-                <input type="checkbox"
-                  id="FC"
-                  checked={this.props.FC}
-                  onChange={() => this.changeHandler(Algorithms.BT, Algorithms.FC)}
-                />FC
-              </div>
-              <div>
-                <input type="checkbox"
-                  id="MAC"
-                  checked={this.props.MAC}
-                  onChange={() => this.changeHandler(Algorithms.BT, Algorithms.MAC)}
-                />MAC
-              </div>
-            </div>
-          </div>
-          <div style={{ height: '10px' }} />
-        </div> */}
-        <div className={styles['border']}>
-          <h1>Legend</h1>
+      <div className={styles['border']}>
+        <h1>Consistency</h1>
+        <div className={styles['holders']}>
           <div className={styles['table_container']}>
             <table>
               <tr>
@@ -130,49 +94,16 @@ export default class AlgorithmToggle extends Component {
               </tr>
             </table>
           </div>
-        </div>
-        {/* <div className={styles['gap']} /> */}
-        <div className={styles['border']}>
-          <h1>Consistency</h1>
           <div className={styles['container']}>
-            <div>
-              <select value={this.state.value} onChange={this.handleChange}>
-                <option value="Unary">Unary</option>
-                <option value="GAC">GAC</option>
-                <option value="2wC">2wC</option>
-                <option value="3wC">3wC</option>
-                <option value="4wC">4wC</option>
-                <option value="Backbone">Backbone</option>
-              </select>
-            </div>
-            {/* <button className={styles['STR2']}
-              style={{ borderStyle: this.props.STR2 ? 'inset' : 'outset' }}
-              onClick={() => this.changeHandler(Algorithms.STR2)}
-            >
-            STR2
-            </button> */}
-            {/* <div style={{ height: '10px' }} /> */}
-            {/* <div className={styles['mWCHolder']}>
-              <button className={styles['mWC']}
-                style={{ borderStyle: this.props.mWC ? 'inset' : 'outset' }}
-                onClick={() => this.changeHandler(Algorithms.mWC)}
-              >
-              mWC
-              </button>
-              <NumericInput id="m"
-                className={styles['selector']}
-                min={2}
-                max={4}
-                value={this.props.m}
-                step={1}
-                strict
-                onChange={
-                valueAsNumber => this.changeHandler(Algorithms.mWC, valueAsNumber)}
-                onClick={event => event.stopPropagation()}
-              />
-            </div> */}
+            <select value={this.state.value} onChange={this.handleChange}>
+              <option value="Unary">Unary</option>
+              <option value="GAC">GAC</option>
+              <option value="2wC">2wC</option>
+              <option value="3wC">3wC</option>
+              <option value="4wC">4wC</option>
+              <option value="Backbone">Backbone</option>
+            </select>
           </div>
-
         </div>
       </div>
     );
