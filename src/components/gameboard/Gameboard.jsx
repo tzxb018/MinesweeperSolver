@@ -25,8 +25,8 @@ export default class Gameboard extends Component {
   /* dynamic display components */
 
   background = () => {
-    const height = this.props.numRows * 16 + 62;
-    const width = this.props.numCols * 16 + 20;
+    const height = this.props.numRows * 20 + 62;
+    const width = this.props.numCols * 20 + 20;
 
     return (
       <svg className={styles['svg']} height={height} width={width}>

@@ -3,8 +3,9 @@
 :local {
   .bottom {
     position: relative;
-    left: 20px;
+    // left: 20px;
     grid-row: 2 3;
+
   }
 
   .button {
@@ -15,55 +16,125 @@
   }
 
   .container {
-    background-color: $unl_dark_blue;
-    color: $unl_light_cream;
-    border-radius: 5px;
+    // background-color: $unl_dark_blue;
+    // color: $unl_light_cream;
+    // border-radius: 5px;
     padding: 10px;
   }
 
   .flex_container {
     margin-top: 5px;
-    display: flex;
+    display: inline-block;
     justify-content: space-between;
   }
 
   .gap {
-    min-height: 10px;
-    min-width: 10px;
+    min-height: 5px;
+    min-width: 5px;
+  }
+
+  .mWCHolder
+  {
+    display: inline-flex;
   }
 
   .mWC {
     @extend .button;
-    background-color: $unl_wheat;
+    // background-color: $unl_wheat;
     max-width: 60%;
-  }
-
-  .panel_container {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .search {
-    @extend .container;
-    background-color: $unl_dark_gray;
-    display: grid;
-    grid-template-rows: auto auto;
   }
 
   .selector {
     background-color: $unl_light_cream;
     margin-left: 10px;
     width: 40px;
+    height: 100%;
   }
 
-  .solve {
+  .panel_container {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .search {
     @extend .container;
-    background-color: $unl_red;
+    // background-color: $unl_dark_gray;
+    display: grid;
+    grid-template-rows: auto auto;
+  }
+
+
+  .solve {
+    // @extend .container;
+    border: solid black 3pt; 
+    // border-right: 0pt;
+    height: 180px; 
+    padding: 5px;
+    // background-color: $unl_red;
   }
 
   .STR2 {
     @extend .button;
-    background-color: $unl_dark_green;
+    // background-color: $unl_dark_green;
+  }
+
+  .holders{
+    display: inline-flex;
+  }
+
+  .border
+  {
+    border: solid black 3pt; 
+    border-right: 0pt; 
+    height: 180px; 
+    padding: 5px 10px;
+    font-size: 13pt; 
+  }
+
+  .unary {
+    height: 12px;
+    width: 12px;
+    background-color: #24576b;
+  }
+
+  .gac{
+    height: 12px;
+    width: 12px;
+    background-color: #7d7a10;
+  }
+
+  .two_wc{
+    height: 12px;
+    width: 12px;
+    background-color:#ffd750;
+  }
+
+  .three_wc{
+    height: 12px;
+    width: 12px;
+    background-color: #a5228d;
+  }
+
+  .four_wc{
+    height: 12px;
+    width: 12px;
+    background-color: #f58a1f;
+  }
+
+  .backbone{
+    height: 12px;
+    width: 12px;
+    background-color: #808285;
+  }
+
+  .table_container
+  {
+    padding: 5px 0px; 
+  }
+
+  select {
+    font-size: 13pt; 
+    font-family: 'Times New Roman', Times, serif;
   }
 }

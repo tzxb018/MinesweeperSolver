@@ -10,7 +10,7 @@ export default class SolvePanel extends Component {
     return (
       <div className={styles['panel_container']}>
         <AlgorithmToggle />
-        <div className={styles['gap']} />
+        {/* <div className={styles['gap']} /> */}
         <StepLoop />
       </div>
     );

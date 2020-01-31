@@ -3,15 +3,16 @@
 button {
   background-color: $unl_gray;
   border-radius: 5px;
-  font-size: 12pt;
+  font-size: 13pt;
   height: 30px;
-  max-width: fit-content;
+  // max-width: fit-content;
   min-height: 30px;
   min-width: 60px;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 h1 {
-  font-size: 1.15em;
+  font-size: 1.25em;
   font-weight: bold;
   margin: 0px;
   text-align: center;
@@ -19,8 +20,15 @@ h1 {
 
 :local {
   .container {
-    display: flex;
+    display: flex; 
+    flex-direction: column;
     height: 97vh;
+  }
+
+  .row
+  {
+    display: inline-flex;
+    padding: 10px; 
   }
 
   .gap {

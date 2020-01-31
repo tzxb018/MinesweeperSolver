@@ -165,9 +165,7 @@ export default (state, forceReevaluation = false) => state.withMutations(s => {
 
   // solve the csp with BTS
   if (s.getIn(['csp', 'algorithms', Algorithms.BT, 'isActive'])
-  && (s.getIn(['csp', 'algorithms', Algorithms.BT, 'subSets', Algorithms.BC])
-  || s.getIn(['csp', 'algorithms', Algorithms.BT, 'subSets', Algorithms.FC])
-  || s.getIn(['csp', 'algorithms', Algorithms.BT, 'subSets', Algorithms.MAC]))) {
+  && s.getIn(['csp', 'algorithms', Algorithms.BT, 'subSets', Algorithms.MAC])) {
     activeComponents.forEach(componentIndex => {
       s.update('csp', c => BT(c, componentIndex, c.getIn(['algorithms', Algorithms.BT, 'subSets'])));
     });

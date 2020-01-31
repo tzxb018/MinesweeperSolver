@@ -19,6 +19,10 @@ export default class CheatButton extends Component {
 
 
   /* event handlers */
+  handleCheat(cheatType) {
+    this.setState({ random: cheatType });
+    this.props.cheat(this.state.random);
+  }
 
   clickHandler = () => {
     this.props.cheat(this.state.random);
@@ -27,10 +31,10 @@ export default class CheatButton extends Component {
 
   render() {
     return (
-      <div>
+      <div className={styles['container']}>
         <h1>Cheats</h1>
-        <div className={styles['container']}>
-          <button className={styles['button']} onClick={this.clickHandler} disabled={!this.props.canCheat}>
+        <div className={styles['holder']}>
+          {/* <button className={styles['button']} onClick={this.clickHandler} disabled={!this.props.canCheat}>
             Cheat
           </button>
           <div>
@@ -48,7 +52,16 @@ export default class CheatButton extends Component {
               onChange={() => this.setState({ random: false })}
             />
             <label htmlFor="fringeOnly">fringe only</label>
-          </div>
+          </div> */}
+          <button type="submit"
+            disabled={!this.props.canCheat}
+            onClick={() => this.handleCheat(true)}
+          >Random</button>
+          <div className={styles['gap']} />
+          <button type="submit"
+            disabled={!this.props.canCheat}
+            onClick={() => this.handleCheat(false)}
+          >Fringe</button>
         </div>
       </div>
     );

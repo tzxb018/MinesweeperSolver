@@ -23,6 +23,10 @@ export default class UndoRedo extends Component {
         <button onClick={this.props.onRedo} disabled={!this.props.canRedo} >
           Redo
         </button>
+        {/* <div className={styles['gap']} />
+        <button>
+          Clear
+        </button> */}
       </div>
     );
   }

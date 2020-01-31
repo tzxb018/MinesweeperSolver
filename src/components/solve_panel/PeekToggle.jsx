@@ -20,8 +20,14 @@ export default class PeekToggle extends Component {
   render() {
     return (
       <div>
-        <input type="checkbox" id="peek" checked={this.props.isPeeking} onChange={this.changeHandler} />
-        <label htmlFor="peek">Peek</label>
+        <button
+          type="submit"
+          id="peek"
+          onClick={this.changeHandler}
+          style={{ borderStyle: this.props.isPeeking ? 'inset' : 'outset' }}
+        >Peek</button>
+        {/* <input type="checkbox" id="peek" checked={this.props.isPeeking} onChange={this.changeHandler} /> */}
+        {/* <label htmlFor="peek">Peek</label> */}
       </div>
     );
   }

@@ -1,11 +1,11 @@
 import Immutable from 'immutable';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import NumericInput from 'react-numeric-input';
+// import NumericInput from 'react-numeric-input';
 import { initTestState } from 'reducers/board/testFunctions';
 import TestWorker from 'web_workers/test.worker.js';
 
-import styles from './style';
+// import styles from './style';
 
 const worker = new TestWorker();
 
@@ -16,7 +16,7 @@ export default class TestPanel extends Component {
       PropTypes.instanceOf(Immutable.Map),
       PropTypes.instanceOf(Map),
     ]).isRequired,
-    isTesting: PropTypes.bool.isRequired,
+    // isTesting: PropTypes.bool.isRequired,
     numCols: PropTypes.number.isRequired,
     numMines: PropTypes.number.isRequired,
     numRows: PropTypes.number.isRequired,
@@ -74,38 +74,39 @@ export default class TestPanel extends Component {
 
   render() {
     return (
-      <div>
-        <h1>Tests</h1>
-        <div className={styles['container']}>
-          <button className={styles['button']} onClick={this.clickHandler} disabled={this.props.isTesting}>
-            Run
-          </button>
-          <NumericInput id="numIterations"
-            className={styles['selector']}
-            onChange={valueAsNumber => this.setState({ numIterations: valueAsNumber })}
-            min={10}
-            max={1000}
-            value={this.state.numIterations}
-            step={10}
-            snap
-          />
-          <div>
-            <input type="checkbox"
-              id="allowCheats"
-              checked={this.state.allowCheats}
-              onChange={() => this.setState({ allowCheats: !this.state.allowCheats })}
-            />
-            <label htmlFor="allowCheats">allow cheats</label>
-            <br />
-            <input type="checkbox"
-              id="useRandomInstances"
-              checked={this.state.useRandomInstances}
-              onChange={() => this.setState({ useRandomInstances: !this.state.useRandomInstances })}
-            />
-            <label htmlFor="useRandomInstances">use random instances</label>
-          </div>
-        </div>
-      </div>
+      // <div className={styles['container']}>
+      //   <h1>Tests</h1>
+      //   <div className={styles['padding']}>
+      //     <button className={styles['button']} onClick={this.clickHandler} disabled={this.props.isTesting}>
+      //       Run
+      //     </button>
+      //     <NumericInput id="numIterations"
+      //       className={styles['selector']}
+      //       onChange={valueAsNumber => this.setState({ numIterations: valueAsNumber })}
+      //       min={10}
+      //       max={1000}
+      //       value={this.state.numIterations}
+      //       step={10}
+      //       snap
+      //     />
+      //     <div>
+      //       <input type="checkbox"
+      //         id="allowCheats"
+      //         checked={this.state.allowCheats}
+      //         onChange={() => this.setState({ allowCheats: !this.state.allowCheats })}
+      //       />
+      //       <label htmlFor="allowCheats">allow cheats</label>
+      //       <br />
+      //       <input type="checkbox"
+      //         id="useRandomInstances"
+      //         checked={this.state.useRandomInstances}
+      //         onChange={() => this.setState({ useRandomInstances: !this.state.useRandomInstances })}
+      //       />
+      //       <label htmlFor="useRandomInstances">use random instances</label>
+      //     </div>
+      //   </div>
+      // </div>
+      <div />
     );
   }
 }

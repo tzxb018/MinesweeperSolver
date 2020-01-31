@@ -261,7 +261,7 @@ export const initialize = () => {
         isActive: false,
       }),
       [Algorithms.mWC]: Immutable.Map({
-        isActive: true,
+        isActive: false,
         m: 2,
       }),
     }),
@@ -404,15 +404,40 @@ export const loseGame = (state, row, col) => state.withMutations(s => {
  * @returns newState
  */
 export const toggleActive = (state, algorithm, modifier) => state.withMutations(s => {
-  if (modifier) {
-    switch (algorithm) {
-      case Algorithms.BT: s.updateIn(['csp', 'algorithms', Algorithms.BT, 'subSets', modifier], a => !a); break;
-      case Algorithms.mWC: s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier); break;
-      default:
-    }
-  } else {
-    s.updateIn(['csp', 'algorithms', algorithm, 'isActive'], a => !a);
+  console.log('toggle active', algorithm);
+  if (algorithm === Algorithms.Unary) {
+    console.log('selected unary');
+    s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
+    s.setIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'], false);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
+  } else if (algorithm === Algorithms.STR2) {
+    console.log('selected gac');
+    s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
+    s.setIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], false);
+  } else if (algorithm === Algorithms.mWC) {
+    console.log('selected mwc');
+    s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], false);
+    s.setIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier);
+  } else if (algorithm === Algorithms.BT) {
+    console.log('selected bt');
+    s.setIn(['csp', 'algorithms', Algorithms.BT, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.STR2, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'isActive'], true);
+    s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], 4);
   }
+  console.log(s);
+  // if (modifier) {
+  //   switch (algorithm) {
+  //     case Algorithms.BT: s.updateIn(['csp', 'algorithms', Algorithms.BT, 'subSets', modifier], a => !a); break;
+  //     case Algorithms.mWC: s.setIn(['csp', 'algorithms', Algorithms.mWC, 'm'], modifier); break;
+  //     default:
+  //   }
+  // } else {
+  //   s.updateIn(['csp', 'algorithms', algorithm, 'isActive'], a => !a);
+  // }
   if (s.get('isGameRunning')) {
     s.update('historyLog', h => h.pop());
     return processCSP(s, true);

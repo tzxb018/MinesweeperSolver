@@ -59,7 +59,7 @@ export default class HistoryLog extends Component {
     return (
       <div className={styles['history_log']}>
         {this.display()}
-        <div style={{ float: 'left', clear: 'both' }} ref={(element) => { this.scrollBottom = element; }} />
+        <div className={styles['last']} ref={(element) => { this.scrollBottom = element; }} />
       </div>
     );
   }

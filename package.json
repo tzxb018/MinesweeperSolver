@@ -51,6 +51,7 @@
     "testRegex": "/__tests__/.*\\.(js|jsx)$"
   },
   "dependencies": {
+    "bootstrap": "^4.4.1",
     "classnames": "^2.2.6",
     "css-loader": "^0.28.11",
     "immutable": "^3.8.1",
@@ -62,6 +63,7 @@
     "react-immutable-proptypes": "^2.1.0",
     "react-numeric-input": "^2.2.3",
     "react-redux": "^5.1.1",
+    "react-select": "^3.0.8",
     "redux": "^3.7.0",
     "redux-undo": "^1.0.0-beta9-9-7",
     "sass-loader": "^6.0.7",

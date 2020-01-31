@@ -20,8 +20,8 @@ export default class Minefield extends Component {
     const style = {
       position: 'absolute',
       display: 'grid',
-      gridTemplateColumns: `repeat(${this.props.numCols}, 16px)`,
-      gridTemplateRows: `repeat(${this.props.numRows}, 16px)`,
+      gridTemplateColumns: `repeat(${this.props.numCols}, 20px)`,
+      gridTemplateRows: `repeat(${this.props.numRows}, 20px)`,
       zIndex: this.props.isReportingError ? 2 : 1,
     };
     const formattedCells = [];
@@ -42,8 +42,8 @@ export default class Minefield extends Component {
     const style = {
       position: 'absolute',
       display: 'grid',
-      gridTemplateColumns: `repeat(${this.props.numCols}, 16px) 10px 16px`,
-      gridTemplateRows: `repeat(${this.props.numRows}, 16px) 10px 16px`,
+      gridTemplateColumns: `repeat(${this.props.numCols}, 20px) 10px 20px`,
+      gridTemplateRows: `repeat(${this.props.numRows}, 20px) 10px 20px`,
       zIndex: 2,
     };
     const rowColNumbers = [];
