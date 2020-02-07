@@ -71,6 +71,6 @@
     "systemjs": "^0.20.11",
     "url-loader": "^2.1.0",
     "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.11.3"
+    "webpack-dev-server": "^3.1.11"
   }
 }
