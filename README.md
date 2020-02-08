@@ -1,10 +1,19 @@
-# Minesweeper Solver
+Minesweeper Solver
+===========
 ![GitHub top language](https://img.shields.io/github/languages/top/tzxb018/MinesweeperSolver?style=plastic)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/tzxb018/MinesweeperSolver?style=plastic)
 
+## Authors
+
+* **Tomohide Bessho** - *UNL Undergraduate Student* - https://github.com/tzxb018
+* **Taylor DeMint** - *UNL Graduate Student* - https://github.com/deminty
+* **Berthe Choueiry** - *UNL Associate Professor and Project Supervisor* - https://cse.unl.edu/~choueiry/
+
+## Project Description
 
 This is an application that takes the game of Minesweeper and implements constraint propigation to make a solver for the game. This project was written in JS React and JS Redux primarily as an npm project. I started on this project midway, so not all of this is my code. I was responisble for restructuring and rewritting the UI elements and some of the constraint propigation logic. Most of my work can be found in the src/components file. The components are written in both JS React and Redux and define how the webiste looks online. Here is a comparison of what the website looked like before and how it looks now.
 
+## My Contribution
 https://cse.unl.edu/~minesweeper/beta/minesweeper/
 
 ![Alt text](/beta.png?raw=true "Optional Title")
