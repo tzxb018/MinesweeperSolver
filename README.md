@@ -1,7 +1,6 @@
 Minesweeper Solver
 ===========
 ![GitHub top language](https://img.shields.io/github/languages/top/tzxb018/MinesweeperSolver?style=plastic)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/tzxb018/MinesweeperSolver?style=plastic)
 
 ## Authors
 
