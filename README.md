@@ -13,3 +13,5 @@ As you can tell from this, the UI was not pretty and hard to follow. It was also
 
 https://cse.unl.edu/~minesweeper/delta/minesweeper/
 ![Alt_text](/delta.png?raw=true)
+
+As you can see, everything is more conscise and better spaced. The interface is easier to naviagate and use and is visually more appealing. 
