@@ -1,17 +1,7 @@
 # Minesweeper
+https://img.shields.io/github/languages/top/tzxb018/MinesweeperSolver?style=plastic
 
-## To do list
-* write a real README
-* implement using the number of mines available when a problem reaches steady state (certainty first, then option for probabalistic)
-* improve history log to not just be text based
-* testing and bug fixes
-* make in-house testing suite a separate tab of history log for results
-* check cross-platform compatability (edge, firefox, mobile)
-* deploy
-* add tooltips with option to hide them
-* test and optimize algorithms (mWC and search especially)
+This is an application that takes the game of Minesweeper and implements constraint propigation to make a solver for the game. This project was written in JS React and JS Redux primarily as an npm project. I started on this project midway, so not all of this is my code. I was responisble for restructuring and rewritting the UI elements and some of the constraint propigation logic. Most of my work can be found in the src/components file. The components are written in both JS React and Redux and define how the webiste looks online. Here is a comparison of what the website looked like before and how it looks now.
 
-* record current count of components
-* put the number selector for mWC inside the mWC button both after "mWC" and instead of the "m"
+https://cse.unl.edu/~minesweeper/beta/minesweeper/
 
-* solve single step
