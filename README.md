@@ -1,4 +1,4 @@
-# Minesweeper
+# Minesweeper Solver
 ![GitHub top language](https://img.shields.io/github/languages/top/tzxb018/MinesweeperSolver?style=plastic)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/tzxb018/MinesweeperSolver?style=plastic)
 
@@ -12,4 +12,4 @@ https://cse.unl.edu/~minesweeper/beta/minesweeper/
 As you can tell from this, the UI was not pretty and hard to follow. It was also confusing on how to select/deselect the different solving algorithms and was not visually appealing. Here is the site after I made my edits. 
 
 https://cse.unl.edu/~minesweeper/delta/minesweeper/
-![Alt_text](/delta.png?raw=true "Delta")
+![Alt_text](/delta.png?raw=true)
